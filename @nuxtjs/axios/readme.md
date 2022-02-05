@@ -1,4 +1,4 @@
 **Depenencies Needed:**
-    - axios
-    - axios-retry
-    - @nuxt/kit
+- axios
+- axios-retry
+- @nuxt/kit
