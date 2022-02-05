@@ -8,8 +8,9 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 
 **Instructions**
 - Add any of these modules to your `modules` directory of your nuxt 3 application. 
-- Then in your `package.json` add them as a local module
-- finally run `npm install` to have them symlinked
+- Then in your `package.json` add them as a local module.
+- Finally run `npm install` to have them symlinked.
+- You can then add them to the `modules` or `'buildModules` like you would in Nuxt with the same named aliases.
 
 Example `package.json`:
 <details>
