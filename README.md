@@ -1,4 +1,4 @@
-# nuxt-alternatives
+# nuxt-module-alternatives
 Alternative modules to use while waiting for Nuxt 3 Compatibility
 
 **Current Modules**
