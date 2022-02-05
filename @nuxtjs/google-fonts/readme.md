@@ -1,3 +1,3 @@
 **Depenencies Needed:**
-    - google-fonts-helper
-    - @nuxt/kit
+- google-fonts-helper
+- @nuxt/kit
