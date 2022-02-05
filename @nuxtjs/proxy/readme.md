@@ -1,3 +1,3 @@
 **Depenencies Needed:**
-    - http-proxy-middleware
-    - @nuxt/kit
+- http-proxy-middleware
+- @nuxt/kit
