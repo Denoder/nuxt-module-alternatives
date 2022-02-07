@@ -25,7 +25,8 @@ export default defineNuxtConfig({
 })
 ```
 
-**Store Index Format**
+**index.js format**
+
 The store has a already been inititalized so all you need to do is export a default object with the stores you want to use.
 
 ```ts
