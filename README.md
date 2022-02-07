@@ -5,6 +5,7 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Axios Module: [Nuxt Community Repository](https://github.com/nuxt-community/axios-module)
 - Nuxt Proxy Module: [Nuxt Community Repository](https://github.com/nuxt-community/proxy-module)
 - Nuxt Google Fonts Module: [Nuxt Community Repository](https://github.com/nuxt-community/google-fonts-module)
+- Nuxt Vuex: ?
 
 **Instructions**
 - Add any of these modules to your `modules` directory of your nuxt 3 application. 
