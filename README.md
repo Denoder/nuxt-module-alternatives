@@ -36,6 +36,7 @@ Example `package.json`:
         "@nuxtjs/axios": "file:modules/@nuxtjs/axios",
         "@nuxtjs/google-fonts": "file:modules/@nuxtjs/google-fonts",
         "@nuxtjs/proxy": "file:modules/@nuxtjs/proxy",
+        "@nuxtjs/vuex": "file:modules/@nuxtjs/vuex",
         "@pinia/nuxt": "^0.1.8"
     }
 }
