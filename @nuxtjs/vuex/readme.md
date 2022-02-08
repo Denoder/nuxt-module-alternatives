@@ -1,4 +1,5 @@
 **Depenencies Needed:**
+- vuex 4.x+
 - glob
 - @nuxt/kit
 
