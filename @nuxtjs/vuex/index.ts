@@ -2,7 +2,13 @@ import { resolve, join } from 'path'
 import { defineNuxtModule, addPluginTemplate } from '@nuxt/kit'
 import Glob from 'glob'
 
-export default defineNuxtModule({
+export interface ModuleOptions {
+    devtools: Boolean,
+    storeFolder: String,
+    storeName: String,
+}
+
+export default defineNuxtModule<ModuleOptions>({
     meta: {
         name: '@nuxtjs/vuex',
         configKey: 'vuex',
