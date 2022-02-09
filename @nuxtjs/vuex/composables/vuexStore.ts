@@ -1,18 +1,9 @@
 import { useState, useNuxtApp } from '#app'
 import { toRaw, isReactive, isRef, toRef } from 'vue'
 
-export const vuexStore = (storeInstance) => {
-    let instance
-    const { $vuex } = useNuxtApp()
-
-    if (storeInstance) {
-        instance = storeInstance
-    }
-    else {
-        instance = $vuex
-    }
-
-    let store = toRaw(instance)
+export const vuexStore = (key: String) => {
+    const nuxt = useNuxtApp()
+    const store = toRaw(nuxt['$' + key ? key : 'vuex'])
 
     const refs = {}
 
