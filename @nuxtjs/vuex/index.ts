@@ -1,11 +1,10 @@
 import { resolve, join } from 'path'
-import { defineNuxtModule, addPluginTemplate } from '@nuxt/kit'
-import Glob from 'glob'
+import { defineNuxtModule, addPluginTemplate, addAutoImport } from '@nuxt/kit'
 
 export interface ModuleOptions {
     devtools: Boolean,
     storeFolder: String,
-    storeName: String,
+    storeName: String
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -18,7 +17,6 @@ export default defineNuxtModule<ModuleOptions>({
         }
     },
     defaults: {
-        devtools: false,
         storeName: 'vuex',
         storeFolder: 'store'
     },
@@ -29,7 +27,7 @@ export default defineNuxtModule<ModuleOptions>({
             ...nuxt.options.vuex,
         }
 
-        options.storeModules = await resolveStore(options, nuxt)
+        options.store = resolve(nuxt.options.srcDir, options.storeFolder)
 
         // Add Vuex (Vue3)
         addPluginTemplate({
@@ -37,39 +35,7 @@ export default defineNuxtModule<ModuleOptions>({
             fileName: join('vuex.mjs'),
             options
         })
+
+        addAutoImport({name: 'vuexStore', as: 'vuexStore', from: resolve(__dirname, 'composables/vuexStore') })
     }
 })
-
-let resolveStore = async (options, nuxt) => {
-    return (await resolveRelative(resolve(nuxt.options.srcDir, options.storeFolder))).sort(({ src: p1 }, { src: p2 }) => {
-        let res = p1.split('/').length - p2.split('/').length
-        if (res === 0 && p1.includes('/index.')) {
-            res = -1
-        } else if (res === 0 && p2.includes('/index.')) {
-            res = 1
-        }
-        return res
-    })
-}
-
-
-let resolveRelative = async (dir) => {
-    const dirPrefix = new RegExp(`^${dir}/`)
-    return (await resolveFiles(dir)).map(file => ({ 
-        src: file.replace(dirPrefix, ''),
-        fullPath: file,
-    }))
-}
-
-// Resolve files
-let resolveFiles = async (dir) => {
-    return await new Promise((resolve, reject) => {
-        Glob(`${dir}/**/*.{js,ts}`, (err, files) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve(files)
-            }
-        })
-    })
-}
