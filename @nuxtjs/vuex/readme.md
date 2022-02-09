@@ -1,6 +1,5 @@
 **Depenencies Needed:**
 - vuex 4.x+
-- glob
 - @nuxt/kit
 
 **Instructions**
@@ -21,36 +20,47 @@ export default defineNuxtConfig({
     vuex: {
         storeFolder: 'store',
         storeName: 'vuex',
-        devtools: false
     }
 })
 ```
 
 **index.js format**
 
-The store has a already been inititalized so all you need to do is export a default object with the stores you want to use.
+You will need to create an index.js file wirth the createStore function from vuex
 
 ```ts
+import { createStore } from 'vuex'
 import main from "./main";
 
-export default {
-    counter: {
-        namespaced: false,
-        state: () => ({
-            count: 0
-        }),
-        mutations: {
-            increment(state) {
-                // `state` is the local module state
-                state.count++
+export default createStore({
+    strict: (process.env.NODE_ENV !== 'production'),
+    modules: {
+        auth: {
+            namespaced: true,
+            state: () => ({
+                user: null,
+            }),
+            mutations: {
+                setUser(state, user) {
+                    state.user = user;
+                }
+            },
+            getters: {
+                user(state) {
+                    return state.user;
+                }
             }
         },
-        getters: {
-            doubleCount(state) {
-                return state.count * 2
-            }
-        }
+        main
     },
-    main
-}
+})
 ```
+
+There is a new composable added that you can use to handle SSR, the naming convention is based off the storeName + 'Store' so to access the composable you will use for example `vuexStore` (unless the changed the store name that is the default) so to get the store values after mutation you would do:
+
+```ts
+const store = vuexStore()
+
+store.auth.user // user: null
+```
+use your regular `$vuex` provider to commit and dispatch, and use the composable to get the mutations.
