@@ -56,11 +56,12 @@ export default createStore({
 })
 ```
 
-There is a new composable added that you can use to handle SSR, the naming convention is based off the storeName + 'Store' so to access the composable you will use for example `vuexStore` (unless the changed the store name that is the default) so to get the store values after mutation you would do:
+There is a new composable added that you can use to handle SSR, so to get the store values after mutation you would do:
 
 ```ts
 const store = vuexStore()
 
 store.auth.user // user: null
 ```
-use your regular `$vuex` provider to commit and dispatch, and use the composable to get the mutations.
+use your regular `$vuex` provider to commit and dispatch, and use the composable to get the mutations. If you have renamed the storeName pass the the instance to the `vuexStore()` function like this: `vuexStore($store)`
+
