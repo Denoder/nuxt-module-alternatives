@@ -63,5 +63,5 @@ const store = vuexStore()
 
 store.auth.user // user: null
 ```
-use your regular `$vuex` provider to commit and dispatch, and use the composable to get the mutations. If you have renamed the storeName pass the the instance to the `vuexStore()` function like this: `vuexStore($store)`
+use your regular `$vuex` provider to commit and dispatch, and use the composable to get the mutations. If you have renamed the storeName pass the the storeName to the `vuexStore()` function like this: `vuexStore('store')`
 
