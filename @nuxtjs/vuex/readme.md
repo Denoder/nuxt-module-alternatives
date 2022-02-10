@@ -56,14 +56,16 @@ export default createStore({
 })
 ```
 
-There is a new composable added that you can use to handle SSR, so to get the store values after mutation you would do:
+There is a new composable added that you can use to handle SSR,
+pass your vuex instance to the composable to utilize it: `const { store, state } = vuexStore({ instance: $vuex })`
 
 ```ts
-const store = vuexStore()
+const { $vuex } = useNuxtApp()
+const { store, state } = vuexStore({ instance: $vuex })
 
-store.auth.user // user: null
+state.auth.user // user: null
 ```
-pass your vuex instance to the composable to utilize it: `const { store, state } = vuexStore({ instance: $vuex })`
+
 
 `store.commit()`
 
