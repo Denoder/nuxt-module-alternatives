@@ -10,7 +10,7 @@ options: {
 }) => {
     const nuxt = useNuxtApp()
     const store = toRaw(options.instance ? options.instance : nuxt.$vuex)
-    const state = toRef(nuxt.payload.state, options.instance ? options.instance : 'vuex')
+    const state = toRef(nuxt.payload.state, options.payload ? options.payload : 'vuex')
     const refs = {}
 
     for (const key in store) {
