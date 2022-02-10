@@ -1,10 +1,10 @@
-import { useState, useNuxtApp } from '#app'
+import { useNuxtApp } from '#app'
 import { toRaw, isReactive, isRef, toRef } from 'vue'
 
 export const vuexStore = (key: String) => {
     const nuxt = useNuxtApp()
-    const store = toRaw(nuxt['$' + key ? key : 'vuex'])
-
+    const store = toRaw(nuxt['$' + (key ? key : 'vuex')])
+    const state = toRef(nuxt.payload.state, '$' + (key ? key : 'vuex'))
     const refs = {}
 
     for (const key in store) {
@@ -14,5 +14,9 @@ export const vuexStore = (key: String) => {
         }
     }
 
-    return useState('vuexStore', () => refs._state).value.data
+    if (state.value === undefined) {
+        state.value = refs._state
+    }
+
+    return state.value.data
 }
