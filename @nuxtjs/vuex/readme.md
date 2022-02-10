@@ -66,7 +66,10 @@ store.auth.user // user: null
 pass your vuex instance to the composable to utilize it: `const { store, state } = vuexStore({ instance: $vuex })`
 
 `store.commit()`
+
 `store.dispatch()`
+
+etc...
 
 to update after hydration
 
