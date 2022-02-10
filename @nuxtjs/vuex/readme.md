@@ -63,5 +63,11 @@ const store = vuexStore()
 
 store.auth.user // user: null
 ```
-use your regular `$vuex` provider to commit and dispatch, and use the composable to get the mutations. If you have renamed the storeName pass the the storeName to the `vuexStore()` function like this: `vuexStore('store')`
+pass your vuex instance to the composable to utilize it: `const { store, state } = vuexStore({ instance: $vuex })`
 
+`store.commit()`
+`store.dispatch()`
+
+to update after hydration
+
+`const { store, state } = vuexStore({ method: 'update' })`
