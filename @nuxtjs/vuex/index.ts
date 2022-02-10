@@ -2,7 +2,6 @@ import { resolve, join } from 'path'
 import { defineNuxtModule, addPluginTemplate, addAutoImport } from '@nuxt/kit'
 
 export interface ModuleOptions {
-    devtools: Boolean,
     storeFolder: String,
     storeName: String
 }
