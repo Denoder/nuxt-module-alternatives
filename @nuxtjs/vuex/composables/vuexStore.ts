@@ -1,10 +1,16 @@
 import { useNuxtApp } from '#app'
 import { toRaw, isReactive, isRef, toRef } from 'vue'
+import { Store } from 'vuex'
 
-export const vuexStore = (key: String) => {
+export const vuexStore = (
+options: {
+    instance: Store,
+    method: String,
+    payload: String
+}) => {
     const nuxt = useNuxtApp()
-    const store = toRaw(nuxt['$' + (key ? key : 'vuex')])
-    const state = toRef(nuxt.payload.state, '$' + (key ? key : 'vuex'))
+    const store = toRaw(options.instance ? options.instance : nuxt.$vuex)
+    const state = toRef(nuxt.payload.state, options.instance ? options.instance : 'vuex')
     const refs = {}
 
     for (const key in store) {
@@ -14,9 +20,9 @@ export const vuexStore = (key: String) => {
         }
     }
 
-    if (state.value === undefined) {
-        state.value = refs._state
+    if(state.value === undefined || options.method === 'update') {
+        state.value = refs
     }
 
-    return state.value.data
+    return { state: state.value._state.data, store }
 }
