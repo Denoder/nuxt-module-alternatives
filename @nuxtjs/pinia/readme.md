@@ -4,7 +4,7 @@
 
 **Info**
 
-This is merely for my reference, you can continue to use the nuxt module the official repository provides, i justl ike to keep things in the same format. 
+This is merely for my reference, you can continue to use the nuxt module the official repository provides, I just like to keep things in the same format. 
 
 **Additions** 
 
