@@ -5,6 +5,7 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Axios Module: [Nuxt Community Repository](https://github.com/nuxt-community/axios-module)
 - Nuxt Proxy Module: [Nuxt Community Repository](https://github.com/nuxt-community/proxy-module)
 - Nuxt Google Fonts Module: [Nuxt Community Repository](https://github.com/nuxt-community/google-fonts-module)
+- VueJS/Nuxt Pinia: [VueJS/Nuxt Pinia Repository](https://github.com/vuejs/pinia)
 - Nuxt Vuex: ?
 
 **Instructions**
@@ -35,8 +36,9 @@ Example `package.json`:
     "dependencies": {
         "@nuxtjs/axios": "file:modules/@nuxtjs/axios",
         "@nuxtjs/google-fonts": "file:modules/@nuxtjs/google-fonts",
+        "@nuxtjs/pinia": "file:modules/@nuxtjs/pinia",
         "@nuxtjs/proxy": "file:modules/@nuxtjs/proxy",
-        "@nuxtjs/vuex": "file:modules/@nuxtjs/vuex",
+        "@nuxtjs/vuex": "file:modules/@nuxtjs/vuex", // Depricated
         "@pinia/nuxt": "^0.1.8"
     }
 }
