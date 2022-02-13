@@ -41,7 +41,6 @@ Example `package.json`:
         "@nuxtjs/pinia": "file:modules/@nuxtjs/pinia",
         "@nuxtjs/proxy": "file:modules/@nuxtjs/proxy",
         "@nuxtjs/vuex": "file:modules/@nuxtjs/vuex", // Depricated
-        "@pinia/nuxt": "^0.1.8"
     }
 }
 ```
