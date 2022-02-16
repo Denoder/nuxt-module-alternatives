@@ -44,6 +44,33 @@ Example `package.json`:
     }
 }
 ```
+or 
+
+```json
+{
+    "private": true,
+    "scripts": {
+        "dev": "nuxi dev",
+        "build": "nuxi build",
+        "start": "node .output/server/index.mjs"
+    },
+    "devDependencies": {
+        "axios": "^0.25.0",
+        "axios-retry": "^3.2.4",
+        "google-fonts-helper": "^2.0.1",
+        "http-proxy-middleware": "^2.0.2",
+        "nuxt3": "latest"
+    },
+    "dependencies": {
+        "@nuxtjs/axios": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/axios?master",
+        "@nuxtjs/auth": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/auth?master",
+        "@nuxtjs/google-fonts": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/google-fonts?master",
+        "@nuxtjs/pinia": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/pinia?master",
+        "@nuxtjs/proxy": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/proxy?master",
+        "@nuxtjs/vuex": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/vuex?master", // Depricated
+    }
+}
+```
 </details>
 
 Each module has a readme file with a list of packages that will need to be installed as a dependency.
