@@ -40,7 +40,7 @@ Example `package.json`:
         "@nuxtjs/google-fonts": "file:modules/@nuxtjs/google-fonts",
         "@nuxtjs/pinia": "file:modules/@nuxtjs/pinia",
         "@nuxtjs/proxy": "file:modules/@nuxtjs/proxy",
-        "@nuxtjs/vuex": "file:modules/@nuxtjs/vuex", // Depricated
+        "@nuxtjs/vuex": "file:modules/@nuxtjs/vuex" // Depricated
     }
 }
 ```
@@ -67,7 +67,7 @@ or
         "@nuxtjs/google-fonts": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/google-fonts?master",
         "@nuxtjs/pinia": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/pinia?master",
         "@nuxtjs/proxy": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/proxy?master",
-        "@nuxtjs/vuex": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/vuex?master", // Depricated
+        "@nuxtjs/vuex": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/vuex?master" // Depricated
     }
 }
 ```
