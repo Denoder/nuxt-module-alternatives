@@ -8,7 +8,7 @@ export * from './laravel-passport'
 export * from './laravel-sanctum'
 
 export const ProviderAliases = {
-  'laravel/jwt': 'laravelJWT',
-  'laravel/passport': 'laravelPassport',
-  'laravel/sanctum': 'laravelSanctum'
+    'laravel/jwt': 'laravelJWT',
+    'laravel/passport': 'laravelPassport',
+    'laravel/sanctum': 'laravelSanctum'
 }

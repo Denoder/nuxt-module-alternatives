@@ -159,13 +159,16 @@ export class Storage {
     }
 
     watchState(
-        key: string,
-        fn: (value: unknown, oldValue: unknown) => void
+        watchKey: string,
+        fn: (value: unknown) => void
     ): () => void {
         if (this._usePinia) {
-            return this.store.$subscribe((mutation, state) => {
-                if (mutation.type === 'patch object') {
-                    fn(state[key], mutation.payload[key])
+            return this.store.$onAction(({ name, args }) => {
+                if (name === 'SET') {
+                    const { key, value } = args[0]
+                    if (key === watchKey) {
+                        fn(value)
+                    }
                 }
             })
         }

@@ -4,7 +4,7 @@ import { defineNuxtPlugin } from '#app'
 // Active schemes
 <%= options.schemeImports.map(i => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n') %>
 
-export default defineNuxtPlugin(ctx => {
+export default defineNuxtPlugin(async ctx => {
 
     // Options
     const options = JSON.parse('<%= JSON.stringify(options.options) %>')
@@ -25,7 +25,10 @@ export default defineNuxtPlugin(ctx => {
     ctx.provide('auth', $auth);
 
     // Initialize auth
-    return $auth.init().catch(error => {
+    try {
+        await $auth.init()
+    }
+    catch (error) {
         if (process.client) {
 
             // Don't console log expired auth session errors. This error is common, and expected to happen.
@@ -37,5 +40,5 @@ export default defineNuxtPlugin(ctx => {
 
             console.error('[ERROR] [AUTH]', error)
         }
-    })
+    }
 })

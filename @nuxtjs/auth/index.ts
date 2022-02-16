@@ -50,7 +50,7 @@ export default defineNuxtModule({
 
         // Use nuxt hook to add middleware
         nuxt.hook('pages:middleware:extend', middleware => {
-            middleware.unshift({ name: 'auth', path: resolve(__dirname, 'core/middleware.ts'), global: false })
+            middleware.push({ name: 'auth', path: resolve(__dirname, 'core/middleware.ts'), global: false })
         })
 
         // Extend auth with plugins
@@ -62,6 +62,5 @@ export default defineNuxtModule({
         // Transpile and alias auth src
         const runtime = resolve(__dirname, 'runtime')
         nuxt.options.alias['~auth/runtime'] = runtime
-        //nuxt.options.build.transpile.push(__dirname)
     }
 })

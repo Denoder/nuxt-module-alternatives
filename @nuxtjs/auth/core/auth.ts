@@ -11,12 +11,11 @@ import type {
 } from '../types'
 import type { ModuleOptions } from '../options'
 import {
-    routeOption,
     isRelativeURL,
     isSet,
     isSameURL,
     getProp,
-    normalizePath
+    routeOption
 } from '../utils'
 import { Storage } from './storage'
 
@@ -125,16 +124,13 @@ export class Auth {
         } catch (error) {
             this.callOnError(error)
         } finally {
-            // Watch for loggedIn changes only in client side
             if (process.client && this.options.watchLoggedIn) {
                 this.$storage.watchState('loggedIn', (loggedIn) => {
-                    // disabled for now, at the moment try to rediect manually
-                    /*if (
-                        // TODO: Why Router is incompatible?
-                        !routeOption(this.ctx._route as Route, 'auth', false)
-                    ) {
-                        this.redirect(loggedIn ? 'home' : 'logout')
-                    }*/
+                    if (loggedIn) {
+                        if (!routeOption(this.ctx._route as Route, 'auth', false)) {
+                            this.redirect(loggedIn ? 'home' : 'logout')
+                        }
+                    }
                 })
             }
         }
@@ -252,12 +248,10 @@ export class Auth {
     }
 
     reset(...args: unknown[]): void {
-        if (!this.getStrategy().reset) {
+        if ((this.getStrategy() as TokenableScheme).token && !this.getStrategy().reset) {
             this.setUser(false)
-                // TODO: Check if is Tokenable Scheme
-                ; (this.getStrategy() as TokenableScheme).token.reset()
-                // TODO: Check if is Refreshable Scheme
-                ; (this.getStrategy() as RefreshableScheme).refreshToken.reset()
+            ; this.getStrategy().token.reset()
+            ; this.getStrategy().refreshToken.reset()
         }
 
         return this.getStrategy().reset(
@@ -317,10 +311,7 @@ export class Auth {
         endpoint: HTTPRequest,
         defaults: HTTPRequest = {}
     ): Promise<HTTPResponse> {
-        const _endpoint =
-            typeof defaults === 'object'
-                ? Object.assign({}, defaults, endpoint)
-                : endpoint
+        const _endpoint = typeof defaults === 'object' ? Object.assign({}, defaults, endpoint) : endpoint
 
         // Fix baseURL for relative endpoints
         if (_endpoint.baseURL === '') {
@@ -347,25 +338,19 @@ export class Auth {
         endpoint: HTTPRequest,
         defaults?: HTTPRequest
     ): Promise<HTTPResponse> {
-        // TODO: Check if is Tokenable Scheme
-        const token = (this.getStrategy() as TokenableScheme).token.get()
-
         const _endpoint = Object.assign({}, defaults, endpoint)
 
-        // TODO: Use `this.getStrategy()` instead of `this.strategies[strategy]`
-        const tokenName =
-            (this.strategies[strategy] as TokenableScheme).options.token.name ||
-            'Authorization'
-        if (!_endpoint.headers) {
-            _endpoint.headers = {}
-        }
-        if (
-            !_endpoint.headers[tokenName] &&
-            isSet(token) &&
-            token &&
-            typeof token === 'string'
-        ) {
-            _endpoint.headers[tokenName] = token
+        if ((this.getStrategy() as TokenableScheme).token) {
+            const token = this.getStrategy().token.get()
+    
+            const tokenName = this.getStrategy().options.token.name || 'Authorization'
+            if (!_endpoint.headers) {
+                _endpoint.headers = {}
+            }
+    
+            if (!_endpoint.headers[tokenName] && isSet(token) && token && typeof token === 'string') {
+                _endpoint.headers[tokenName] = token
+            }
         }
 
         return this.request(_endpoint)
@@ -400,16 +385,17 @@ export class Auth {
         }
     }
 
-    redirect(name: string, noRouter = false): void {
+    redirect(name: string, opt: { route?: Route | boolean, noRouter?: boolean } = { route: false, noRouter: false }): void {
+        const router = useRouter()
+
         if (!this.options.redirect) {
             return
         }
 
-        const from = this.options.fullPathRedirect
-            ? this.ctx._route.fullPath
-            : this.ctx._route.path
+        const from = opt.route ? (this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path) : (this.options.fullPathRedirect ? this.ctx._route.fullPath : this.ctx._route.path)
 
         let to = this.options.redirect[name]
+
         if (!to) {
             return
         }
@@ -442,19 +428,13 @@ export class Auth {
             return
         }
 
-        const queryString = Object.keys(this.ctx._route.query).map(key => key + '=' + this.ctx._route.query[key]).join('&');
+        const queryString = Object.keys(opt.route ? opt.route.query : this.ctx._route.query).map(key => key + '=' + opt.route ? opt.route.query[key] : this.ctx._route.query[key]).join('&');
 
-        if (process.client) {
-            if (noRouter) {
-                if (isRelativeURL(to) && !to.includes(this.ctx._route.path)) {
-                    to = normalizePath('/' + this.ctx._route.path + '/' + to) // Don't pass in context to preserve base url
-                }
-                window.location.replace(to)
-            } else {
-                this.ctx.$router.push(to + (queryString ? '?' + queryString : ''))
-            }
-        } else {
-            this.ctx.$router.push(to + (queryString ? '?' + queryString : ''))
+        if (opt.noRouter) {
+            window.location.replace(to + (queryString ? '?' + queryString : ''));
+        }
+        else {
+            router.push(to + (queryString ? '?' + queryString : ''))
         }
     }
 

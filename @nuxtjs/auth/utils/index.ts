@@ -75,8 +75,8 @@ export function normalizePath(path = '', ctx?: Context): string {
     let result = path.split('?')[0]
 
     // Remove base path
-    if (ctx && ctx.base) {
-        result = result.replace(ctx.base, '/')
+    if (ctx && ctx.$router.options.history.base) {
+        result = result.replace(ctx.$router.options.history.base, '/')
     }
 
     // Remove redundant / from the end of path

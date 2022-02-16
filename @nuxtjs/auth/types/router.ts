@@ -1,6 +1,6 @@
 export interface VueComponent {
-  options: object
-  _Ctor: VueComponent
+    options: object
+    _Ctor: VueComponent
 }
 
 export type MatchedRoute = { components: VueComponent[] }

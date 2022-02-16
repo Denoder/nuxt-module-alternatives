@@ -2,8 +2,9 @@ import type { Route } from '../types'
 import { routeOption, getMatchedComponents, normalizePath } from '../utils'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
+
     const ctx = useNuxtApp()
-    
+
     // Disable middleware if options: { auth: false } is set on the route
     if (routeOption(to as Route, 'auth', false)) {
         return
@@ -29,7 +30,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
         // -- Authorized --
         if (!login || insidePage(login) || pageIsInGuestMode) {
-            ctx.$auth.redirect('home')
+            ctx.$auth.redirect('home', { route: to })
         }
 
         // Refresh token has expired. There is no way to refresh. Force reset.
@@ -55,6 +56,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         // (Those passing `callback` at runtime need to mark their callback component
         // with `auth: false` to avoid an unnecessary redirect from callback to login)
     } else if (!pageIsInGuestMode && (!callback || !insidePage(callback))) {
-        ctx.$auth.redirect('login')
+        ctx.$auth.redirect('login', { route: to })
     }
 });
