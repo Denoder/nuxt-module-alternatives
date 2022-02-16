@@ -1,0 +1,15 @@
+{
+    "name": "@nuxtjs/proxy",
+    "version": "1.0.0",
+    "license": "MIT",
+    "type": "module",
+    "main": "./index.ts",
+    "files": [
+        "."
+    ],
+    "scripts": {},
+    "dependencies": {
+        "@nuxt/kit": "npm:@nuxt/kit-edge@latest",
+        "http-proxy-middleware": "latest",
+    }
+}
