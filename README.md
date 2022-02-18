@@ -69,5 +69,3 @@ or
 }
 ```
 </details>
-
-The modules should install the necissary packages.
