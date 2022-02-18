@@ -55,7 +55,7 @@ the cookie scheme has been moved to its own scheme so the user property takes pl
 
 **Layouts**
 
-~~Please do note that currently the way nuxt 3 works, if you use the auth module and you are utitlizing multiple layouts, that it will not work and any redirection will fail. You will need to be using one layout, but if you find some way around this, please do tell me. This  seems to be an issue with or without this module, ad any redirection to a new layout will cause and error. ~~
+~~Please do note that currently the way nuxt 3 works, if you use the auth module and you are utitlizing multiple layouts, that it will not work and any redirection will fail. You will need to be using one layout, but if you find some way around this, please do tell me. This  seems to be an issue with or without this module, ad any redirection to a new layout will cause and error.~~
 
 I believe this has to do with certain theming aspects, so if you don't encounter any issues then it's safe to ignore this.
 
