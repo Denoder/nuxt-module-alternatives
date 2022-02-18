@@ -7,6 +7,7 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Auth Module: [Nuxt Community Repository](https://github.com/nuxt-community/auth-module)
 - Nuxt Google Fonts Module: [Nuxt Community Repository](https://github.com/nuxt-community/google-fonts-module)
 - VueJS/Nuxt Pinia: [VueJS/Nuxt Pinia Repository](https://github.com/vuejs/pinia)
+- Nuxt Element Plus: ?
 - Nuxt Vuex: ?
 
 **Instructions**
@@ -14,6 +15,8 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Then in your `package.json` add them as a local module.
 - Finally run `npm install` to have them symlinked.
 - You can then add them to the `modules` or `buildModules` like you would in Nuxt with the same named aliases.
+
+Alternatively you can use gitpkg to install these modules.
 
 Example `package.json`:
 <details>
@@ -28,10 +31,6 @@ Example `package.json`:
         "start": "node .output/server/index.mjs"
     },
     "devDependencies": {
-        "axios": "^0.25.0",
-        "axios-retry": "^3.2.4",
-        "google-fonts-helper": "^2.0.1",
-        "http-proxy-middleware": "^2.0.2",
         "nuxt3": "latest"
     },
     "dependencies": {
@@ -55,15 +54,12 @@ or
         "start": "node .output/server/index.mjs"
     },
     "devDependencies": {
-        "axios": "^0.25.0",
-        "axios-retry": "^3.2.4",
-        "google-fonts-helper": "^2.0.1",
-        "http-proxy-middleware": "^2.0.2",
         "nuxt3": "latest"
     },
     "dependencies": {
         "@nuxtjs/axios": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/axios?master",
         "@nuxtjs/auth": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/auth?master",
+        "@nuxtjs/element-plus": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/element-plus?master",
         "@nuxtjs/google-fonts": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/google-fonts?master",
         "@nuxtjs/pinia": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/pinia?master",
         "@nuxtjs/proxy": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/proxy?master",
@@ -73,4 +69,4 @@ or
 ```
 </details>
 
-Each module has a readme file with a list of packages that will need to be installed as a dependency.
+Each module has a readme file with a list of packages that will need to be installed as a dependency. IF you are using the one with gitpkg the dependencies should also download by itself. 
