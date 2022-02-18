@@ -16,8 +16,8 @@ export default defineNuxtModule({
     },
     defaults: {
         mode: 'vite',
-        Components: false,
-        AutoImport: false
+        components: false,
+        autoimport: false
     },
     async setup(moduleOptions, nuxt) {
         // Merge all option sources
@@ -29,12 +29,12 @@ export default defineNuxtModule({
         const vitePlugins = [
             ViteAutoImport({
                 resolvers: [
-                    ElementPlusResolver(options.AutoImport)
+                    ElementPlusResolver(options.autoimport)
                 ],
             }),
             ViteComponents({
                 resolvers: [
-                    ElementPlusResolver(options.Components)
+                    ElementPlusResolver(options.components)
                 ],
             })
         ];
@@ -42,12 +42,12 @@ export default defineNuxtModule({
         const webpackPlugins = [
             WebpackAutoImport({
                 resolvers: [
-                    ElementPlusResolver(options.AutoImport)
+                    ElementPlusResolver(options.autoimport)
                 ],
             }),
             WebpackComponents({
                 resolvers: [
-                    ElementPlusResolver(options.Components)
+                    ElementPlusResolver(options.components)
                 ],
             })
         ];
