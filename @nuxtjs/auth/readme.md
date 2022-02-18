@@ -61,4 +61,4 @@ I believe this has to do with certain theming aspects, so if you don't encounter
 
 **Middleware**
 
-Another thing is that for some reason the context of nuxt is not available when i set the middleware to global, so with that in mind, srtting it to global has been disabled. I have tried to figure out ohow to use it when it's in global but nothing works, the auth instance isnt avaialble until after. Even when i try to hook onto when a page is mounted that does not work. 
+Another thing is that for some reason the context of nuxt is not available when i set the middleware to global, so with that in mind, setting it to global has been disabled. I have tried to figure out ohow to use it when it's in global but nothing works, the auth instance isnt avaialble until after. Even when i try to hook onto when a page is mounted that does not work. 
