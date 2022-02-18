@@ -13,6 +13,7 @@
     },
     "devDependencies": {
         "unplugin-auto-import": "latest",
-        "unplugin-vue-components": "latest"
+        "unplugin-vue-components": "latest",
+        "element-plus": "^2.0.0"
     }
 }
