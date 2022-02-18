@@ -1,0 +1,18 @@
+{
+    "name": "@nuxtjs/element-plus",
+    "version": "1.0.0",
+    "license": "MIT",
+    "type": "module",
+    "main": "./index.ts",
+    "files": [
+        "."
+    ],
+    "scripts": {},
+    "dependencies": {
+        "@nuxt/kit": "npm:@nuxt/kit-edge@latest"
+    },
+    "devDependencies": {
+        "unplugin-auto-import": "latest",
+        "unplugin-vue-components": "latest"
+    }
+}
