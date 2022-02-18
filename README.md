@@ -36,6 +36,7 @@ Example `package.json`:
     "dependencies": {
         "@nuxtjs/axios": "file:modules/@nuxtjs/axios",
         "@nuxtjs/auth": "file:modules/@nuxtjs/auth",
+        "@nuxtjs/element-plus": "file:modules/@nuxtjs/element-plus",
         "@nuxtjs/google-fonts": "file:modules/@nuxtjs/google-fonts",
         "@nuxtjs/pinia": "file:modules/@nuxtjs/pinia",
         "@nuxtjs/proxy": "file:modules/@nuxtjs/proxy",
@@ -69,4 +70,4 @@ or
 ```
 </details>
 
-Each module has a readme file with a list of packages that will need to be installed as a dependency. IF you are using the one with gitpkg the dependencies should also download by itself. 
+The modules should install the necissary packages.
