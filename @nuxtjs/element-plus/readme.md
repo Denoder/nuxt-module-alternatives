@@ -1,6 +1,7 @@
 **Depenencies Needed:**
 - unplugin-auto-import
 - unplugin-vue-components
+- element-plus
 - @nuxt/kit
 
 **Information**
