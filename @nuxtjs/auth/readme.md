@@ -49,8 +49,8 @@ the config would look like this
     }
 ```
 
-notice the `cookie.server` property, this indicates that the cookie we will be looking for will be set uplon login otherwise we will be looking at a client/browser cookie.
-the cookie scheme has been moved to its own scheme so the user property takes place within the cookie strategy and doest extend the token scheme from the local scheme. There has also been 2 user properties one for the client/browser and one for the server.
+notice the `cookie.server` property, this indicates that the cookie we will be looking for will be set upon login otherwise we will be looking at a client/browser cookie.
+the cookie scheme has been moved to its own scheme so the user property takes place within the cookie strategy and doesnt extend the token scheme from the local scheme. There has also been 2 user properties one for the client/browser and one for the server.
 
 **Layouts**
 
