@@ -11,12 +11,17 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Vuex: ?
 
 **Instructions**
+
 - Add any of these modules to your `modules` directory of your nuxt 3 application. 
 - Then in your `package.json` add them as a local module.
 - Finally run `npm install` to have them symlinked.
 - You can then add them to the `modules` or `buildModules` like you would in Nuxt with the same named aliases.
 
 Alternatively you can use gitpkg to install these modules.
+
+**Other Modules**
+
+_If you have a nuxt module that looks like it wont be updated, and has any usefeulness to the general nuxt community, please tell me and I'll take a look into it._
 
 Example `package.json`:
 <details>
