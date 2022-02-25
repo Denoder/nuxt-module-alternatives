@@ -10,7 +10,7 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Element Plus: ?
 - Nuxt Vuex: ?
 
-**Other Informations**
+**Other Information**
 
 The `@nuxtjs` folder is deprecated, use `@nuxtjs-alt` instead (this is due to me adding it to npmjs)
 
