@@ -10,6 +10,10 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Element Plus: ?
 - Nuxt Vuex: ?
 
+**Other Informations**
+
+The `@nuxtjs` folder is deprecated, use `@nuxtjs-alt` instead (this is due to me adding it to npmjs)
+
 **Instructions**
 
 - Add any of these modules to your `modules` directory of your nuxt 3 application. 
@@ -39,13 +43,13 @@ Example `package.json`:
         "nuxt3": "latest"
     },
     "dependencies": {
-        "@nuxtjs/axios": "file:modules/@nuxtjs-alt/axios",
-        "@nuxtjs/auth": "file:modules/@nuxtjs-alt/auth",
-        "@nuxtjs/element-plus": "file:modules/@nuxtjs-alt/element-plus",
-        "@nuxtjs/google-fonts": "file:modules/@nuxtjs-alt/google-fonts",
-        "@nuxtjs/pinia": "file:modules/@nuxtjs-alt/pinia",
-        "@nuxtjs/proxy": "file:modules/@nuxtjs-alt/proxy",
-        "@nuxtjs/vuex": "file:modules/@nuxtjs-alt/vuex" // Deprecated
+        "@nuxtjs-alt/axios": "file:modules/@nuxtjs-alt/axios",
+        "@nuxtjs-alt/auth": "file:modules/@nuxtjs-alt/auth",
+        "@nuxtjs-alt/element-plus": "file:modules/@nuxtjs-alt/element-plus",
+        "@nuxtjs-alt/google-fonts": "file:modules/@nuxtjs-alt/google-fonts",
+        "@nuxtjs-alt/pinia": "file:modules/@nuxtjs-alt/pinia",
+        "@nuxtjs-alt/proxy": "file:modules/@nuxtjs-alt/proxy",
+        "@nuxtjs-alt/vuex": "file:modules/@nuxtjs-alt/vuex" // Deprecated
     }
 }
 ```
