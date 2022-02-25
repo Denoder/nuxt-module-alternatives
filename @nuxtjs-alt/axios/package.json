@@ -1,0 +1,33 @@
+{
+    "name": "@nuxtjs-alt/axios",
+    "version": "1.0.1",
+    "description": "An alternative module to @nuxtjs/axios",
+    "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
+    "author": "Teranode",
+    "keywords": [
+        "nuxt",
+        "nuxtjs",
+        "nuxt-module",
+        "nuxt-plugin",
+        "nuxt-module-alternatives",
+        "axios",
+        "@nuxtjs/axios"
+    ],
+    "license": "MIT",
+    "type": "module",
+    "main": "./module.ts",
+    "types": "./types/index.d.ts",
+    "dependencies": {
+        "@nuxt/kit": "npm:@nuxt/kit-edge@latest",
+        "axios": "latest",
+        "axios-retry": "latest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Teranode/nuxt-module-alternatives.git",
+        "directory": "@nuxtjs-alt/axios"
+    },
+    "bugs": {
+        "url": "https://github.com/Teranode/nuxt-module-alternatives/issues"
+    }
+}

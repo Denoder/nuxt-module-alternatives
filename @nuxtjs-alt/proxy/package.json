@@ -1,0 +1,30 @@
+{
+    "name": "@nuxtjs-alt/proxy",
+    "version": "1.0.0",
+    "description": "An alternative module to @nuxtjs/proxy",
+    "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
+    "author": "Teranode",
+    "keywords": [
+        "nuxt",
+        "nuxtjs",
+        "nuxt-module",
+        "nuxt-plugin",
+        "nuxt-module-alternatives",
+        "@nuxtjs/proxy"
+    ],
+    "license": "MIT",
+    "type": "module",
+    "main": "./module.ts",
+    "dependencies": {
+        "@nuxt/kit": "npm:@nuxt/kit-edge@latest",
+        "http-proxy-middleware": "latest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Teranode/nuxt-module-alternatives.git",
+        "directory": "@nuxtjs-alt/proxy"
+    },
+    "bugs": {
+        "url": "https://github.com/Teranode/nuxt-module-alternatives/issues"
+    }
+}

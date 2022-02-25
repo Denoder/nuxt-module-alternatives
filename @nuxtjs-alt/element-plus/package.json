@@ -1,0 +1,39 @@
+{
+    "name": "@nuxtjs-alt/element-plus",
+    "version": "1.0.0",
+    "description": "A module to handle auto-import for nuxt3",
+    "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
+    "author": "Teranode",
+    "keywords": [
+        "nuxt",
+        "nuxtjs",
+        "nuxt-module",
+        "nuxt-plugin",
+        "nuxt-module-alternatives",
+        "element-plus"
+    ],
+    "license": "MIT",
+    "type": "module",
+    "main": "./module.ts",
+    "types": "./types.ts",
+    "sideEffects": false,
+    "dependencies": {
+        "@nuxt/kit": "npm:@nuxt/kit-edge@latest",
+        "element-plus": "^2.0.2"
+    },
+    "devDependencies": {
+        "unplugin-auto-import": "latest",
+        "unplugin-vue-components": "latest"
+    },
+    "peerDependencies": {
+        "vue": "*"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Teranode/nuxt-module-alternatives.git",
+        "directory": "@nuxtjs-alt/element-plus"
+    },
+    "bugs": {
+        "url": "https://github.com/Teranode/nuxt-module-alternatives/issues"
+    }
+}
