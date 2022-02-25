@@ -16,9 +16,7 @@
     "type": "module",
     "main": "./module.ts",
     "dependencies": {
-        "@nuxt/kit": "npm:@nuxt/kit-edge@latest"
-    },
-    "devDependencies": {
+        "@nuxt/kit": "npm:@nuxt/kit-edge@latest",
         "vuex": "^4.0.2"
     },
     "peerDependencies": {
