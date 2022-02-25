@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/vuex",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A module to utitlize vuex with nuxt3",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
