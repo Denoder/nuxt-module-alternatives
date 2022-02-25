@@ -17,7 +17,7 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Finally run `npm install` to have them symlinked.
 - You can then add them to the `modules` or `buildModules` like you would in Nuxt with the same named aliases.
 
-Alternatively you can use gitpkg to install these modules.
+Adding them to workspaces will install the dependencies. Alternatively you can use the npmjs releases.
 
 **Other Modules**
 
@@ -39,17 +39,17 @@ Example `package.json`:
         "nuxt3": "latest"
     },
     "dependencies": {
-        "@nuxtjs/axios": "file:modules/@nuxtjs/axios",
-        "@nuxtjs/auth": "file:modules/@nuxtjs/auth",
-        "@nuxtjs/element-plus": "file:modules/@nuxtjs/element-plus",
-        "@nuxtjs/google-fonts": "file:modules/@nuxtjs/google-fonts",
-        "@nuxtjs/pinia": "file:modules/@nuxtjs/pinia",
-        "@nuxtjs/proxy": "file:modules/@nuxtjs/proxy",
-        "@nuxtjs/vuex": "file:modules/@nuxtjs/vuex" // Depricated
+        "@nuxtjs/axios": "file:modules/@nuxtjs-alt/axios",
+        "@nuxtjs/auth": "file:modules/@nuxtjs-alt/auth",
+        "@nuxtjs/element-plus": "file:modules/@nuxtjs-alt/element-plus",
+        "@nuxtjs/google-fonts": "file:modules/@nuxtjs-alt/google-fonts",
+        "@nuxtjs/pinia": "file:modules/@nuxtjs-alt/pinia",
+        "@nuxtjs/proxy": "file:modules/@nuxtjs-alt/proxy",
+        "@nuxtjs/vuex": "file:modules/@nuxtjs-alt/vuex" // Deprecated
     }
 }
 ```
-or 
+or (yarn add/install)
 
 ```json
 {
@@ -63,13 +63,13 @@ or
         "nuxt3": "latest"
     },
     "dependencies": {
-        "@nuxtjs/axios": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/axios?master",
-        "@nuxtjs/auth": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/auth?master",
-        "@nuxtjs/element-plus": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/element-plus?master",
-        "@nuxtjs/google-fonts": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/google-fonts?master",
-        "@nuxtjs/pinia": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/pinia?master",
-        "@nuxtjs/proxy": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/proxy?master",
-        "@nuxtjs/vuex": "https://gitpkg.now.sh/Teranode/nuxt-module-alternatives/@nuxtjs/vuex?master" // Depricated
+        "@nuxtjs-alt/axios": "latest",
+        "@nuxtjs-alt/auth": "latest",
+        "@nuxtjs-alt/element-plus": "latest",
+        "@nuxtjs-alt/google-fonts": "latest",
+        "@nuxtjs-alt/pinia": "latest",
+        "@nuxtjs-alt/proxy": "latest",
+        "@nuxtjs-alt/vuex": "latest" // Deprecated
     }
 }
 ```
