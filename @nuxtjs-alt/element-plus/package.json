@@ -19,9 +19,7 @@
     "sideEffects": false,
     "dependencies": {
         "@nuxt/kit": "npm:@nuxt/kit-edge@latest",
-        "element-plus": "^2.0.2"
-    },
-    "devDependencies": {
+        "element-plus": "^2.0.2",
         "unplugin-auto-import": "latest",
         "unplugin-vue-components": "latest"
     },
