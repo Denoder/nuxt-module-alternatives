@@ -14,6 +14,17 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 
 The `@nuxtjs` folder is deprecated, use `@nuxtjs-alt` instead (this is due to me adding it to npmjs)
 
+**Module Order**
+
+If you're using a combination of axios, pinia and auth you need to load them in `buildModules` in the following order.
+```
+buildModules: [
+    '@nuxtjs-alt/auth',
+    '@nuxtjs-alt/axios',
+    '@nuxtjs-alt/pinia',
+]
+```
+
 **Instructions**
 
 - Add any of these modules to your `modules` directory of your nuxt 3 application. 
