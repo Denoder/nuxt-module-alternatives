@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "lib": ["DOM"],
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "strict": false,
+        "declaration": true,
+        "baseUrl": ".",
+        "outDir": "dist",
+        "declarationDir": "temp/types",
+        "types": ["@types/node", "./src/shim", "@nuxt/kit", "@nuxt/schema"]
+    },
+    "include": ["./src"]
+}
