@@ -1,0 +1,8 @@
+{
+  "name": "@nuxtjs-alt/axios",
+  "version": "1.0.2",
+  "configKey": "axios",
+  "compatibility": {
+    "nuxt": "^3.0.0"
+  }
+}
