@@ -1,7 +1,6 @@
 import { name, version } from '../package.json'
-import { defineNuxtModule, addServerMiddleware } from '@nuxt/kit'
+import { defineNuxtModule, addServerMiddleware, createResolver } from '@nuxt/kit'
 import { HttpProxyOptions, getProxyEntries, NuxtProxyOptions } from './options'
-import { resolve } from 'path'
 import fs from 'fs-extra'
 
 declare module "@nuxt/kit" {
@@ -31,11 +30,13 @@ export default defineNuxtModule({
         }
 
         const proxyEntries = getProxyEntries(options as NuxtProxyOptions, defaults)
+        // resolver
+        const resolver = createResolver(import.meta.url)
+        const proxyDirectory = resolver.resolve('runtime/server/middleware')
 
         // Create & Register middleware
         Object.values(proxyEntries).forEach(async (proxyEntry, index) => {
             // addServerMiddleware wont accept a function so to circumvent this we create a file for each entry
-            const proxyDirectory = resolve(nuxt.options.srcDir, 'proxy-middleware')
             const filePath = proxyDirectory + `/proxy-${index}.ts`
 
             fs.emptyDir(proxyDirectory).then(() => {
