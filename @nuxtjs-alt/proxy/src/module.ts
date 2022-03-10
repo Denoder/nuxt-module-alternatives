@@ -31,8 +31,8 @@ export default defineNuxtModule({
 
         const proxyEntries = getProxyEntries(options as NuxtProxyOptions, defaults)
         // resolver
-        const resolver = createResolver(import.meta.url)
-        const proxyDirectory = resolver.resolve('runtime/server/middleware')
+        const resolver = createResolver(nuxt.options.srcDir)
+        const proxyDirectory = resolver.resolve('server/proxy')
 
         // Create & Register middleware
         Object.values(proxyEntries).forEach(async (proxyEntry, index) => {
