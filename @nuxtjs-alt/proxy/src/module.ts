@@ -35,15 +35,21 @@ export default defineNuxtModule({
         // Create & Register middleware
         Object.values(proxyEntries).forEach(async (proxyEntry, index) => {
             // addServerMiddleware wont accept a function so to circumvent this we create a file for each entry
-            const filePath = resolve(nuxt.options.srcDir, `proxy-middleware/proxy-${index}.ts`)
+            const proxyDirectory = resolve(nuxt.options.srcDir, 'proxy-middleware')
+            const filePath = proxyDirectory + `/proxy-${index}.ts`
 
-            fs.outputFile(filePath, proxyContents(proxyEntry))
-            .then(() => {
-                addServerMiddleware(filePath)
+            fs.emptyDir(proxyDirectory).then(() => {
+                fs.outputFile(filePath, proxyContents(proxyEntry))
+                .then(() => {
+                    addServerMiddleware(filePath)
+                })
+                .catch(err => {
+                    console.error(err)
+                });
             })
             .catch(err => {
                 console.error(err)
-            });
+            })
         });
     }
 })
