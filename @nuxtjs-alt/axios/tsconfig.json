@@ -11,7 +11,7 @@
         "baseUrl": ".",
         "outDir": "dist",
         "declarationDir": "temp/types",
-        "types": ["@nuxt/kit", "./types"]
+        "types": ["@types/node", "@nuxt/kit", "@nuxt/schema"]
     },
     "include": ["./src"]
 }

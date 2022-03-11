@@ -1,6 +1,6 @@
 import { name, version } from '../package.json'
-import type { AxiosOptions } from '../types'
 import { defineNuxtModule, installModule, addPluginTemplate, createResolver } from '@nuxt/kit'
+import type { ModuleOptions } from './options'
 
 const CONFIG_KEY = 'axios'
 
@@ -11,11 +11,13 @@ export default defineNuxtModule({
         configKey: CONFIG_KEY,
         compatibility: {
             nuxt: '^3.0.0'
-        }
+        },
+        defaults: {} as ModuleOptions
     },
     setup(_moduleOptions, nuxt) {
         // Combine options
-        const moduleOptions: AxiosOptions = {
+
+        const moduleOptions = {
             ..._moduleOptions,
             ...(nuxt.options.publicRuntimeConfig && nuxt.options.publicRuntimeConfig[CONFIG_KEY])
         }
@@ -145,8 +147,6 @@ export default defineNuxtModule({
         // Proxy integration
         /* @ts-ignore */
         if (options.proxy || nuxt.options.proxy) {
-            /* @ts-ignore */
-            nuxt.options.proxy = typeof options.proxy === 'object' ? options.proxy : (typeof nuxt.options.proxy === 'object' ? nuxt.options.proxy : {})
             installModule('@nuxtjs-alt/proxy')
         }
 
