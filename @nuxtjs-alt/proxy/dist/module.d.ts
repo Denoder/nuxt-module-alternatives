@@ -8,11 +8,12 @@ declare type ProxyOptionsObject = {
 declare type ProxyOptionsArray = Array<[ProxyContext, Options?] | Options | string>;
 declare type NuxtProxyOptions = ProxyOptionsObject | ProxyOptionsArray;
 
+declare const _default: _nuxt_schema.NuxtModule<Options>;
+
 declare module "@nuxt/kit" {
     interface NuxtConfig {
         proxy?: NuxtProxyOptions;
     }
 }
-declare const _default: _nuxt_schema.NuxtModule<Options>;
 
 export { _default as default };

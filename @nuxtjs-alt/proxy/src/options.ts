@@ -1,3 +1,6 @@
+import { addServerMiddleware, createResolver } from '@nuxt/kit'
+import fs from 'fs-extra'
+
 import type { Filter, Options as HttpProxyOptions } from 'http-proxy-middleware'
 export type { Options as HttpProxyOptions } from 'http-proxy-middleware'
 
@@ -10,8 +13,7 @@ export type NuxtProxyOptions = ProxyOptionsObject | ProxyOptionsArray
 
 export function getProxyEntries(proxyOptions: NuxtProxyOptions, defaults: HttpProxyOptions): ProxyEntry[] {
     const applyDefaults = (opts?: HttpProxyOptions) => ({ ...defaults, ...opts }) as HttpProxyOptions
-    const normalizeTarget = (input: string | HttpProxyOptions) =>
-        (typeof input === 'object' ? input : { target: input }) as HttpProxyOptions
+    const normalizeTarget = (input: string | HttpProxyOptions) => (typeof input === 'object' ? input : { target: input }) as HttpProxyOptions
 
     const proxyEntries: ProxyEntry[] = []
 
@@ -46,4 +48,50 @@ export function getProxyEntries(proxyOptions: NuxtProxyOptions, defaults: HttpPr
     }
 
     return proxyEntries
+}
+
+export function createMiddlewareFile(opt: {
+    proxyEntry: ProxyEntry,
+    index: number,
+    nuxt: any
+}): void {
+    try {
+        const resolver = createResolver(opt.nuxt.options.srcDir)
+        const proxyDirectory = resolver.resolve('server/proxy')
+        const filePath = proxyDirectory + `/proxy-${opt.index}.ts`
+
+        fs.emptyDirSync(proxyDirectory)
+        fs.outputFileSync(filePath, proxyMiddlewareContent(opt.proxyEntry))
+        addServerMiddleware({ handle: filePath })
+    }
+    catch (err) {
+        console.error(err)
+    }
+}
+
+export function proxyMiddlewareContent(entry: {
+    context: ProxyContext,
+    options: HttpProxyOptions
+}): string {
+return `
+import type { IncomingMessage, ServerResponse } from 'http'
+import { createProxyMiddleware } from 'http-proxy-middleware'
+
+const middleware = createProxyMiddleware('${entry.context}', ${JSON.stringify(entry.options)})
+
+export default async (req: IncomingMessage, res: ServerResponse) => {
+
+    await new Promise<void>((resolve, reject) => {
+        const next = (err?: unknown) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
+        }
+
+        /* @ts-ignore */
+        middleware(req, res, next)
+    })
+}`
 }
