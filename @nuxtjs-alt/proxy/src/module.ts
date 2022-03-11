@@ -1,13 +1,7 @@
 import { name, version } from '../package.json'
-import { defineNuxtModule, addServerMiddleware, createResolver } from '@nuxt/kit'
-import { HttpProxyOptions, getProxyEntries, NuxtProxyOptions } from './options'
-import fs from 'fs-extra'
-
-declare module "@nuxt/kit" {
-    export interface NuxtConfig {
-        proxy?: NuxtProxyOptions
-    }
-}
+import { createProxyMiddleware } from 'http-proxy-middleware'
+import { addServerMiddleware, defineNuxtModule } from '@nuxt/kit'
+import { createMiddlewareFile, HttpProxyOptions, getProxyEntries, NuxtProxyOptions } from './options'
 
 const CONFIG_KEY = 'proxy' 
 
@@ -20,60 +14,31 @@ export default defineNuxtModule({
             nuxt: '^3.0.0'
         }
     },
-    async setup(options: HttpProxyOptions, nuxt) {
-
+    setup(options: HttpProxyOptions, nuxt) {
         // Defaults
         const defaults: HttpProxyOptions = {
             changeOrigin: true,
-            ws: true,
-            ...options
+            ws: true
         }
 
         const proxyEntries = getProxyEntries(options as NuxtProxyOptions, defaults)
-        // resolver
-        const resolver = createResolver(nuxt.options.srcDir)
-        const proxyDirectory = resolver.resolve('server/proxy')
 
-        // Create & Register middleware
-        Object.values(proxyEntries).forEach(async (proxyEntry, index) => {
-            // addServerMiddleware wont accept a function so to circumvent this we create a file for each entry
-            const filePath = proxyDirectory + `/proxy-${index}.ts`
-
-            fs.emptyDir(proxyDirectory).then(() => {
-                fs.outputFile(filePath, proxyContents(proxyEntry))
-                .then(() => {
-                    addServerMiddleware(filePath)
-                })
-                .catch(err => {
-                    console.error(err)
-                });
-            })
-            .catch(err => {
-                console.error(err)
-            })
+        // addServerMiddleware wont accept a function in build mode for some reason so to circumvent this we create a file for each entry
+        // the folder will regenerate the files on every build
+        Object.values(proxyEntries).forEach((proxyEntry: any, index: number) => {
+            if (process.env.NODE_ENV !== 'production') {
+                // dev mode works fine
+                addServerMiddleware({ handle: createProxyMiddleware(proxyEntry.context, proxyEntry.options) })
+            } else {
+                // production mode requires file creation (for some reason)
+                createMiddlewareFile({ proxyEntry, index, nuxt })
+            }
         });
     }
 })
 
-const proxyContents = (entry: any): string => {
-return `
-import type { IncomingMessage, ServerResponse } from 'http'
-import { createProxyMiddleware } from 'http-proxy-middleware'
-
-const middleware = createProxyMiddleware('${entry.context}', ${JSON.stringify(entry.options)})
-
-export default async (req: IncomingMessage, res: ServerResponse) => {
-
-    await new Promise<void>((resolve, reject) => {
-        const next = (err?: unknown) => {
-            if (err) {
-                reject(err)
-            } else {
-                resolve()
-            }
-        }
-
-        middleware(req, res, next)
-    })
-}`
+declare module "@nuxt/kit" {
+    export interface NuxtConfig {
+        proxy?: NuxtProxyOptions
+    }
 }

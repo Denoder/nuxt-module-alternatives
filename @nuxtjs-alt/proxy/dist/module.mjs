@@ -1,8 +1,9 @@
-import { defineNuxtModule, createResolver, addServerMiddleware } from '@nuxt/kit';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+import { createResolver, addServerMiddleware, defineNuxtModule } from '@nuxt/kit';
 import fs from 'fs-extra';
 
 const name = "@nuxtjs-alt/proxy";
-const version = "1.0.6";
+const version = "1.0.7";
 
 function getProxyEntries(proxyOptions, defaults) {
   const applyDefaults = (opts) => ({ ...defaults, ...opts });
@@ -35,41 +36,19 @@ function getProxyEntries(proxyOptions, defaults) {
   }
   return proxyEntries;
 }
-
-const CONFIG_KEY = "proxy";
-const module = defineNuxtModule({
-  meta: {
-    name,
-    version,
-    configKey: CONFIG_KEY,
-    compatibility: {
-      nuxt: "^3.0.0"
-    }
-  },
-  async setup(options, nuxt) {
-    const defaults = {
-      changeOrigin: true,
-      ws: true,
-      ...options
-    };
-    const proxyEntries = getProxyEntries(options, defaults);
-    const resolver = createResolver(nuxt.options.srcDir);
+function createMiddlewareFile(opt) {
+  try {
+    const resolver = createResolver(opt.nuxt.options.srcDir);
     const proxyDirectory = resolver.resolve("server/proxy");
-    Object.values(proxyEntries).forEach(async (proxyEntry, index) => {
-      const filePath = proxyDirectory + `/proxy-${index}.ts`;
-      fs.emptyDir(proxyDirectory).then(() => {
-        fs.outputFile(filePath, proxyContents(proxyEntry)).then(() => {
-          addServerMiddleware(filePath);
-        }).catch((err) => {
-          console.error(err);
-        });
-      }).catch((err) => {
-        console.error(err);
-      });
-    });
+    const filePath = proxyDirectory + `/proxy-${opt.index}.ts`;
+    fs.emptyDirSync(proxyDirectory);
+    fs.outputFileSync(filePath, proxyMiddlewareContent(opt.proxyEntry));
+    addServerMiddleware({ handle: filePath });
+  } catch (err) {
+    console.error(err);
   }
-});
-const proxyContents = (entry) => {
+}
+function proxyMiddlewareContent(entry) {
   return `
 import type { IncomingMessage, ServerResponse } from 'http'
 import { createProxyMiddleware } from 'http-proxy-middleware'
@@ -87,9 +66,36 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
             }
         }
 
+        /* @ts-ignore */
         middleware(req, res, next)
     })
 }`;
-};
+}
+
+const CONFIG_KEY = "proxy";
+const module = defineNuxtModule({
+  meta: {
+    name,
+    version,
+    configKey: CONFIG_KEY,
+    compatibility: {
+      nuxt: "^3.0.0"
+    }
+  },
+  setup(options, nuxt) {
+    const defaults = {
+      changeOrigin: true,
+      ws: true
+    };
+    const proxyEntries = getProxyEntries(options, defaults);
+    Object.values(proxyEntries).forEach((proxyEntry, index) => {
+      if (process.env.NODE_ENV !== "production") {
+        addServerMiddleware({ handle: createProxyMiddleware(proxyEntry.context, proxyEntry.options) });
+      } else {
+        createMiddlewareFile({ proxyEntry, index, nuxt });
+      }
+    });
+  }
+});
 
 export { module as default };
