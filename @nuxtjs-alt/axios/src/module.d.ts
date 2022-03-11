@@ -5,8 +5,9 @@ import {
     AxiosStatic,
 } from "axios";
 import { IAxiosRetryConfig } from "axios-retry";
+import "@nuxt/kit";
 
-interface NuxtAxiosInstance extends AxiosStatic {
+export interface NuxtAxiosInstance extends AxiosStatic {
     $request<T = any>(config: AxiosRequestConfig): Promise<T>;
     $get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
     $delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
@@ -57,7 +58,7 @@ interface NuxtAxiosInstance extends AxiosStatic {
     create(options?: AxiosRequestConfig): NuxtAxiosInstance;
 }
 
-export interface AxiosOptions {
+export interface ModuleOptions {
     baseURL?: string;
     baseUrl?: string;
     browserBaseURL?: string;
@@ -86,16 +87,16 @@ export interface AxiosOptions {
 }
 
 declare module "axios" {
-    interface AxiosRequestConfig {
+    export interface AxiosRequestConfig {
         progress?: boolean;
     }
 }
 
 declare module "@nuxt/kit" {
-    interface NuxtApp {
+    export interface NuxtApp {
         $axios: NuxtAxiosInstance;
     }
-    interface NuxtOptions {
-        axios: AxiosOptions;
+    export interface NuxtOptions {
+        axios: ModuleOptions;
     }
 }

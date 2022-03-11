@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/axios",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "An alternative module to @nuxtjs/axios",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -17,10 +17,8 @@
     "sideEffects": false,
     "type": "module",
     "main": "./dist/module.mjs",
-    "types": "./types/index.d.ts",
     "files": [
-        "dist",
-        "types/index.d.ts"
+        "dist"
     ],
     "scripts": {
         "prepack": "nuxt-module-build"

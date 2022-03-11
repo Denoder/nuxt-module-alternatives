@@ -1,7 +1,7 @@
 import { defineNuxtModule, createResolver, addPluginTemplate, installModule } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/axios";
-const version = "1.0.2";
+const version = "1.0.3";
 
 const CONFIG_KEY = "axios";
 const module = defineNuxtModule({
@@ -11,7 +11,8 @@ const module = defineNuxtModule({
     configKey: CONFIG_KEY,
     compatibility: {
       nuxt: "^3.0.0"
-    }
+    },
+    defaults: {}
   },
   setup(_moduleOptions, nuxt) {
     const moduleOptions = {
@@ -96,7 +97,6 @@ const module = defineNuxtModule({
       options
     });
     if (options.proxy || nuxt.options.proxy) {
-      nuxt.options.proxy = typeof options.proxy === "object" ? options.proxy : typeof nuxt.options.proxy === "object" ? nuxt.options.proxy : {};
       installModule("@nuxtjs-alt/proxy");
     }
     process.env._AXIOS_BASE_URL_ = options.baseURL;
