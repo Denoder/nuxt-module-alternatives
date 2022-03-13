@@ -1,7 +1,6 @@
-import { resolve } from 'path'
-import type { Module } from '@nuxt/types'
-import { GoogleFontsHelper, DownloadOptions, GoogleFonts } from 'google-fonts-helper'
-import { defineNuxtModule } from '@nuxt/kit'
+import { name, version } from '../package.json'
+import { DownloadOptions, GoogleFonts, GoogleFontsHelper } from 'google-fonts-helper'
+import { createResolver, defineNuxtModule } from '@nuxt/kit'
 
 export interface ModuleOptions extends Partial<DownloadOptions & GoogleFonts> {
     prefetch?: boolean;
@@ -14,14 +13,10 @@ export interface ModuleOptions extends Partial<DownloadOptions & GoogleFonts> {
 
 const CONFIG_KEY = 'googleFonts'
 
-declare module '@nuxt/types' {
-    interface NuxtConfig { [CONFIG_KEY]?: ModuleOptions } // Nuxt 2.14+
-    interface Configuration { [CONFIG_KEY]?: ModuleOptions } // Nuxt 2.9 - 2.13
-}
-
-export default defineNuxtModule<Module>({
+export default defineNuxtModule({
     meta: {
-        name: '@nuxtjs-alt/google-fonts',
+        name,
+        version,
         configKey: CONFIG_KEY,
         compatibility: {
             nuxt: '^3.0.0'
@@ -31,9 +26,9 @@ export default defineNuxtModule<Module>({
 
         const DEFAULTS: ModuleOptions = {
             families: {},
-            display: null,
+            display: undefined,
             subsets: [],
-            text: null,
+            text: undefined,
             prefetch: true,
             preconnect: true,
             preload: true,
@@ -51,8 +46,6 @@ export default defineNuxtModule<Module>({
         const options: ModuleOptions = {
             ...DEFAULTS,
             ...moduleOptions,
-            ...nuxt.options['google-fonts'],
-            ...nuxt.options[CONFIG_KEY],
         }
 
         const googleFontsHelper = new GoogleFontsHelper({
@@ -85,7 +78,9 @@ export default defineNuxtModule<Module>({
 
         // download
         if (options.download) {
-            const outputDir = nuxt.resolver ? nuxt.resolver.resolveAlias(options.outputDir) : nuxt.options.alias[options.outputDir] || options.outputDir
+            /* @ts-ignore */
+            const outputDir = nuxt.options.alias[options.outputDir] || options.outputDir
+            const resolver = createResolver(outputDir)
 
             try {
                 await GoogleFontsHelper.download(url, {
@@ -98,7 +93,7 @@ export default defineNuxtModule<Module>({
                 })
 
                 if (options.inject) {
-                    nuxt.options.css.push(resolve(outputDir, options.stylePath))
+                    nuxt.options.css.push(resolver.resolve(options.stylePath))
                 }
 
             } catch (e) { /* istanbul ignore next */
@@ -181,3 +176,9 @@ export default defineNuxtModule<Module>({
         nuxt.options.meta.__dangerouslyDisableSanitizersByTagID['gf-noscript'] = ['innerHTML']
     }
 })
+
+declare module "@nuxt/kit" {
+    export interface NuxtConfig {
+        [CONFIG_KEY]?: ModuleOptions;
+    }
+}

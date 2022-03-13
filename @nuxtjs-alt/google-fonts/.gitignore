@@ -1,0 +1,12 @@
+node_modules
+*.iml
+.idea
+*.log*
+.nuxt
+.vscode
+.DS_STORE
+coverage
+dist
+package-lock.json
+temp
+tsdoc-metadata.json
