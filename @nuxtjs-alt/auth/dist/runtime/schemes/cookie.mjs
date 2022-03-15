@@ -4,11 +4,11 @@ import { RequestHandler } from "../inc/index.mjs";
 const DEFAULTS = {
   name: "cookie",
   cookie: {
-    name: null,
+    name: void 0,
     server: false
   },
   endpoints: {
-    csrf: null,
+    csrf: void 0,
     login: {
       url: "/api/auth/login",
       method: "post"
@@ -23,16 +23,13 @@ const DEFAULTS = {
     }
   },
   user: {
-    property: {
-      client: false,
-      server: false
-    },
+    property: false,
     autoFetch: true
   }
 };
 export class CookieScheme extends BaseScheme {
-  constructor($auth, options) {
-    super($auth, options, DEFAULTS);
+  constructor($auth, options, ...defaults) {
+    super($auth, options, ...defaults, DEFAULTS);
     this.requestHandler = new RequestHandler(this, this.$auth.ctx.$axios);
   }
   mounted() {
@@ -89,11 +86,7 @@ export class CookieScheme extends BaseScheme {
     }
     return this.$auth.requestWith(endpoint, this.options.endpoints.user).then((response) => {
       let userData;
-      if (process.client) {
-        userData = getProp(response.data, this.options.user.property.client);
-      } else {
-        userData = getProp(response.data, this.options.user.property.server);
-      }
+      userData = getProp(response.data, this.options.user.property);
       if (!userData) {
         const error = new Error(`User Data response does not contain field ${this.options.user.property}`);
         return Promise.reject(error);

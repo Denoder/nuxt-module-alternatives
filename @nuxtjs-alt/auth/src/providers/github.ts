@@ -21,5 +21,5 @@ export function github(
 
     assignDefaults(strategy, DEFAULTS)
 
-    addAuthorize(nuxt, strategy)
+    addAuthorize(strategy)
 }

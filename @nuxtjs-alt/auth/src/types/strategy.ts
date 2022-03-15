@@ -8,5 +8,4 @@ export interface Strategy extends SchemeOptions {
     [option: string]: unknown
 }
 
-export type StrategyOptions<SOptions extends SchemeOptions = SchemeOptions> =
-    ProviderPartialOptions<ProviderOptions & SOptions>
+export type StrategyOptions<SOptions extends SchemeOptions = SchemeOptions> = ProviderPartialOptions<ProviderOptions & SOptions>

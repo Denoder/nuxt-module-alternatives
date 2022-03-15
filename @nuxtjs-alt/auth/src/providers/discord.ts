@@ -24,5 +24,5 @@ export function discord(
 
     assignDefaults(strategy, DEFAULTS)
 
-    addAuthorize(nuxt, strategy, true)
+    addAuthorize(strategy, true)
 }

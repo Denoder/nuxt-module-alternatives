@@ -329,7 +329,7 @@ export class Oauth2Scheme<
             return
         }
 
-        const response = await this.$auth.requestWith(this.name, {
+        const response = await this.$auth.requestWith({
             url: this.options.endpoints.userInfo
         })
 
@@ -424,7 +424,7 @@ export class Oauth2Scheme<
 
         // Redirect to home
         if (this.$auth.options.watchLoggedIn) {
-            this.$auth.redirect('home', true)
+            this.$auth.redirect('home', { noRouter: true })
             return true // True means a redirect happened
         }
     }

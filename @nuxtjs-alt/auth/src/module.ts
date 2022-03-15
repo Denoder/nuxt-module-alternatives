@@ -1,5 +1,4 @@
 import { name, version } from '../package.json'
-import { join } from 'path'
 import { ModuleOptions, moduleDefaults } from './options'
 import { resolveStrategies } from './resolve'
 import { defineNuxtModule, addPluginTemplate, createResolver } from '@nuxt/kit'
@@ -12,15 +11,14 @@ export default defineNuxtModule({
         name,
         version,
         configKey: CONFIG_KEY,
-        type: "module",
-        defaults: moduleDefaults as ModuleOptions,
+        defaults: moduleDefaults,
         compatibility: {
             nuxt: '^3.0.0'
         }
     },
     setup(moduleOptions, nuxt) {
         // Merge all option sources
-        const options = defu(
+        const options: ModuleOptions = defu(
             moduleOptions,
             moduleDefaults
         )
@@ -48,7 +46,7 @@ export default defineNuxtModule({
         addPluginTemplate({
             /* @ts-ignore */
             src: resolver.resolve('runtime/templates/auth.plugin.mjs'),
-            fileName: join('auth.plugin.mjs'),
+            fileName: 'auth.plugin.mjs',
             options: {
                 options,
                 strategies,
@@ -66,7 +64,7 @@ export default defineNuxtModule({
 
         // Extend auth with plugins
         if (options.plugins) {
-            options.plugins.forEach((p) => nuxt.options.plugins.push(p))
+            options.plugins.forEach((p: any) => nuxt.options.plugins.push(p))
             delete options.plugins
         }
 

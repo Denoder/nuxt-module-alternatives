@@ -1,8 +1,7 @@
-import type { Context } from '@nuxt/types'
-import { parse, serialize } from 'cookie-es'
 import type { ModuleOptions } from '../../options'
-import { isUnset, isSet, decodeValue, encodeValue } from '../utils'
 import { defineStore } from 'pinia'
+import { parse, serialize } from 'cookie-es'
+import { isUnset, isSet, decodeValue, encodeValue } from '../utils'
 
 export type StorageOptions = ModuleOptions & {
     initialState: {
@@ -12,17 +11,18 @@ export type StorageOptions = ModuleOptions & {
 }
 
 export class Storage {
-    public ctx: Context
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public ctx: any
     public options: StorageOptions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public store: any
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public state: any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private _state: any
     private _usePinia: boolean
 
-    constructor(ctx: Context, options: StorageOptions) {
+    constructor(ctx: any, options: StorageOptions) {
         this.ctx = ctx
         this.options = options
 
@@ -237,6 +237,7 @@ export class Storage {
 
         const cookieStr = process.client ? document.cookie : this.ctx.ssrContext.req.headers.cookie
 
+        /* @ts-ignore */
         return parse(cookieStr || '') || {}
     }
 
@@ -269,6 +270,7 @@ export class Storage {
             _options.expires = new Date(Date.now() + _options.expires * 864e5)
         }
 
+        /* @ts-ignore */
         const serializedCookie = serialize(_key, _value, _options)
 
         if (process.client) {

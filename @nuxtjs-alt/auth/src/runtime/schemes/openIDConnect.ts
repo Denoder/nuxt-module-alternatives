@@ -1,4 +1,4 @@
-import { IdTokenableSchemeOptions } from '../types'
+import { IdTokenableSchemeOptions } from '../../types'
 import { encodeQuery, parseQuery, normalizePath, getProp } from '../utils'
 import { IdToken, ConfigurationDocument } from '../inc'
 import type {
@@ -192,7 +192,7 @@ export class OpenIDConnectScheme<
             return
         }
 
-        const { data } = await this.$auth.requestWith(this.name, {
+        const { data } = await this.$auth.requestWith({
             url: this.options.endpoints.userInfo
         })
 
@@ -298,7 +298,7 @@ export class OpenIDConnectScheme<
         }
 
         // Redirect to home
-        this.$auth.redirect('home', true)
+        this.$auth.redirect('home', { noRouter: true })
 
         return true // True means a redirect happened
     }

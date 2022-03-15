@@ -5,7 +5,7 @@ export interface ModuleOptions {
     plugins?: Array<string | { src: string; ssr: boolean }>
     ignoreExceptions: boolean
     resetOnError: boolean | ((...args: unknown[]) => boolean)
-    defaultStrategy: string
+    defaultStrategy: string | undefined
     watchLoggedIn: boolean
     rewriteRedirects: boolean
     fullPathRedirect: boolean
