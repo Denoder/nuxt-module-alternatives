@@ -3,7 +3,7 @@ import type { Auth } from '../core'
 
 export class RefreshController {
     public $auth: Auth
-    private _refreshPromise: Promise<HTTPResponse | void> = null
+    private _refreshPromise: Promise<HTTPResponse | void> | null = null
 
     constructor(public scheme: RefreshableScheme) {
         this.$auth = scheme.$auth

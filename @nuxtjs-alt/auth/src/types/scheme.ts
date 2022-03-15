@@ -11,9 +11,10 @@ import type { PartialExcept } from './utils'
 
 // TODO: Move us to our home
 export interface UserOptions {
-    property: string | false
+    property?: string | false
     autoFetch: boolean
 }
+
 export interface EndpointsOption {
     [endpoint: string]: string | HTTPRequest | false
 }
@@ -24,10 +25,7 @@ export interface SchemeOptions {
     name: string
 }
 
-export type SchemePartialOptions<Options extends SchemeOptions> = PartialExcept<
-    Options,
-    keyof SchemeOptions
->
+export type SchemePartialOptions<Options extends SchemeOptions> = PartialExcept<Options,keyof SchemeOptions>
 
 export interface SchemeCheck {
     valid: boolean

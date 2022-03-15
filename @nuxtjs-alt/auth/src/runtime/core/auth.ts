@@ -1,4 +1,3 @@
-import type { Context } from "@nuxt/types";
 import requrl from "requrl";
 import type {
     HTTPRequest,
@@ -6,6 +5,8 @@ import type {
     Route,
     Scheme,
     SchemeCheck,
+    TokenableScheme,
+    RefreshableScheme,
 } from "../../types";
 import type { ModuleOptions } from "../../options";
 import {
@@ -22,7 +23,7 @@ export type ErrorListener = (...args: unknown[]) => void;
 export type RedirectListener = (to: string, from: string) => string;
 
 export class Auth {
-    public ctx: Context;
+    public ctx: any;
     public options: ModuleOptions;
     public strategies: Record<string, Scheme> = {};
     public error: Error;
@@ -33,7 +34,7 @@ export class Auth {
     private _stateWarnShown: boolean;
     private _getStateWarnShown: boolean;
 
-    constructor(ctx: Context, options: ModuleOptions) {
+    constructor(ctx: any, options: ModuleOptions) {
         this.ctx = ctx;
         this.options = options;
 
@@ -62,7 +63,7 @@ export class Auth {
         return this.getStrategy();
     }
 
-    getStrategy(throwException = true): Scheme {
+    getStrategy(throwException = true): Scheme | TokenableScheme | RefreshableScheme {
         if (throwException) {
             if (!this.$state.strategy) {
                 throw new Error("No strategy is set!");
@@ -128,6 +129,7 @@ export class Auth {
         } catch (error) {
             this.callOnError(error);
         } finally {
+            /* @ts-ignore */
             if (process.client && this.options.watchLoggedIn) {
                 this.$storage.watchState("loggedIn", (loggedIn) => {
                     if (loggedIn) {
@@ -240,7 +242,7 @@ export class Auth {
         refreshToken?: string | boolean
     ): Promise<HTTPResponse | void> {
         if (!this.getStrategy().setUserToken) {
-            this.getStrategy().token.set(token);
+            (<TokenableScheme>this.getStrategy()).token.set(token);
             return Promise.resolve();
         }
 
@@ -253,10 +255,10 @@ export class Auth {
     }
 
     reset(...args: unknown[]): void {
-        if (this.getStrategy().token && !this.getStrategy().reset) {
+        if ((<TokenableScheme>this.getStrategy()).token && !this.getStrategy().reset) {
             this.setUser(false);
-            this.getStrategy().token.reset();
-            this.getStrategy().refreshToken.reset();
+            (<TokenableScheme>this.getStrategy()).token.reset();
+            (<RefreshableScheme>this.getStrategy()).refreshToken.reset();
         }
 
         return this.getStrategy().reset(
@@ -265,12 +267,12 @@ export class Auth {
     }
 
     refreshTokens(): Promise<HTTPResponse | void> {
-        if (!this.getStrategy().refreshController) {
+        if (!(<RefreshableScheme>this.getStrategy()).refreshController) {
             return Promise.resolve();
         }
 
         return Promise.resolve(
-            this.getStrategy().refreshController.handleRefresh()
+            (<RefreshableScheme>this.getStrategy()).refreshController.handleRefresh()
         ).catch((error) => {
             this.callOnError(error, { method: "refreshTokens" });
             return Promise.reject(error);
@@ -342,27 +344,21 @@ export class Auth {
     }
 
     requestWith(
-        strategy: string,
         endpoint: HTTPRequest,
         defaults?: HTTPRequest
     ): Promise<HTTPResponse> {
         const _endpoint = Object.assign({}, defaults, endpoint);
 
-        if (this.getStrategy().token) {
-            const token = this.getStrategy().token.get();
+        if ((<TokenableScheme>this.getStrategy()).token) {
+            const token = (<TokenableScheme>this.getStrategy()).token.get();
 
-            const tokenName =
-                this.getStrategy().options.token.name || "Authorization";
+            const tokenName = (<TokenableScheme>this.getStrategy()).options.token.name || "Authorization";
+
             if (!_endpoint.headers) {
                 _endpoint.headers = {};
             }
 
-            if (
-                !_endpoint.headers[tokenName] &&
-                isSet(token) &&
-                token &&
-                typeof token === "string"
-            ) {
+            if (!_endpoint.headers[tokenName] && isSet(token) && token && typeof token === "string") {
                 _endpoint.headers[tokenName] = token;
             }
         }
@@ -401,7 +397,7 @@ export class Auth {
 
     redirect(
         name: string,
-        opt: { route?: Route | boolean; noRouter?: boolean } = {
+        opt: { route?: any | boolean; noRouter?: boolean } = {
             route: false,
             noRouter: false,
         }

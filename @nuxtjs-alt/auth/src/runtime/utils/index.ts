@@ -1,5 +1,5 @@
-import type { Context } from '@nuxt/types'
-import type { Route, RecursivePartial } from '../../types'
+import type { Nuxt as Context } from "@nuxt/schema";
+import type { RecursivePartial } from '../../types'
 
 export const isUnset = (o: unknown): boolean => typeof o === 'undefined' || o === null
 
@@ -46,7 +46,7 @@ export function encodeQuery(queryObject: {
 }
 
 export function routeOption(
-    route: Route,
+    route: any,
     key: string,
     value: string | boolean
 ): boolean {
@@ -54,7 +54,7 @@ export function routeOption(
 }
 
 export function getMatchedComponents(
-    route: Route,
+    route: any,
     matches: unknown[] = []
 ): unknown[] {
 

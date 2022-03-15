@@ -19,9 +19,11 @@ export interface CookieSchemeEndpoints extends EndpointsOption {
 
 export interface CookieSchemeCookie {
     name: string
+    server: boolean
 }
 
 export interface CookieSchemeOptions {
+    name: string
     endpoints: CookieSchemeEndpoints
     user: UserOptions
     cookie: CookieSchemeCookie
@@ -31,11 +33,11 @@ export interface CookieSchemeOptions {
 const DEFAULTS: SchemePartialOptions<CookieSchemeOptions> = {
     name: 'cookie',
     cookie: {
-        name: null,
+        name: undefined,
         server: false
     },
     endpoints: {
-        csrf: null,
+        csrf: undefined,
         login: {
             url: '/api/auth/login',
             method: 'post'
@@ -50,29 +52,29 @@ const DEFAULTS: SchemePartialOptions<CookieSchemeOptions> = {
         }
     },
     user: {
-        property: {
-            client: false,
-            server: false
-        },
+        property: false,
         autoFetch: true
     }
 }
 
-export class CookieScheme<
-    OptionsT extends CookieSchemeOptions = CookieSchemeOptions
-    >
-    extends BaseScheme<OptionsT>
+export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseScheme<OptionsT>
 {
     public requestHandler: RequestHandler
 
     constructor($auth: Auth, options: SchemePartialOptions<CookieSchemeOptions>, ...defaults: SchemePartialOptions<CookieSchemeOptions>[]) {
-        super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT)
+        super(
+            $auth,
+            options as OptionsT,
+            ...(defaults as OptionsT[]),
+            DEFAULTS as OptionsT
+        )
 
         // Initialize Request Interceptor
         this.requestHandler = new RequestHandler(this, this.$auth.ctx.$axios)
     }
 
     mounted(): Promise<HTTPResponse | void> {
+        /* @ts-ignore */
         if (process.server) {
             this.$auth.ctx.$axios.setHeader(
                 'referer',
@@ -83,6 +85,7 @@ export class CookieScheme<
         // Initialize request interceptor
         this.initializeRequestInterceptor()
 
+        /* @ts-ignore */
         if ((this.options.cookie.server && process.server) || (!this.options.cookie.server && process.client)) {
             // Fetch user once
             return this.$auth.fetchUserOnce()
@@ -95,6 +98,7 @@ export class CookieScheme<
         if (this.options.cookie.name) {
             const cookies = this.$auth.$storage.getCookies()
 
+            /* @ts-ignore */
             if ((this.options.cookie.server && process.server) || (!this.options.cookie.server && process.client)) {
                 response.valid = Boolean(cookies[this.options.cookie.name])
             } else {
@@ -114,6 +118,7 @@ export class CookieScheme<
 
         // Make CSRF request if required
         if (this.options.endpoints.csrf) {
+            /* @ts-ignore */
             await this.$auth.request(this.options.endpoints.csrf, {
                 maxRedirects: 0
             })
@@ -145,6 +150,7 @@ export class CookieScheme<
     fetchUser(endpoint?: HTTPRequest): Promise<HTTPResponse | void> {
         // Cookie is required but not available
 
+        /* @ts-ignore */
         if ((this.options.cookie.server && process.server) || (!this.options.cookie.server && process.client)) {
             if (!this.check().valid) {
                 return Promise.resolve()
@@ -159,15 +165,12 @@ export class CookieScheme<
 
         // Try to fetch user and then set
         return this.$auth
-            .requestWith(this.name, endpoint, this.options.endpoints.user)
+            .requestWith(endpoint, this.options.endpoints.user)
             .then((response) => {
                 let userData: any
 
-                if (process.client) {
-                    userData = getProp(response.data, this.options.user.property.client)
-                } else {
-                    userData = getProp(response.data, this.options.user.property.server)
-                }
+                /* @ts-ignore */
+                userData = getProp(response.data, this.options.user.property)
 
                 if (!userData) {
                     const error = new Error(
@@ -190,7 +193,7 @@ export class CookieScheme<
         // Only connect to logout endpoint if it's configured
         if (this.options.endpoints.logout) {
             await this.$auth
-                .requestWith(this.name, endpoint, this.options.endpoints.logout)
+                .requestWith(endpoint, this.options.endpoints.logout)
                 .catch(() => {
                     //
                 })

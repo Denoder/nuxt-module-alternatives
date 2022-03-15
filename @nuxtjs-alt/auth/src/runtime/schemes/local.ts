@@ -62,11 +62,7 @@ const DEFAULTS: SchemePartialOptions<LocalSchemeOptions> = {
     scope: false
 }
 
-export class LocalScheme<
-    OptionsT extends LocalSchemeOptions = LocalSchemeOptions
-    >
-    extends BaseScheme<OptionsT>
-    implements TokenableScheme<OptionsT>
+export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOptions> extends BaseScheme<OptionsT> implements TokenableScheme<OptionsT>
 {
     public token: Token
     public requestHandler: RequestHandler
@@ -213,7 +209,7 @@ export class LocalScheme<
 
         // Try to fetch user and then set
         return this.$auth
-            .requestWith(this.name, endpoint, this.options.endpoints.user)
+            .requestWith(endpoint, this.options.endpoints.user)
             .then((response) => {
                 const userData = getProp(response.data, this.options.user.property)
 
@@ -237,7 +233,7 @@ export class LocalScheme<
         // Only connect to logout endpoint if it's configured
         if (this.options.endpoints.logout) {
             await this.$auth
-                .requestWith(this.name, endpoint, this.options.endpoints.logout)
+                .requestWith(endpoint, this.options.endpoints.logout)
                 .catch(() => {
                     //
                 })

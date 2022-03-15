@@ -93,7 +93,7 @@ export function laravelPassport(
         assignDefaults(strategy, _DEFAULTS)
 
         assignAbsoluteEndpoints(strategy)
-        initializePasswordGrantFlow(nuxt, strategy)
+        initializePasswordGrantFlow(strategy)
     } else {
         const _DEFAULTS: typeof strategy = {
             ...defaults,
@@ -111,6 +111,6 @@ export function laravelPassport(
         assignDefaults(strategy, _DEFAULTS)
 
         assignAbsoluteEndpoints(strategy)
-        addAuthorize(nuxt, strategy)
+        addAuthorize(strategy)
     }
 }

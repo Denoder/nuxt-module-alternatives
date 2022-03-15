@@ -3,6 +3,7 @@ import defu from 'defu'
 import axios from 'axios'
 import bodyParser from 'body-parser'
 import requrl from 'requrl'
+import { addServerMiddleware } from '@nuxt/kit'
 import type { StrategyOptions, HTTPRequest } from '../../types'
 import type {
     Oauth2SchemeOptions,
@@ -20,7 +21,6 @@ export function assignDefaults<SOptions extends StrategyOptions>(
 export function addAuthorize<
     SOptions extends StrategyOptions<Oauth2SchemeOptions>
 >(
-    nuxt: any, // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     strategy: SOptions,
     useForms: boolean = false
 ): void {
@@ -44,7 +44,7 @@ export function addAuthorize<
     const formMiddleware = bodyParser.urlencoded({ extended: true })
 
     // Register endpoint
-    nuxt.options.serverMiddleware.unshift({
+    addServerMiddleware({
         path: endpoint,
         handler: (req, res, next) => {
             if (req.method !== 'POST') {
@@ -115,7 +115,6 @@ export function addAuthorize<
 export function initializePasswordGrantFlow<
     SOptions extends StrategyOptions<RefreshSchemeOptions>
 >(
-    nuxt: any, // eslint-disable-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     strategy: SOptions
 ): void {
     // Get clientSecret, clientId, endpoints.login.url
@@ -135,7 +134,7 @@ export function initializePasswordGrantFlow<
     const formMiddleware = bodyParser.json()
 
     // Register endpoint
-    nuxt.options.serverMiddleware.unshift({
+    addServerMiddleware({
         path: endpoint,
         handler: (req, res, next) => {
             if (req.method !== 'POST') {

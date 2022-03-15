@@ -1,10 +1,9 @@
-import type { Route } from '../../types'
-import { routeOption, getMatchedComponents, normalizePath } from '../utils'
 import { defineNuxtRouteMiddleware, useNuxtApp } from '#app'
+import { routeOption, getMatchedComponents, normalizePath } from '../utils'
 
-export default defineNuxtRouteMiddleware(async (to: Route, from: Route) => {
+export default defineNuxtRouteMiddleware(async (to, from) => {
 
-    const ctx = useNuxtApp()
+    const ctx: any = useNuxtApp()
 
     // Disable middleware if options: { auth: false } is set on the route
     if (routeOption(to, 'auth', false)) {
@@ -12,7 +11,7 @@ export default defineNuxtRouteMiddleware(async (to: Route, from: Route) => {
     }
 
     // Disable middleware if no route was matched to allow 404/error page
-    const matches = []
+    const matches: any[] = []
     const Components = getMatchedComponents(to, matches)
 
     if (!Components.length) {
@@ -23,7 +22,7 @@ export default defineNuxtRouteMiddleware(async (to: Route, from: Route) => {
 
     const pageIsInGuestMode = routeOption(to, 'auth', 'guest')
 
-    const insidePage = (page) => normalizePath(to.path, ctx) === normalizePath(page, ctx)
+    const insidePage = (page: any) => normalizePath(to.path, ctx) === normalizePath(page, ctx)
 
     if (ctx.$auth.$state.loggedIn) {
         // Perform scheme checks.

@@ -1,15 +1,14 @@
-import type { NuxtAxiosInstance } from '@nuxtjs-alt/axios'
 import type { TokenableScheme, RefreshableScheme, HTTPRequest } from '../../types'
 import { ExpiredAuthSessionError } from './expired-auth-session-error'
 
 export class RequestHandler {
     public scheme: TokenableScheme | RefreshableScheme
-    public axios: NuxtAxiosInstance
+    public axios: any
     public interceptor: number
 
     constructor(
-        scheme: TokenableScheme | RefreshableScheme,
-        axios: NuxtAxiosInstance
+        scheme: TokenableScheme | RefreshableScheme | any,
+        axios: any
     ) {
         this.scheme = scheme
         this.axios = axios
@@ -35,7 +34,7 @@ export class RequestHandler {
         this.interceptor = this.axios.interceptors.request.use(async (config) => {
 
             // Don't intercept refresh token requests
-            if (this.scheme.options.token && !this._needToken(config) || config.url === refreshEndpoint || this.scheme.options.cookie) {
+            if (this.scheme.options.token && !this._needToken(config) || config.url === refreshEndpoint) {
                 return config
             }
 
