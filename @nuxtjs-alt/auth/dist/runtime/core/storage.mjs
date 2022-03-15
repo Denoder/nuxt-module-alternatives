@@ -1,6 +1,6 @@
+import { defineStore } from "pinia";
 import { parse, serialize } from "cookie-es";
 import { isUnset, isSet, decodeValue, encodeValue } from "../utils/index.mjs";
-import { defineStore } from "pinia";
 export class Storage {
   constructor(ctx, options) {
     this.ctx = ctx;

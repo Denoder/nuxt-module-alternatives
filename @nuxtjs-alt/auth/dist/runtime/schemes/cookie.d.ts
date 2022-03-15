@@ -9,16 +9,18 @@ export interface CookieSchemeEndpoints extends EndpointsOption {
 }
 export interface CookieSchemeCookie {
     name: string;
+    server: boolean;
 }
 export interface CookieSchemeOptions {
+    name: string;
     endpoints: CookieSchemeEndpoints;
     user: UserOptions;
     cookie: CookieSchemeCookie;
     csrf: HTTPRequest;
 }
-export declare class CookieScheme<OptionsT extends CookieSchemeOptions = CookieSchemeOptions> extends BaseScheme<OptionsT> {
+export declare class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseScheme<OptionsT> {
     requestHandler: RequestHandler;
-    constructor($auth: Auth, options: SchemePartialOptions<CookieSchemeOptions>, ...defaults: SchemePartialOptions<CookieSchemeOptions>[]);
+    constructor($auth: Auth, options: SchemePartialOptions<CookieSchemeOptions>);
     mounted(): Promise<HTTPResponse | void>;
     check(): SchemeCheck;
     login(endpoint: HTTPRequest): Promise<HTTPResponse>;

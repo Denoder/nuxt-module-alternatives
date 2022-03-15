@@ -7,8 +7,6 @@ export interface FacebookProviderOptions
     Oauth2SchemeOptions { }
 
 export function facebook(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-    _nuxt: any,
     strategy: ProviderPartialOptions<FacebookProviderOptions>
 ): void {
     const DEFAULTS: typeof strategy = {

@@ -7,7 +7,6 @@ export interface GoogleProviderOptions
     Oauth2SchemeOptions { }
 
 export function google(
-    _nuxt: any,
     strategy: ProviderPartialOptions<GoogleProviderOptions>
 ): void {
     const DEFAULTS: typeof strategy = {

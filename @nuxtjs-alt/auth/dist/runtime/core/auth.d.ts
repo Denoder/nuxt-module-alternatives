@@ -1,11 +1,10 @@
-import type { Context } from "@nuxt/types";
-import type { HTTPRequest, HTTPResponse, Route, Scheme, SchemeCheck } from "../../types";
+import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme } from "../../types";
 import type { ModuleOptions } from "../../options";
 import { Storage } from "./storage";
 export declare type ErrorListener = (...args: unknown[]) => void;
 export declare type RedirectListener = (to: string, from: string) => string;
 export declare class Auth {
-    ctx: Context;
+    ctx: any;
     options: ModuleOptions;
     strategies: Record<string, Scheme>;
     error: Error;
@@ -15,10 +14,10 @@ export declare class Auth {
     private _redirectListeners;
     private _stateWarnShown;
     private _getStateWarnShown;
-    constructor(ctx: Context, options: ModuleOptions);
+    constructor(ctx: any, options: ModuleOptions);
     get state(): any;
     get strategy(): Scheme;
-    getStrategy(throwException?: boolean): Scheme;
+    getStrategy(throwException?: boolean): Scheme | TokenableScheme | RefreshableScheme;
     get user(): Record<string, unknown> | null;
     get loggedIn(): boolean;
     get busy(): boolean;
@@ -38,12 +37,12 @@ export declare class Auth {
     fetchUserOnce(...args: unknown[]): Promise<HTTPResponse | void>;
     setUser(user: unknown): void;
     request(endpoint: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse>;
-    requestWith(strategy: string, endpoint: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse>;
+    requestWith(endpoint: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse>;
     wrapLogin(promise: Promise<HTTPResponse | void>): Promise<HTTPResponse | void>;
     onError(listener: ErrorListener): void;
     callOnError(error: Error, payload?: {}): void;
     redirect(name: string, opt?: {
-        route?: Route | boolean;
+        route?: any | boolean;
         noRouter?: boolean;
     }): void;
     onRedirect(listener: RedirectListener): void;

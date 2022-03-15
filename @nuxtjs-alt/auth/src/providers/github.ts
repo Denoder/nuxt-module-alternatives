@@ -7,8 +7,6 @@ export interface GithubProviderOptions
     Oauth2SchemeOptions { }
 
 export function github(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-    nuxt: any,
     strategy: ProviderPartialOptions<GithubProviderOptions>
 ): void {
     const DEFAULTS: typeof strategy = {

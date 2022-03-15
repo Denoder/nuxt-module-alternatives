@@ -113,7 +113,7 @@ export class LocalScheme extends BaseScheme {
       this.$auth.setUser({});
       return Promise.resolve();
     }
-    return this.$auth.requestWith(this.name, endpoint, this.options.endpoints.user).then((response) => {
+    return this.$auth.requestWith(endpoint, this.options.endpoints.user).then((response) => {
       const userData = getProp(response.data, this.options.user.property);
       if (!userData) {
         const error = new Error(`User Data response does not contain field ${this.options.user.property}`);
@@ -128,7 +128,7 @@ export class LocalScheme extends BaseScheme {
   }
   async logout(endpoint = {}) {
     if (this.options.endpoints.logout) {
-      await this.$auth.requestWith(this.name, endpoint, this.options.endpoints.logout).catch(() => {
+      await this.$auth.requestWith(endpoint, this.options.endpoints.logout).catch(() => {
       });
     }
     return this.$auth.reset();

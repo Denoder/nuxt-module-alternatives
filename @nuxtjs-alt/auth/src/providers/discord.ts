@@ -7,8 +7,6 @@ export interface DiscordProviderOptions
     Oauth2SchemeOptions { }
 
 export function discord(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-    nuxt: any,
     strategy: ProviderPartialOptions<DiscordProviderOptions>
 ): void {
     const DEFAULTS: typeof strategy = {

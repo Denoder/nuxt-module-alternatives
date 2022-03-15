@@ -4,7 +4,7 @@ export declare class RequestHandler {
     scheme: TokenableScheme | RefreshableScheme;
     axios: NuxtAxiosInstance;
     interceptor: number;
-    constructor(scheme: TokenableScheme | RefreshableScheme, axios: NuxtAxiosInstance);
+    constructor(scheme: TokenableScheme | RefreshableScheme | any, axios: NuxtAxiosInstance);
     setHeader(token: string): void;
     clearHeader(): void;
     initializeRequestInterceptor(refreshEndpoint?: string): void;
