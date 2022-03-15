@@ -31,8 +31,8 @@ const DEFAULTS = {
   }
 };
 export class CookieScheme extends BaseScheme {
-  constructor($auth, options, ...defaults) {
-    super($auth, options, ...defaults, DEFAULTS);
+  constructor($auth, options) {
+    super($auth, options, DEFAULTS);
     this.requestHandler = new RequestHandler(this, this.$auth.ctx.$axios);
   }
   mounted() {
@@ -87,7 +87,7 @@ export class CookieScheme extends BaseScheme {
       this.$auth.setUser({});
       return Promise.resolve();
     }
-    return this.$auth.requestWith(this.name, endpoint, this.options.endpoints.user).then((response) => {
+    return this.$auth.requestWith(endpoint, this.options.endpoints.user).then((response) => {
       let userData;
       if (process.client) {
         userData = getProp(response.data, this.options.user.property.client);
@@ -107,7 +107,7 @@ export class CookieScheme extends BaseScheme {
   }
   async logout(endpoint = {}) {
     if (this.options.endpoints.logout) {
-      await this.$auth.requestWith(this.name, endpoint, this.options.endpoints.logout).catch(() => {
+      await this.$auth.requestWith(endpoint, this.options.endpoints.logout).catch(() => {
       });
     }
     return this.$auth.reset();

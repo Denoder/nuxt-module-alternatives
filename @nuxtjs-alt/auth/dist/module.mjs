@@ -1,4 +1,3 @@
-import { join } from 'path';
 import { existsSync } from 'fs';
 import hash from 'hasha';
 import qs from 'querystring';
@@ -23,7 +22,7 @@ const require = __cjs_mod__.createRequire(import.meta.url);
 
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.0.2";
+const version = "1.0.3";
 
 const moduleDefaults = {
   enableMiddleware: true,
@@ -590,6 +589,12 @@ var enhanceError$3 = function enhanceError(error, config, code, request, respons
   return error;
 };
 
+var transitional = {
+  silentJSONParsing: true,
+  forcedJSONParsing: true,
+  clarifyTimeoutError: false
+};
+
 var enhanceError$2 = enhanceError$3;
 
 /**
@@ -873,7 +878,7 @@ var buildFullPath$1 = buildFullPath$2;
 var parseHeaders = parseHeaders$1;
 var isURLSameOrigin = isURLSameOrigin$1;
 var createError$1 = createError$3;
-var defaults$5 = defaults_1;
+var transitionalDefaults$2 = transitional;
 var Cancel$3 = Cancel_1;
 
 var xhr = function xhrAdapter(config) {
@@ -988,7 +993,7 @@ var xhr = function xhrAdapter(config) {
     // Handle timeout
     request.ontimeout = function handleTimeout() {
       var timeoutErrorMessage = config.timeout ? 'timeout of ' + config.timeout + 'ms exceeded' : 'timeout exceeded';
-      var transitional = config.transitional || defaults$5.transitional;
+      var transitional = config.transitional || transitionalDefaults$2;
       if (config.timeoutErrorMessage) {
         timeoutErrorMessage = config.timeoutErrorMessage;
       }
@@ -1670,7 +1675,7 @@ followRedirects.exports = wrap({ http: http$1, https: https$1 });
 followRedirects.exports.wrap = wrap;
 
 var data = {
-  "version": "0.26.0"
+  "version": "0.26.1"
 };
 
 var utils$7 = utils$f;
@@ -1686,7 +1691,7 @@ var zlib = require$$8;
 var VERSION$1 = data.version;
 var createError = createError$3;
 var enhanceError$1 = enhanceError$3;
-var defaults$4 = defaults_1;
+var transitionalDefaults$1 = transitional;
 var Cancel$2 = Cancel_1;
 
 var isHttps = /https:?/;
@@ -2036,7 +2041,7 @@ var http_1 = function httpAdapter(config) {
         } else {
           timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
         }
-        var transitional = config.transitional || defaults$4.transitional;
+        var transitional = config.transitional || transitionalDefaults$1;
         reject(createError(
           timeoutErrorMessage,
           config,
@@ -2077,6 +2082,7 @@ var http_1 = function httpAdapter(config) {
 var utils$6 = utils$f;
 var normalizeHeaderName = normalizeHeaderName$1;
 var enhanceError = enhanceError$3;
+var transitionalDefaults = transitional;
 
 var DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencoded'
@@ -2117,11 +2123,7 @@ function stringifySafely(rawValue, parser, encoder) {
 
 var defaults$3 = {
 
-  transitional: {
-    silentJSONParsing: true,
-    forcedJSONParsing: true,
-    clarifyTimeoutError: false
-  },
+  transitional: transitionalDefaults,
 
   adapter: getDefaultAdapter(),
 
@@ -2999,7 +3001,7 @@ function assignAbsoluteEndpoints(strategy) {
   }
 }
 
-function auth0(_nuxt, strategy) {
+function auth0(strategy) {
   const DEFAULTS = {
     scheme: "auth0",
     endpoints: {
@@ -3013,7 +3015,7 @@ function auth0(_nuxt, strategy) {
   assignDefaults(strategy, DEFAULTS);
 }
 
-function discord(nuxt, strategy) {
+function discord(strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
@@ -3029,7 +3031,7 @@ function discord(nuxt, strategy) {
   addAuthorize(nuxt, strategy, true);
 }
 
-function facebook(_nuxt, strategy) {
+function facebook(strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
@@ -3041,7 +3043,7 @@ function facebook(_nuxt, strategy) {
   assignDefaults(strategy, DEFAULTS);
 }
 
-function github(nuxt, strategy) {
+function github(strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
@@ -3055,7 +3057,7 @@ function github(nuxt, strategy) {
   addAuthorize(nuxt, strategy);
 }
 
-function google(_nuxt, strategy) {
+function google(strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
@@ -3067,7 +3069,7 @@ function google(_nuxt, strategy) {
   assignDefaults(strategy, DEFAULTS);
 }
 
-function laravelJWT(_nuxt, strategy) {
+function laravelJWT(strategy) {
   const { url } = strategy;
   if (!url) {
     throw new Error("url is required for laravel jwt!");
@@ -3113,7 +3115,7 @@ function laravelJWT(_nuxt, strategy) {
 function isPasswordGrant(strategy) {
   return strategy.grantType === "password";
 }
-function laravelPassport(nuxt, strategy) {
+function laravelPassport(strategy) {
   const { url } = strategy;
   if (!url) {
     throw new Error("url is required is laravel passport!");
@@ -3177,7 +3179,7 @@ function laravelPassport(nuxt, strategy) {
   }
 }
 
-function laravelSanctum(_nuxt, strategy) {
+function laravelSanctum(strategy) {
   const { url } = strategy;
   if (!url) {
     throw new Error("URL is required with Laravel Sanctum!");
@@ -3327,7 +3329,6 @@ const module = defineNuxtModule({
     name,
     version,
     configKey: CONFIG_KEY,
-    type: "module",
     defaults: moduleDefaults,
     compatibility: {
       nuxt: "^3.0.0"
@@ -3348,7 +3349,7 @@ const module = defineNuxtModule({
     options.defaultStrategy = options.defaultStrategy || strategies.length ? strategies[0].name : "";
     addPluginTemplate({
       src: resolver.resolve("runtime/templates/auth.plugin.mjs"),
-      fileName: join("auth.plugin.mjs"),
+      fileName: "auth.plugin.mjs",
       options: {
         options,
         strategies,

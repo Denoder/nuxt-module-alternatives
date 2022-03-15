@@ -203,7 +203,7 @@ export class Auth {
       return Promise.reject(error);
     });
   }
-  requestWith(strategy, endpoint, defaults) {
+  requestWith(endpoint, defaults) {
     const _endpoint = Object.assign({}, defaults, endpoint);
     if (this.getStrategy().token) {
       const token = this.getStrategy().token.get();

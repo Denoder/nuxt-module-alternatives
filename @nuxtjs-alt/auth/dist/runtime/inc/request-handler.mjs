@@ -17,7 +17,7 @@ export class RequestHandler {
   }
   initializeRequestInterceptor(refreshEndpoint) {
     this.interceptor = this.axios.interceptors.request.use(async (config) => {
-      if (this.scheme.options.token && !this._needToken(config) || config.url === refreshEndpoint || this.scheme.options.cookie) {
+      if (this.scheme.options.token && !this._needToken(config) || config.url === refreshEndpoint) {
         return config;
       }
       const { valid, tokenExpired, refreshTokenExpired, isRefreshable } = this.scheme.check(true);
