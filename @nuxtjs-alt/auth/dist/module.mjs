@@ -10,7 +10,7 @@ import require$$4 from 'assert';
 import require$$8 from 'zlib';
 import bodyParser from 'body-parser';
 import requrl from 'requrl';
-import { resolvePath, requireModule, defineNuxtModule, createResolver, addPluginTemplate } from '@nuxt/kit';
+import { addServerMiddleware, resolvePath, requireModule, defineNuxtModule, createResolver, addPluginTemplate } from '@nuxt/kit';
 
 // -- Unbuild CommonJS Shims --
 import __cjs_url__ from 'url';
@@ -22,7 +22,7 @@ const require = __cjs_mod__.createRequire(import.meta.url);
 
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.0.3";
+const version = "1.0.4";
 
 const moduleDefaults = {
   enableMiddleware: true,
@@ -2863,7 +2863,7 @@ var axios = axios$2.exports;
 function assignDefaults(strategy, defaults) {
   Object.assign(strategy, defu(strategy, defaults));
 }
-function addAuthorize(nuxt, strategy, useForms = false) {
+function addAuthorize(strategy, useForms = false) {
   const clientSecret = strategy.clientSecret;
   const clientID = strategy.clientId;
   const tokenEndpoint = strategy.endpoints.token;
@@ -2873,7 +2873,7 @@ function addAuthorize(nuxt, strategy, useForms = false) {
   strategy.endpoints.token = endpoint;
   strategy.responseType = "code";
   const formMiddleware = bodyParser.urlencoded({ extended: true });
-  nuxt.options.serverMiddleware.unshift({
+  addServerMiddleware({
     path: endpoint,
     handler: (req, res, next) => {
       if (req.method !== "POST") {
@@ -2928,7 +2928,7 @@ function addAuthorize(nuxt, strategy, useForms = false) {
     }
   });
 }
-function initializePasswordGrantFlow(nuxt, strategy) {
+function initializePasswordGrantFlow(strategy) {
   const clientSecret = strategy.clientSecret;
   const clientId = strategy.clientId;
   const tokenEndpoint = strategy.endpoints.token;
@@ -2937,7 +2937,7 @@ function initializePasswordGrantFlow(nuxt, strategy) {
   strategy.endpoints.login.url = endpoint;
   strategy.endpoints.refresh.url = endpoint;
   const formMiddleware = bodyParser.json();
-  nuxt.options.serverMiddleware.unshift({
+  addServerMiddleware({
     path: endpoint,
     handler: (req, res, next) => {
       if (req.method !== "POST") {
@@ -3028,7 +3028,7 @@ function discord(strategy) {
     scope: ["identify", "email"]
   };
   assignDefaults(strategy, DEFAULTS);
-  addAuthorize(nuxt, strategy, true);
+  addAuthorize(strategy, true);
 }
 
 function facebook(strategy) {
@@ -3054,7 +3054,7 @@ function github(strategy) {
     scope: ["user", "email"]
   };
   assignDefaults(strategy, DEFAULTS);
-  addAuthorize(nuxt, strategy);
+  addAuthorize(strategy);
 }
 
 function google(strategy) {
@@ -3158,7 +3158,7 @@ function laravelPassport(strategy) {
     };
     assignDefaults(strategy, _DEFAULTS);
     assignAbsoluteEndpoints(strategy);
-    initializePasswordGrantFlow(nuxt, strategy);
+    initializePasswordGrantFlow(strategy);
   } else {
     const _DEFAULTS = {
       ...defaults,
@@ -3175,7 +3175,7 @@ function laravelPassport(strategy) {
     };
     assignDefaults(strategy, _DEFAULTS);
     assignAbsoluteEndpoints(strategy);
-    addAuthorize(nuxt, strategy);
+    addAuthorize(strategy);
   }
 }
 

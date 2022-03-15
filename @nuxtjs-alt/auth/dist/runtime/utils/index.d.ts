@@ -1,5 +1,5 @@
 import type { Nuxt as Context } from "@nuxt/schema";
-import type { Route, RecursivePartial } from '../../types';
+import type { RecursivePartial } from '../../types';
 export declare const isUnset: (o: unknown) => boolean;
 export declare const isSet: (o: unknown) => boolean;
 export declare const isSameURL: (ctx: Context, a: string, b: string) => boolean;
@@ -8,8 +8,8 @@ export declare function parseQuery(queryString: string): Record<string, unknown>
 export declare function encodeQuery(queryObject: {
     [key: string]: string | number | boolean;
 }): string;
-export declare function routeOption(route: Route, key: string, value: string | boolean): boolean;
-export declare function getMatchedComponents(route: Route, matches?: unknown[]): unknown[];
+export declare function routeOption(route: any, key: string, value: string | boolean): boolean;
+export declare function getMatchedComponents(route: any, matches?: unknown[]): unknown[];
 export declare function normalizePath(path?: string, ctx?: Context): string;
 export declare function encodeValue(val: unknown): string;
 export declare function decodeValue(val: unknown): unknown;

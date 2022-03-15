@@ -241,7 +241,7 @@ export class Oauth2Scheme extends BaseScheme {
       this.refreshToken.set(refreshToken);
     }
     if (this.$auth.options.watchLoggedIn) {
-      this.$auth.redirect("home", true);
+      this.$auth.redirect("home", { noRouter: true });
       return true;
     }
   }

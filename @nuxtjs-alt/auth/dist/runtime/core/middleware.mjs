@@ -1,5 +1,5 @@
-import { routeOption, getMatchedComponents, normalizePath } from "../utils/index.mjs";
 import { defineNuxtRouteMiddleware, useNuxtApp } from "#app";
+import { routeOption, getMatchedComponents, normalizePath } from "../utils/index.mjs";
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const ctx = useNuxtApp();
   if (routeOption(to, "auth", false)) {

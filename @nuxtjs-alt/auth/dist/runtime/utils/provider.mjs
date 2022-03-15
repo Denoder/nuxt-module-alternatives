@@ -3,10 +3,11 @@ import defu from "defu";
 import axios from "axios";
 import bodyParser from "body-parser";
 import requrl from "requrl";
+import { addServerMiddleware } from "@nuxt/kit";
 export function assignDefaults(strategy, defaults) {
   Object.assign(strategy, defu(strategy, defaults));
 }
-export function addAuthorize(nuxt, strategy, useForms = false) {
+export function addAuthorize(strategy, useForms = false) {
   const clientSecret = strategy.clientSecret;
   const clientID = strategy.clientId;
   const tokenEndpoint = strategy.endpoints.token;
@@ -16,7 +17,7 @@ export function addAuthorize(nuxt, strategy, useForms = false) {
   strategy.endpoints.token = endpoint;
   strategy.responseType = "code";
   const formMiddleware = bodyParser.urlencoded({ extended: true });
-  nuxt.options.serverMiddleware.unshift({
+  addServerMiddleware({
     path: endpoint,
     handler: (req, res, next) => {
       if (req.method !== "POST") {
@@ -71,7 +72,7 @@ export function addAuthorize(nuxt, strategy, useForms = false) {
     }
   });
 }
-export function initializePasswordGrantFlow(nuxt, strategy) {
+export function initializePasswordGrantFlow(strategy) {
   const clientSecret = strategy.clientSecret;
   const clientId = strategy.clientId;
   const tokenEndpoint = strategy.endpoints.token;
@@ -80,7 +81,7 @@ export function initializePasswordGrantFlow(nuxt, strategy) {
   strategy.endpoints.login.url = endpoint;
   strategy.endpoints.refresh.url = endpoint;
   const formMiddleware = bodyParser.json();
-  nuxt.options.serverMiddleware.unshift({
+  addServerMiddleware({
     path: endpoint,
     handler: (req, res, next) => {
       if (req.method !== "POST") {
