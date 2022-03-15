@@ -14,8 +14,6 @@ export interface LaravelSanctumProviderOptions
 }
 
 export function laravelSanctum(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-    _nuxt: any,
     strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>
 ): void {
     const { url } = strategy

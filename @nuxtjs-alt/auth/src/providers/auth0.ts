@@ -9,8 +9,6 @@ export interface Auth0ProviderOptions
 }
 
 export function auth0(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-    _nuxt: any,
     strategy: ProviderPartialOptions<Auth0ProviderOptions>
 ): void {
     const DEFAULTS: typeof strategy = {

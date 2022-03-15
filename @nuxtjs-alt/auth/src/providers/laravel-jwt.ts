@@ -9,7 +9,6 @@ export interface LaravelJWTProviderOptions
 }
 
 export function laravelJWT(
-    _nuxt: any,
     strategy: ProviderPartialOptions<LaravelJWTProviderOptions>
 ): void {
     const { url } = strategy
