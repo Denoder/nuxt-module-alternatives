@@ -4,11 +4,11 @@ import { RequestHandler } from "../inc/index.mjs";
 const DEFAULTS = {
   name: "cookie",
   cookie: {
-    name: void 0,
+    name: null,
     server: false
   },
   endpoints: {
-    csrf: void 0,
+    csrf: false,
     login: {
       url: "/api/auth/login",
       method: "post"
@@ -23,7 +23,10 @@ const DEFAULTS = {
     }
   },
   user: {
-    property: false,
+    property: {
+      client: false,
+      server: false
+    },
     autoFetch: true
   }
 };
@@ -58,9 +61,7 @@ export class CookieScheme extends BaseScheme {
   async login(endpoint) {
     this.$auth.reset();
     if (this.options.endpoints.csrf) {
-      await this.$auth.request(this.options.endpoints.csrf, {
-        maxRedirects: 0
-      });
+      await this.$auth.request(this.options.endpoints.csrf, { maxRedirects: 0 });
     }
     if (!this.options.endpoints.login) {
       return;
@@ -86,7 +87,11 @@ export class CookieScheme extends BaseScheme {
     }
     return this.$auth.requestWith(endpoint, this.options.endpoints.user).then((response) => {
       let userData;
-      userData = getProp(response.data, this.options.user.property);
+      if (process.client) {
+        userData = getProp(response.data, this.options.user.property.client);
+      } else {
+        userData = getProp(response.data, this.options.user.property.server);
+      }
       if (!userData) {
         const error = new Error(`User Data response does not contain field ${this.options.user.property}`);
         return Promise.reject(error);
@@ -100,7 +105,8 @@ export class CookieScheme extends BaseScheme {
   }
   async logout(endpoint = {}) {
     if (this.options.endpoints.logout) {
-      await this.$auth.requestWith(endpoint, this.options.endpoints.logout).catch(() => {
+      await this.$auth.requestWith(endpoint, this.options.endpoints.logout).catch((err) => {
+        console.error(err);
       });
     }
     return this.$auth.reset();

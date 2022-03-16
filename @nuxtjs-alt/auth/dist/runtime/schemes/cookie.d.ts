@@ -1,4 +1,4 @@
-import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserOptions, HTTPRequest, HTTPResponse } from '../../types';
+import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCoookieOptions, HTTPRequest, HTTPResponse } from '../../types';
 import { BaseScheme } from './base';
 import type { Auth } from '../core';
 import { RequestHandler } from '../inc';
@@ -6,6 +6,7 @@ export interface CookieSchemeEndpoints extends EndpointsOption {
     login: HTTPRequest;
     logout: HTTPRequest | false;
     user: HTTPRequest | false;
+    csrf: HTTPRequest | false;
 }
 export interface CookieSchemeCookie {
     name: string;
@@ -14,9 +15,8 @@ export interface CookieSchemeCookie {
 export interface CookieSchemeOptions {
     name: string;
     endpoints: CookieSchemeEndpoints;
-    user: UserOptions;
+    user: UserCoookieOptions;
     cookie: CookieSchemeCookie;
-    csrf: HTTPRequest;
 }
 export declare class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseScheme<OptionsT> {
     requestHandler: RequestHandler;
