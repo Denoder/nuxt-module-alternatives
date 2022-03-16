@@ -2,13 +2,14 @@ import requrl from "requrl";
 import type {
     HTTPRequest,
     HTTPResponse,
-    Route,
     Scheme,
     SchemeCheck,
     TokenableScheme,
     RefreshableScheme,
 } from "../../types";
+import type { RouteLocationNormalized } from 'vue-router'
 import type { ModuleOptions } from "../../options";
+import type { NuxtApp } from "#app";
 import {
     isRelativeURL,
     isSet,
@@ -23,7 +24,7 @@ export type ErrorListener = (...args: unknown[]) => void;
 export type RedirectListener = (to: string, from: string) => string;
 
 export class Auth {
-    public ctx: any;
+    public ctx: NuxtApp;
     public options: ModuleOptions;
     public strategies: Record<string, Scheme> = {};
     public error: Error;
@@ -34,7 +35,7 @@ export class Auth {
     private _stateWarnShown: boolean;
     private _getStateWarnShown: boolean;
 
-    constructor(ctx: any, options: ModuleOptions) {
+    constructor(ctx: NuxtApp, options: ModuleOptions) {
         this.ctx = ctx;
         this.options = options;
 
@@ -133,7 +134,7 @@ export class Auth {
             if (process.client && this.options.watchLoggedIn) {
                 this.$storage.watchState("loggedIn", (loggedIn) => {
                     if (loggedIn) {
-                        if (!routeOption(this.ctx._route as Route,"auth",false)) {
+                        if (!routeOption(this.ctx._route as RouteLocationNormalized,"auth",false)) {
                             this.redirect(loggedIn ? "home" : "logout");
                         }
                     }
@@ -316,10 +317,7 @@ export class Auth {
         endpoint: HTTPRequest,
         defaults: HTTPRequest = {}
     ): Promise<HTTPResponse> {
-        const _endpoint =
-            typeof defaults === "object"
-                ? Object.assign({}, defaults, endpoint)
-                : endpoint;
+        const _endpoint = typeof defaults === "object" ? Object.assign({}, defaults, endpoint) : endpoint;
 
         // Fix baseURL for relative endpoints
         if (_endpoint.baseURL === "") {
@@ -397,7 +395,8 @@ export class Auth {
 
     redirect(
         name: string,
-        opt: { route?: any | boolean; noRouter?: boolean } = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        opt: { route?: any | false; noRouter?: boolean } = {
             route: false,
             noRouter: false,
         }
@@ -408,13 +407,7 @@ export class Auth {
             return;
         }
 
-        const from = opt.route
-            ? this.options.fullPathRedirect
-                ? opt.route.fullPath
-                : opt.route.path
-            : this.options.fullPathRedirect
-            ? this.ctx._route.fullPath
-            : this.ctx._route.path;
+        const from = opt.route ? this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path : this.options.fullPathRedirect ? this.ctx._route.fullPath : this.ctx._route.path;
 
         let to = this.options.redirect[name];
 
@@ -425,17 +418,13 @@ export class Auth {
         // Apply rewrites
         if (this.options.rewriteRedirects) {
             if (
-                name === "login" &&
-                isRelativeURL(from) &&
-                !isSameURL(this.ctx, to, from)
+                name === "login" && isRelativeURL(from) && !isSameURL(this.ctx, to, from)
             ) {
                 this.$storage.setUniversal("redirect", from);
             }
 
             if (name === "home") {
-                const redirect = this.$storage.getUniversal(
-                    "redirect"
-                ) as string;
+                const redirect = this.$storage.getUniversal("redirect") as string;
                 this.$storage.setUniversal("redirect", null);
 
                 if (isRelativeURL(redirect)) {
@@ -452,20 +441,10 @@ export class Auth {
             return;
         }
 
-        const queryString = Object.keys(
-            opt.route ? opt.route.query : this.ctx._route.query
-        )
-            .map((key) =>
-                key + "=" + opt.route
-                    ? opt.route.query[key]
-                    : this.ctx._route.query[key]
-            )
-            .join("&");
+        const queryString = Object.keys(opt.route ? opt.route.query : this.ctx._route.query).map((key) => key + "=" + opt.route ? opt.route.query[key] : this.ctx._route.query[key]).join("&");
 
         if (opt.noRouter) {
-            window.location.replace(
-                to + (queryString ? "?" + queryString : "")
-            );
+            window.location.replace(to + (queryString ? "?" + queryString : ""));
         } else {
             router.push(to + (queryString ? "?" + queryString : ""));
         }

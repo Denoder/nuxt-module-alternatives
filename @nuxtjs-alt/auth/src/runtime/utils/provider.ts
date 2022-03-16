@@ -8,7 +8,8 @@ import type { StrategyOptions, HTTPRequest } from '../../types'
 import type {
     Oauth2SchemeOptions,
     RefreshSchemeOptions,
-    LocalSchemeOptions
+    LocalSchemeOptions,
+    CookieScemeOptions
 } from '../schemes'
 
 export function assignDefaults<SOptions extends StrategyOptions>(
@@ -18,9 +19,7 @@ export function assignDefaults<SOptions extends StrategyOptions>(
     Object.assign(strategy, defu(strategy, defaults))
 }
 
-export function addAuthorize<
-    SOptions extends StrategyOptions<Oauth2SchemeOptions>
->(
+export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOptions>>(
     strategy: SOptions,
     useForms: boolean = false
 ): void {
@@ -112,9 +111,7 @@ export function addAuthorize<
     })
 }
 
-export function initializePasswordGrantFlow<
-    SOptions extends StrategyOptions<RefreshSchemeOptions>
->(
+export function initializePasswordGrantFlow<SOptions extends StrategyOptions<RefreshSchemeOptions>>(
     strategy: SOptions
 ): void {
     // Get clientSecret, clientId, endpoints.login.url
@@ -194,9 +191,7 @@ export function initializePasswordGrantFlow<
 }
 
 export function assignAbsoluteEndpoints<
-    SOptions extends StrategyOptions<
-        (LocalSchemeOptions | Oauth2SchemeOptions) & { url: string }
-    >
+    SOptions extends StrategyOptions<(LocalSchemeOptions | Oauth2SchemeOptions | CookieScemeOptions) & { url: string }>
 >(strategy: SOptions): void {
     const { url, endpoints } = strategy
 
