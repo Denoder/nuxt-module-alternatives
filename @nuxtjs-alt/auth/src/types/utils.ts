@@ -4,5 +4,4 @@ export type RecursivePartial<T> = {
     : RecursivePartial<T[P]>
 }
 
-export type PartialExcept<T, K extends keyof T> = RecursivePartial<T> &
-    Pick<T, K>
+export type PartialExcept<T, K extends keyof T> = RecursivePartial<T> & Pick<T, K>

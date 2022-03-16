@@ -1,4 +1,5 @@
 import type { ModuleOptions } from '../../options'
+import type { NuxtApp } from "#app";
 import { defineStore } from 'pinia'
 import { parse, serialize } from 'cookie-es'
 import { isUnset, isSet, decodeValue, encodeValue } from '../utils'
@@ -11,8 +12,7 @@ export type StorageOptions = ModuleOptions & {
 }
 
 export class Storage {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    public ctx: any
+    public ctx: NuxtApp
     public options: StorageOptions
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public store: any
@@ -22,7 +22,7 @@ export class Storage {
     private _state: any
     private _usePinia: boolean
 
-    constructor(ctx: any, options: StorageOptions) {
+    constructor(ctx: NuxtApp, options: StorageOptions) {
         this.ctx = ctx
         this.options = options
 

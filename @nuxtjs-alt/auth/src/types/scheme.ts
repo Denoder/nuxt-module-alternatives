@@ -15,6 +15,14 @@ export interface UserOptions {
     autoFetch: boolean
 }
 
+export interface UserCoookieOptions {
+    property: {
+        client: string | false
+        server: string | false
+    }
+    autoFetch: boolean
+}
+
 export interface EndpointsOption {
     [endpoint: string]: string | HTTPRequest | false
 }

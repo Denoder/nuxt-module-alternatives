@@ -1,16 +1,17 @@
-import type { Nuxt as Context } from "@nuxt/schema";
+import type { NuxtApp } from "#app";
 import type { RecursivePartial } from '../../types';
+import type { RouteLocationNormalized } from 'vue-router';
 export declare const isUnset: (o: unknown) => boolean;
 export declare const isSet: (o: unknown) => boolean;
-export declare const isSameURL: (ctx: Context, a: string, b: string) => boolean;
+export declare const isSameURL: (ctx: NuxtApp, a: string, b: string) => boolean;
 export declare function isRelativeURL(u: string): boolean;
 export declare function parseQuery(queryString: string): Record<string, unknown>;
 export declare function encodeQuery(queryObject: {
     [key: string]: string | number | boolean;
 }): string;
-export declare function routeOption(route: any, key: string, value: string | boolean): boolean;
-export declare function getMatchedComponents(route: any, matches?: unknown[]): unknown[];
-export declare function normalizePath(path?: string, ctx?: Context): string;
+export declare function routeOption(route: RouteLocationNormalized, key: string, value: string | boolean): boolean;
+export declare function getMatchedComponents(route: RouteLocationNormalized, matches?: unknown[]): unknown[];
+export declare function normalizePath(path?: string, ctx?: NuxtApp): string;
 export declare function encodeValue(val: unknown): string;
 export declare function decodeValue(val: unknown): unknown;
 /**

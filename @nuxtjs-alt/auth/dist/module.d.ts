@@ -1,3 +1,5 @@
+import { NuxtApp } from '#app';
+
 declare type OpenIDConnectConfigurationDocument = {
     issuer?: string;
     authorization_endpoint?: string;
@@ -45,6 +47,7 @@ interface CookieSchemeEndpoints extends EndpointsOption {
     login: HTTPRequest;
     logout: HTTPRequest | false;
     user: HTTPRequest | false;
+    csrf: HTTPRequest | false;
 }
 interface CookieSchemeCookie {
     name: string;
@@ -53,9 +56,8 @@ interface CookieSchemeCookie {
 interface CookieSchemeOptions {
     name: string;
     endpoints: CookieSchemeEndpoints;
-    user: UserOptions;
+    user: UserCoookieOptions;
     cookie: CookieSchemeCookie;
-    csrf: HTTPRequest;
 }
 declare class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseScheme<OptionsT> {
     requestHandler: RequestHandler;
@@ -259,13 +261,13 @@ declare type StorageOptions = ModuleOptions & {
     };
 };
 declare class Storage {
-    ctx: any;
+    ctx: NuxtApp;
     options: StorageOptions;
     store: any;
     state: any;
     private _state;
     private _usePinia;
-    constructor(ctx: any, options: StorageOptions);
+    constructor(ctx: NuxtApp, options: StorageOptions);
     setUniversal<V extends unknown>(key: string, value: V): V | void;
     getUniversal(key: string): unknown;
     syncUniversal(key: string, defaultValue?: unknown): unknown;
@@ -415,6 +417,13 @@ declare type PartialExcept<T, K extends keyof T> = RecursivePartial<T> & Pick<T,
 
 interface UserOptions {
     property?: string | false;
+    autoFetch: boolean;
+}
+interface UserCoookieOptions {
+    property: {
+        client: string | false;
+        server: string | false;
+    };
     autoFetch: boolean;
 }
 interface EndpointsOption {
@@ -635,7 +644,7 @@ interface Strategy extends SchemeOptions {
 declare type ErrorListener = (...args: unknown[]) => void;
 declare type RedirectListener = (to: string, from: string) => string;
 declare class Auth {
-    ctx: any;
+    ctx: NuxtApp;
     options: ModuleOptions;
     strategies: Record<string, Scheme>;
     error: Error;
@@ -645,7 +654,7 @@ declare class Auth {
     private _redirectListeners;
     private _stateWarnShown;
     private _getStateWarnShown;
-    constructor(ctx: any, options: ModuleOptions);
+    constructor(ctx: NuxtApp, options: ModuleOptions);
     get state(): any;
     get strategy(): Scheme;
     getStrategy(throwException?: boolean): Scheme | TokenableScheme | RefreshableScheme;
@@ -673,7 +682,7 @@ declare class Auth {
     onError(listener: ErrorListener): void;
     callOnError(error: Error, payload?: {}): void;
     redirect(name: string, opt?: {
-        route?: any | boolean;
+        route?: any | false;
         noRouter?: boolean;
     }): void;
     onRedirect(listener: RedirectListener): void;

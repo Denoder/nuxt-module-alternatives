@@ -18,7 +18,7 @@ export class ConfigurationDocument {
     return value;
   }
   async request() {
-    const serverDoc = this.scheme.$auth.ctx?.nuxtState?.$auth?.openIDConnect?.configurationDocument;
+    const serverDoc = this.scheme.$auth.ctx?.payload?.data?.$auth?.openIDConnect?.configurationDocument;
     if (process.client && serverDoc) {
       this.set(serverDoc);
     }

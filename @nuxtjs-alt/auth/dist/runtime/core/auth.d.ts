@@ -1,10 +1,11 @@
 import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme } from "../../types";
 import type { ModuleOptions } from "../../options";
+import type { NuxtApp } from "#app";
 import { Storage } from "./storage";
 export declare type ErrorListener = (...args: unknown[]) => void;
 export declare type RedirectListener = (to: string, from: string) => string;
 export declare class Auth {
-    ctx: any;
+    ctx: NuxtApp;
     options: ModuleOptions;
     strategies: Record<string, Scheme>;
     error: Error;
@@ -14,7 +15,7 @@ export declare class Auth {
     private _redirectListeners;
     private _stateWarnShown;
     private _getStateWarnShown;
-    constructor(ctx: any, options: ModuleOptions);
+    constructor(ctx: NuxtApp, options: ModuleOptions);
     get state(): any;
     get strategy(): Scheme;
     getStrategy(throwException?: boolean): Scheme | TokenableScheme | RefreshableScheme;
@@ -42,7 +43,7 @@ export declare class Auth {
     onError(listener: ErrorListener): void;
     callOnError(error: Error, payload?: {}): void;
     redirect(name: string, opt?: {
-        route?: any | boolean;
+        route?: any | false;
         noRouter?: boolean;
     }): void;
     onRedirect(listener: RedirectListener): void;

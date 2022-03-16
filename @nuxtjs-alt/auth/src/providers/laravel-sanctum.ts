@@ -56,11 +56,13 @@ export function laravelSanctum(
             }
         },
         user: {
-            property: false
+            property: {
+                client: false,
+                server: false
+            }
         }
     }
 
     assignDefaults(strategy, DEFAULTS)
-
     assignAbsoluteEndpoints(strategy)
 }

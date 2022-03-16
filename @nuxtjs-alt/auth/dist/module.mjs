@@ -22,7 +22,7 @@ const require = __cjs_mod__.createRequire(import.meta.url);
 
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.0.4";
+const version = "1.0.5";
 
 const moduleDefaults = {
   enableMiddleware: true,
@@ -3217,7 +3217,10 @@ function laravelSanctum(strategy) {
       }
     },
     user: {
-      property: false
+      property: {
+        client: false,
+        server: false
+      }
     }
   };
   assignDefaults(strategy, DEFAULTS);
