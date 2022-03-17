@@ -1,6 +1,6 @@
 import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme } from "../../types";
 import type { ModuleOptions } from "../../options";
-import type { NuxtApp } from "#app";
+import { NuxtApp } from "#app";
 import { Storage } from "./storage";
 export declare type ErrorListener = (...args: unknown[]) => void;
 export declare type RedirectListener = (to: string, from: string) => string;

@@ -1,4 +1,5 @@
 import requrl from "requrl";
+import { useRouter } from "#app";
 import {
   isRelativeURL,
   isSet,
@@ -7,7 +8,6 @@ import {
   routeOption
 } from "../utils";
 import { Storage } from "./storage.mjs";
-import { useRouter } from "#app";
 export class Auth {
   constructor(ctx, options) {
     this.strategies = {};
@@ -73,7 +73,7 @@ export class Auth {
       if (process.client && this.options.watchLoggedIn) {
         this.$storage.watchState("loggedIn", (loggedIn) => {
           if (loggedIn) {
-            if (!routeOption(this.ctx._route, "auth", false)) {
+            if (!routeOption(this.ctx.$router.currentRoute, "auth", false)) {
               this.redirect(loggedIn ? "home" : "logout");
             }
           }
@@ -245,7 +245,7 @@ export class Auth {
     if (!this.options.redirect) {
       return;
     }
-    const from = opt.route ? this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path : this.options.fullPathRedirect ? this.ctx._route.fullPath : this.ctx._route.path;
+    const from = opt.route ? this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path : this.options.fullPathRedirect ? this.ctx.$router.currentRoute.fullPath : this.ctx.$router.currentRoute.path;
     let to = this.options.redirect[name];
     if (!to) {
       return;
@@ -266,7 +266,7 @@ export class Auth {
     if (isSameURL(this.ctx, to, from)) {
       return;
     }
-    const queryString = Object.keys(opt.route ? opt.route.query : this.ctx._route.query).map((key) => key + "=" + opt.route ? opt.route.query[key] : this.ctx._route.query[key]).join("&");
+    const queryString = Object.keys(opt.route ? opt.route.query : this.ctx.$router.currentRoute.query).map((key) => key + "=" + opt.route ? opt.route.query[key] : this.ctx.$router.currentRoute.query[key]).join("&");
     if (opt.noRouter) {
       window.location.replace(to + (queryString ? "?" + queryString : ""));
     } else {

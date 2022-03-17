@@ -1,4 +1,4 @@
-import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCoookieOptions, HTTPRequest, HTTPResponse } from '../../types';
+import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCookieOptions, HTTPRequest, HTTPResponse } from '../../types';
 import { BaseScheme } from './base';
 import type { Auth } from '../core';
 import { RequestHandler } from '../inc';
@@ -15,7 +15,7 @@ export interface CookieSchemeCookie {
 export interface CookieSchemeOptions {
     name: string;
     endpoints: CookieSchemeEndpoints;
-    user: UserCoookieOptions;
+    user: UserCookieOptions;
     cookie: CookieSchemeCookie;
 }
 export declare class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseScheme<OptionsT> {

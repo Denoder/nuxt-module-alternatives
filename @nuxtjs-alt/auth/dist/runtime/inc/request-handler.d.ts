@@ -1,9 +1,10 @@
 import type { TokenableScheme, RefreshableScheme } from '../../types';
+import { NuxtAxiosInstance } from '@nuxtjs-alt/axios';
 export declare class RequestHandler {
     scheme: TokenableScheme | RefreshableScheme;
-    axios: any;
+    axios: NuxtAxiosInstance;
     interceptor: number;
-    constructor(scheme: TokenableScheme | RefreshableScheme | any, axios: any);
+    constructor(scheme: TokenableScheme | RefreshableScheme, axios: NuxtAxiosInstance);
     setHeader(token: string): void;
     clearHeader(): void;
     initializeRequestInterceptor(refreshEndpoint?: string): void;
