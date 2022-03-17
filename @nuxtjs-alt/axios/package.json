@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/axios",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "An alternative module to @nuxtjs/axios",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -14,13 +14,19 @@
         "@nuxtjs/axios"
     ],
     "license": "MIT",
-    "sideEffects": false,
     "type": "module",
     "main": "./dist/module.mjs",
+    "module": "./dist/module.mjs",
+    "commonjs": "./dist/module.cjs",
+    "types": "./dist/module.d.ts",
+    "typings": "./dist/module.d.ts",
     "files": [
         "dist"
     ],
     "scripts": {
+        "dev": "nuxi dev playground",
+        "dev:build": "nuxi build playground",
+        "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
         "prepack": "nuxt-module-build"
     },
     "dependencies": {

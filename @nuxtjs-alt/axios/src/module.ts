@@ -1,6 +1,6 @@
 import { name, version } from '../package.json'
 import { defineNuxtModule, installModule, addPluginTemplate, createResolver } from '@nuxt/kit'
-import type { ModuleOptions } from './options'
+import { ModuleOptions } from './options'
 
 const CONFIG_KEY = 'axios'
 
@@ -17,7 +17,7 @@ export default defineNuxtModule({
     setup(_moduleOptions, nuxt) {
         // Combine options
 
-        const moduleOptions = {
+        const moduleOptions: ModuleOptions = {
             ..._moduleOptions,
             ...(nuxt.options.publicRuntimeConfig && nuxt.options.publicRuntimeConfig[CONFIG_KEY])
         }
