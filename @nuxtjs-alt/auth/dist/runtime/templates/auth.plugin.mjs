@@ -21,7 +21,6 @@ export default defineNuxtPlugin(async ctx => {
     }).join('\n\n  ')
     %>
 
-    ctx.vueApp.use($auth);
     ctx.provide('auth', $auth);
 
     // Initialize auth
