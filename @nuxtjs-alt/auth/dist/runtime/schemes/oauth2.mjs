@@ -68,7 +68,7 @@ export class Oauth2Scheme extends BaseScheme {
     return Array.isArray(this.options.scope) ? this.options.scope.join(" ") : this.options.scope;
   }
   get redirectURI() {
-    const basePath = this.$auth.ctx.base || "";
+    const basePath = this.$auth.ctx.$config.app.baseURL || "";
     const path = normalizePath(basePath + "/" + this.$auth.options.redirect.callback);
     return this.options.redirectUri || urlJoin(requrl(this.req), path);
   }
@@ -192,14 +192,14 @@ export class Oauth2Scheme extends BaseScheme {
     this.$auth.setUser(getProp(response.data, this.options.user.property));
   }
   async _handleCallback() {
-    if (this.$auth.options.redirect && normalizePath(this.$auth.ctx.route.path, this.$auth.ctx) !== normalizePath(this.$auth.options.redirect.callback, this.$auth.ctx)) {
+    if (this.$auth.options.redirect && normalizePath(this.$auth.ctx.$router.currentRoute.path, this.$auth.ctx) !== normalizePath(this.$auth.options.redirect.callback, this.$auth.ctx)) {
       return;
     }
     if (process.server) {
       return;
     }
-    const hash = parseQuery(this.$auth.ctx.route.hash.substr(1));
-    const parsedQuery = Object.assign({}, this.$auth.ctx.route.query, hash);
+    const hash = parseQuery(this.$auth.ctx.$router.currentRoute.hash.substr(1));
+    const parsedQuery = Object.assign({}, this.$auth.ctx.$router.currentRoute.query, hash);
     let token = parsedQuery[this.options.token.property];
     let refreshToken;
     if (this.options.refreshToken.property) {

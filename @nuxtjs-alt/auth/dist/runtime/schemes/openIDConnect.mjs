@@ -115,14 +115,14 @@ export class OpenIDConnectScheme extends Oauth2Scheme {
     this.$auth.setUser(data);
   }
   async _handleCallback() {
-    if (this.$auth.options.redirect && normalizePath(this.$auth.ctx.route.path) !== normalizePath(this.$auth.options.redirect.callback)) {
+    if (this.$auth.options.redirect && normalizePath(this.$auth.ctx.$router.currentRoute.path) !== normalizePath(this.$auth.options.redirect.callback)) {
       return;
     }
     if (process.server) {
       return;
     }
-    const hash = parseQuery(this.$auth.ctx.route.hash.substr(1));
-    const parsedQuery = Object.assign({}, this.$auth.ctx.route.query, hash);
+    const hash = parseQuery(this.$auth.ctx.$router.currentRoute.hash.substr(1));
+    const parsedQuery = Object.assign({}, this.$auth.ctx.$router.currentRoute.query, hash);
     let token = parsedQuery[this.options.token.property];
     let refreshToken;
     if (this.options.refreshToken.property) {

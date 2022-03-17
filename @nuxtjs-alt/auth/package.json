@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/auth",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "An alternative module to @nuxtjs/auth",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -13,9 +13,10 @@
         "@nuxtjs/auth"
     ],
     "license": "MIT",
-    "sideEffects": false,
     "type": "module",
     "main": "./dist/module.mjs",
+    "module": "./dist/module.mjs",
+    "commonjs": "./dist/module.cjs",
     "types": "./dist/module.d.ts",
     "typings": "./dist/module.d.ts",
     "files": [
@@ -42,7 +43,6 @@
         "@nuxtjs/eslint-config-typescript": "latest",
         "@types/node": "latest",
         "eslint": "latest",
-        "jiti": "^1.12.9",
         "nuxt3": "latest",
         "standard-version": "latest"
     },

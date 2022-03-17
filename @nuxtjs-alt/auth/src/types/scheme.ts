@@ -15,7 +15,7 @@ export interface UserOptions {
     autoFetch: boolean
 }
 
-export interface UserCoookieOptions {
+export interface UserCookieOptions {
     property: {
         client: string | false
         server: string | false
@@ -73,14 +73,14 @@ export interface TokenOptions {
 }
 
 export interface TokenableSchemeOptions extends SchemeOptions {
-    token: TokenOptions
+    token?: TokenOptions
     endpoints: EndpointsOption
 }
 
 export interface TokenableScheme<
     OptionsT extends TokenableSchemeOptions = TokenableSchemeOptions
     > extends Scheme<OptionsT> {
-    token: Token
+    token?: Token
     requestHandler: RequestHandler
 }
 

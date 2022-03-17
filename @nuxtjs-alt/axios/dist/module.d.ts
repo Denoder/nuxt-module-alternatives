@@ -86,12 +86,12 @@ declare module "axios" {
     }
 }
 
-declare module "@nuxt/kit" {
+declare module "#app" {
     export interface NuxtApp {
-        $axios: NuxtAxiosInstance;
+        $axios?: NuxtAxiosInstance;
     }
     export interface NuxtOptions {
-        axios: ModuleOptions;
+        axios?: ModuleOptions;
     }
 }
 

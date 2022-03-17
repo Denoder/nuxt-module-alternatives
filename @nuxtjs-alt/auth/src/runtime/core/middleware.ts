@@ -22,8 +22,8 @@ export default defineNuxtRouteMiddleware(async (to: RouteLocationNormalized, fro
 
     const pageIsInGuestMode = routeOption(to, 'auth', 'guest')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const insidePage = (page: any) => normalizePath(to.path, ctx) === normalizePath(page, ctx)
+    // @ts-ignore
+    const insidePage = (page: string) => normalizePath(to.path, ctx) === normalizePath(page, ctx)
 
     if (ctx.$auth.$state.loggedIn) {
         // Perform scheme checks.

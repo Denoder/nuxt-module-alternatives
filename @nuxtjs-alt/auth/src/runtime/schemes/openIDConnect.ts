@@ -203,7 +203,7 @@ export class OpenIDConnectScheme<
         // Handle callback only for specified route
         if (
             this.$auth.options.redirect &&
-            normalizePath(this.$auth.ctx.route.path) !==
+            normalizePath(this.$auth.ctx.$router.currentRoute.path) !==
             normalizePath(this.$auth.options.redirect.callback)
         ) {
             return
@@ -213,8 +213,8 @@ export class OpenIDConnectScheme<
             return
         }
 
-        const hash = parseQuery(this.$auth.ctx.route.hash.substr(1))
-        const parsedQuery = Object.assign({}, this.$auth.ctx.route.query, hash)
+        const hash = parseQuery(this.$auth.ctx.$router.currentRoute.hash.substr(1))
+        const parsedQuery = Object.assign({}, this.$auth.ctx.$router.currentRoute.query, hash)
 
         // accessToken/idToken
         let token: string = parsedQuery[this.options.token.property] as string

@@ -5,7 +5,6 @@ import {
     AxiosStatic,
 } from "axios";
 import { IAxiosRetryConfig } from "axios-retry";
-import "@nuxt/kit";
 
 export interface NuxtAxiosInstance extends AxiosStatic {
     $request<T = any>(config: AxiosRequestConfig): Promise<T>;
@@ -92,11 +91,11 @@ declare module "axios" {
     }
 }
 
-declare module "@nuxt/kit" {
+declare module "#app" {
     export interface NuxtApp {
-        $axios: NuxtAxiosInstance;
+        $axios?: NuxtAxiosInstance;
     }
     export interface NuxtOptions {
-        axios: ModuleOptions;
+        axios?: ModuleOptions;
     }
 }

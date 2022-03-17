@@ -1,14 +1,15 @@
 import type { TokenableScheme, RefreshableScheme, HTTPRequest } from '../../types'
 import { ExpiredAuthSessionError } from './expired-auth-session-error'
+import { NuxtAxiosInstance } from '@nuxtjs-alt/axios'
 
 export class RequestHandler {
     public scheme: TokenableScheme | RefreshableScheme
-    public axios: any
+    public axios: NuxtAxiosInstance
     public interceptor: number
 
     constructor(
-        scheme: TokenableScheme | RefreshableScheme | any,
-        axios: any
+        scheme: TokenableScheme | RefreshableScheme,
+        axios: NuxtAxiosInstance
     ) {
         this.scheme = scheme
         this.axios = axios
