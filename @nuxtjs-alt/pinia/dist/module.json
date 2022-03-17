@@ -1,0 +1,8 @@
+{
+  "name": "@nuxtjs-alt/pinia",
+  "version": "1.0.5",
+  "configKey": "pinia",
+  "compatibility": {
+    "nuxt": "^3.0.0"
+  }
+}

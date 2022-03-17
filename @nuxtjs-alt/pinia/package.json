@@ -1,10 +1,9 @@
 {
     "name": "@nuxtjs-alt/pinia",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "description": "An alternative module to @pinia/nuxt",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
-    "sideEffects": false,
     "keywords": [
         "nuxt",
         "nuxtjs",
@@ -16,10 +15,25 @@
     ],
     "license": "MIT",
     "type": "module",
-    "main": "./module.ts",
+    "main": "./dist/module.mjs",
+    "module": "./dist/module.mjs",
+    "commonjs": "./dist/module.cjs",
+    "types": "./dist/module.d.ts",
+    "typings": "./dist/module.d.ts",
+    "scripts": {
+        "prepack": "nuxt-module-build"
+    },
+    "files": [
+        "dist"
+    ],
     "dependencies": {
         "@nuxt/kit": "npm:@nuxt/kit-edge@latest",
         "pinia": "^2.0.0"
+    },
+    "devDependencies": {
+        "@nuxt/module-builder": "latest",
+        "eslint": "latest",
+        "nuxt3": "latest"
     },
     "peerDependencies": {
         "vue": "*"
