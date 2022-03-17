@@ -1,7 +1,7 @@
 import type { Auth } from "./runtime/index";
 import { ModuleOptions } from "./options";
 
-declare module "@nuxt/kit" {
+declare module "#app" {
     export interface NuxtApp {
         $auth?: Auth;
     }

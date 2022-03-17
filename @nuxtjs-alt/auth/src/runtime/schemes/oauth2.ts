@@ -126,6 +126,7 @@ export class Oauth2Scheme<
             DEFAULTS as OptionsT
         )
 
+        // @ts-ignore
         this.req = $auth.ctx.ssrContext.req
 
         // Initialize Token instance
@@ -148,7 +149,8 @@ export class Oauth2Scheme<
     }
 
     protected get redirectURI(): string {
-        const basePath = this.$auth.ctx.base || ''
+        // @ts-ignore
+        const basePath = this.$auth.ctx.$config.app.baseURL || ''
         const path = normalizePath(
             basePath + '/' + this.$auth.options.redirect.callback
         ) // Don't pass in context since we want the base path
@@ -340,7 +342,7 @@ export class Oauth2Scheme<
         // Handle callback only for specified route
         if (
             this.$auth.options.redirect &&
-            normalizePath(this.$auth.ctx.route.path, this.$auth.ctx) !==
+            normalizePath(this.$auth.ctx.$router.currentRoute.path, this.$auth.ctx) !==
             normalizePath(this.$auth.options.redirect.callback, this.$auth.ctx)
         ) {
             return
@@ -350,8 +352,8 @@ export class Oauth2Scheme<
             return
         }
 
-        const hash = parseQuery(this.$auth.ctx.route.hash.substr(1))
-        const parsedQuery = Object.assign({}, this.$auth.ctx.route.query, hash)
+        const hash = parseQuery(this.$auth.ctx.$router.currentRoute.hash.substr(1))
+        const parsedQuery = Object.assign({}, this.$auth.ctx.$router.currentRoute.query, hash)
         // accessToken/idToken
         let token: string = parsedQuery[this.options.token.property] as string
         // refresh token

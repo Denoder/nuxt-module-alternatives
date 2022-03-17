@@ -1,5 +1,5 @@
 import type { ModuleOptions } from '../../options'
-import type { NuxtApp } from "#app";
+import { NuxtApp } from "#app";
 import { defineStore } from 'pinia'
 import { parse, serialize } from 'cookie-es'
 import { isUnset, isSet, decodeValue, encodeValue } from '../utils'
@@ -235,9 +235,9 @@ export class Storage {
             return
         }
 
+        // @ts-ignore
         const cookieStr = process.client ? document.cookie : this.ctx.ssrContext.req.headers.cookie
 
-        /* @ts-ignore */
         return parse(cookieStr || '') || {}
     }
 
@@ -246,6 +246,7 @@ export class Storage {
         value: V,
         options: { prefix?: string } = {}
     ): V {
+        // @ts-ignore
         if (!this.options.cookie || (process.server && !this.ctx.ssrContext.res)) {
             return
         }
@@ -276,11 +277,14 @@ export class Storage {
         if (process.client) {
             // Set in browser
             document.cookie = serializedCookie
+            // @ts-ignore
         } else if (process.server && this.ctx.ssrContext.res) {
             // Send Set-Cookie header from server side
+            // @ts-ignore
             let cookies = (this.ctx.ssrContext.res.getHeader('Set-Cookie') as string[]) || []
             if (!Array.isArray(cookies)) cookies = [cookies]
             cookies.unshift(serializedCookie)
+            // @ts-ignore
             this.ctx.ssrContext.res.setHeader(
                 'Set-Cookie',
                 cookies.filter(
@@ -296,6 +300,7 @@ export class Storage {
     }
 
     getCookie(key: string): unknown {
+        // @ts-ignore
         if (!this.options.cookie || (process.server && !this.ctx.ssrContext.req)) {
             return
         }

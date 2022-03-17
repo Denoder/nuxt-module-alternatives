@@ -2,7 +2,7 @@ import type {
     EndpointsOption,
     SchemePartialOptions,
     SchemeCheck,
-    UserCoookieOptions,
+    UserCookieOptions,
     HTTPRequest,
     HTTPResponse
 } from '../../types'
@@ -26,7 +26,7 @@ export interface CookieSchemeCookie {
 export interface CookieSchemeOptions {
     name: string
     endpoints: CookieSchemeEndpoints
-    user: UserCoookieOptions
+    user: UserCookieOptions
     cookie: CookieSchemeCookie
 }
 
@@ -80,6 +80,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         if (process.server) {
             this.$auth.ctx.$axios.setHeader(
                 'referer',
+                // @ts-ignore
                 this.$auth.ctx.ssrContext.req.headers.host
             )
         }

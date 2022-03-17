@@ -44,8 +44,9 @@ export class ConfigurationDocument {
 
     async request() {
         // Get Configuration document from state hydration
-        const serverDoc: OpenIDConnectConfigurationDocument = this.scheme.$auth.ctx?.payload?.data?.$auth?.openIDConnect?.configurationDocument
         /* @ts-ignore */
+        const serverDoc: OpenIDConnectConfigurationDocument = this.scheme.$auth.ctx?.payload?.data?.$auth?.openIDConnect?.configurationDocument
+
         if (process.client && serverDoc) {
             this.set(serverDoc)
         }
@@ -56,8 +57,8 @@ export class ConfigurationDocument {
                 .catch((e) => Promise.reject(e))
 
             // Push Configuration document to state hydration
-            /* @ts-ignore */
             if (process.server) {
+                /* @ts-ignore */
                 this.scheme.$auth.ctx.beforeNuxtRender(({ nuxtState }) => {
                     nuxtState.$auth = {
                         oidc: {

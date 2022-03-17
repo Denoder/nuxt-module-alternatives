@@ -27,7 +27,6 @@ export default defineNuxtModule({
         const resolver = createResolver(import.meta.url)
 
         // Resolve strategies
-        /* @ts-ignore */
         const { strategies, strategyScheme } = resolveStrategies(options)
         delete options.strategies
 
@@ -44,7 +43,6 @@ export default defineNuxtModule({
 
         // Add auth plugin
         addPluginTemplate({
-            /* @ts-ignore */
             src: resolver.resolve('runtime/templates/auth.plugin.mjs'),
             fileName: 'auth.plugin.mjs',
             options: {
