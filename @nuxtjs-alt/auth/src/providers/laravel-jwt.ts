@@ -1,4 +1,4 @@
-import type { ProviderPartialOptions, ProviderOptions } from '../types'
+import type { ProviderPartialOptions, ProviderOptions } from '../type'
 import type { RefreshSchemeOptions } from '../runtime/schemes'
 import { assignDefaults, assignAbsoluteEndpoints } from '../runtime/utils/provider'
 

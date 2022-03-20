@@ -6,7 +6,7 @@ import type {
     SchemeCheck,
     TokenableScheme,
     RefreshableScheme,
-} from "../../types";
+} from "../../type";
 import type { RouteLocationNormalized } from 'vue-router'
 import type { ModuleOptions } from "../../options";
 import { NuxtApp, useRouter } from "#app";

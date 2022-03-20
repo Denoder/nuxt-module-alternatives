@@ -1,6 +1,7 @@
 import { defineBuildConfig } from "unbuild";
 
 export default defineBuildConfig({
+    declaration: true,
     externals: [
         "#app",
         "axios",
@@ -10,12 +11,7 @@ export default defineBuildConfig({
         "@nuxtjs-alt/pinia",
         // Defaults
         "@nuxt/schema",
-        "@nuxt/schema-edge",
         "@nuxt/kit",
-        "@nuxt/kit-edge",
-        "nuxt",
-        "nuxt-edge",
         "nuxt3",
-        "vue",
     ]
 });

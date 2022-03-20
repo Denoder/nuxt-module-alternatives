@@ -1,4 +1,4 @@
-import type { RefreshableScheme, HTTPResponse } from '../../types'
+import type { RefreshableScheme, HTTPResponse } from '../../type'
 import type { Auth } from '../core'
 
 export class RefreshController {

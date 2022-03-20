@@ -1,4 +1,4 @@
-import type { Strategy } from './types'
+import type { Strategy } from './type'
 
 export interface ModuleOptions {
     enableMiddleware?: boolean

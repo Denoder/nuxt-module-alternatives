@@ -1,4 +1,4 @@
-import type { ProviderPartialOptions, ProviderOptions } from '../types'
+import type { ProviderPartialOptions, ProviderOptions } from '../type'
 import type { Oauth2SchemeOptions } from '../runtime/schemes'
 import { assignDefaults } from '../runtime/utils/provider'
 

@@ -2,10 +2,10 @@ import type {
     ProviderPartialOptions,
     HTTPRequest,
     ProviderOptions
-} from '../types'
+} from '../type'
 import type { CookieSchemeOptions } from '../runtime/schemes'
 
-import { assignDefaults, assignAbsoluteEndpoints } from '../runtime/utils/provider'
+import { assignDefaults } from '../runtime/utils/provider'
 
 export interface LaravelSanctumProviderOptions
     extends ProviderOptions,
@@ -16,11 +16,6 @@ export interface LaravelSanctumProviderOptions
 export function laravelSanctum(
     strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>
 ): void {
-    const { url } = strategy
-
-    if (!url) {
-        throw new Error('URL is required with Laravel Sanctum!')
-    }
 
     const endpointDefaults: Partial<HTTPRequest> = {
         withCredentials: true,
@@ -35,34 +30,36 @@ export function laravelSanctum(
         scheme: 'cookie',
         name: 'laravelSanctum',
         cookie: {
-            name: 'XSRF-TOKEN'
+            name: 'XSRF-TOKEN',
+            server: true
         },
         endpoints: {
             csrf: {
                 ...endpointDefaults,
-                url: url + '/sanctum/csrf-cookie'
+                url: `${strategy.url ? strategy.url : ''}/sanctum/csrf-cookie`
             },
             login: {
                 ...endpointDefaults,
-                url: url + '/login'
+                url: `${strategy.url ? strategy.url : ''}/login`
             },
             logout: {
                 ...endpointDefaults,
-                url: url + '/logout'
+                url: `${strategy.url ? strategy.url : ''}/logout`
             },
             user: {
                 ...endpointDefaults,
-                url: url + '/api/user'
+                url: `${strategy.url ? strategy.url : ''}/api/user`
             }
         },
         user: {
             property: {
                 client: false,
                 server: false
-            }
-        }
+            },
+            autoFetch: true
+        },
+        ...strategy
     }
 
     assignDefaults(strategy, DEFAULTS)
-    assignAbsoluteEndpoints(strategy)
 }

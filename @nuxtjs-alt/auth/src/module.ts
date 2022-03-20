@@ -1,7 +1,8 @@
 import { name, version } from '../package.json'
-import { ModuleOptions, moduleDefaults } from './options'
+import { moduleDefaults, ModuleOptions } from './options'
 import { resolveStrategies } from './resolve'
 import { defineNuxtModule, addPluginTemplate, createResolver } from '@nuxt/kit'
+import type { Auth } from ".";
 import defu from 'defu'
 
 const CONFIG_KEY = 'auth'
@@ -11,11 +12,11 @@ export default defineNuxtModule({
         name,
         version,
         configKey: CONFIG_KEY,
-        defaults: moduleDefaults,
         compatibility: {
             nuxt: '^3.0.0'
         }
     },
+    defaults: moduleDefaults,
     setup(moduleOptions, nuxt) {
         // Merge all option sources
         const options: ModuleOptions = defu(
@@ -71,3 +72,21 @@ export default defineNuxtModule({
         nuxt.options.alias['#auth/runtime'] = runtime
     }
 })
+
+declare module '@nuxt/schema' {
+    export interface NuxtConfig { 
+        ['auth']?: Partial<ModuleOptions> 
+    }
+    export interface NuxtOptions { 
+        ['auth']?: ModuleOptions 
+    }
+}
+
+declare module "#app" {
+    export interface NuxtApp {
+        $auth: Auth;
+    }
+    export interface NuxtConfig {
+        auth: ModuleOptions;
+    }
+}

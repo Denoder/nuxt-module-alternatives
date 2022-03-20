@@ -5,7 +5,7 @@ import type {
     HTTPResponse,
     HTTPRequest,
     RefreshableSchemeOptions
-} from '../../types'
+} from '../../type'
 import type { Auth } from '../core'
 import { cleanObj, getProp } from '../utils'
 import {

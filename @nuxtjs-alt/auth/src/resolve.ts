@@ -5,7 +5,7 @@ import hash from 'hasha'
 import * as AUTH_PROVIDERS from './providers'
 import { ProviderAliases } from './providers'
 import type { ModuleOptions } from './options'
-import type { Strategy } from './types'
+import type { Strategy } from './type'
 import { resolvePath, requireModule } from '@nuxt/kit'
 
 const BuiltinSchemes = {

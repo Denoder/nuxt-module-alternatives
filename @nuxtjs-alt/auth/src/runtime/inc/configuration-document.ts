@@ -1,6 +1,6 @@
 import defu from 'defu'
 import { OpenIDConnectScheme, OpenIDConnectSchemeEndpoints } from '../schemes'
-import { OpenIDConnectConfigurationDocument } from '../../types'
+import { OpenIDConnectConfigurationDocument } from '../../type'
 import { Storage } from '../core/storage'
 import { ConfigurationDocumentRequestError } from './configuration-document-request-error'
 

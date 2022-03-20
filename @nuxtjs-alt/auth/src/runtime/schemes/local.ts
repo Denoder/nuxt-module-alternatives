@@ -7,7 +7,7 @@ import type {
     HTTPRequest,
     HTTPResponse,
     SchemeCheck
-} from '../../types'
+} from '../../type'
 import type { Auth } from '../core'
 import { getProp } from '../utils'
 import { Token, RequestHandler } from '../inc'

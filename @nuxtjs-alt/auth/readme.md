@@ -15,9 +15,6 @@ the config would look like this
 
 ```ts
     auth: {
-        redirect: {
-            home: '/'
-        },
         strategies: {
             localStorage: false,
             cookie: {
@@ -26,13 +23,14 @@ the config would look like this
                     name: 'token',
                 },
                 endpoints: {
+                    csrf: false
                     login: { url: '/api/user/login', method: 'post' },
                     user: { url: '/api/user/me', method: 'get' }
                 },
                 user: {
                     property: {
                         client: false,
-                        server: 'user'
+                        server: false
                     },
                     autoFetch: true
                 }
@@ -44,13 +42,44 @@ the config would look like this
 notice the `cookie.server` property, this indicates that the cookie we will be looking for will be set upon login otherwise we will be looking at a client/browser cookie.
 the cookie scheme has been moved to its own scheme so the user property takes place within the cookie strategy and doesnt extend the token scheme from the local scheme. There has also been 2 user properties one for the client/browser and one for the server.
 
+**Laravel Sanctum**
+
+Laravel Sanctum wokrs a tiny bit differently, It inherits the same config as the Cookie scheme (see above) here's what the config would look like:
+
+```ts
+    auth: {
+        strategies: {
+            laravelSanctum: {
+                provider: 'laravel/sanctum',
+                cookie: {
+                    server: true,
+                    name: 'XSRF-TOKEN',
+                },
+                endpoints: {
+                    csrf: { url: '/sanctum/csrf-cookie' }
+                    login: { url: '/login' },
+                    logout: { url: '/logout' },
+                    user: { url: '/api/user' }
+                },
+                user: {
+                    property: {
+                        client: false,
+                        server: false
+                    },
+                    autoFetch: true
+                }
+            },
+        }
+    }
+```
+
 **Middleware**
 
 For some reason the context of nuxt is not available when the middleware is set to global, so with that in mind, setting it to global has been disabled. As an alternative you may try to create your own middleware and disable this one by setting `enableMiddleware: false`
 
 **Depenencies Needed:**
 - @nuxtjs-alt/axios
-- @nuxtjs-alt/pinia or @pinia/nuxt
+- @nuxtjs-alt/pinia
 - body-parser
 - cookie
 - defu
