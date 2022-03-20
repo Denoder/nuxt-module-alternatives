@@ -1,5 +1,5 @@
 import defu from 'defu'
-import type { SchemeOptions } from '../../types'
+import type { SchemeOptions } from '../../type'
 import type { Auth } from '../core'
 
 export class BaseScheme<OptionsT extends SchemeOptions> {

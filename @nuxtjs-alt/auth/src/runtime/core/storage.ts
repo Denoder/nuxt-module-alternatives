@@ -338,7 +338,7 @@ export class Storage {
         }
 
         // Local Storage only exists in the browser
-        if (!process.client) {
+        if (process.server) {
             return false
         }
 
@@ -346,6 +346,7 @@ export class Storage {
         // error out. So have to use this hacky approach :\
         // https://stackoverflow.com/questions/16427636/check-if-localstorage-is-available
         const test = 'test'
+
         try {
             localStorage.setItem(test, test)
             localStorage.removeItem(test)

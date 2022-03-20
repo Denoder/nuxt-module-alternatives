@@ -54,12 +54,12 @@ export class OpenIDConnectScheme extends Oauth2Scheme {
       response.refreshTokenExpired = true;
       return response;
     }
-    if (idTokenStatus.expired()) {
-      response.idTokenExpired = true;
-      return response;
-    }
     if (tokenStatus.expired()) {
       response.tokenExpired = true;
+      return response;
+    }
+    if (idTokenStatus.expired()) {
+      response.idTokenExpired = true;
       return response;
     }
     response.valid = true;

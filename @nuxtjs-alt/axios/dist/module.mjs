@@ -1,7 +1,7 @@
 import { defineNuxtModule, createResolver, addPluginTemplate, installModule } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/axios";
-const version = "1.0.4";
+const version = "1.0.5";
 
 const CONFIG_KEY = "axios";
 const module = defineNuxtModule({
@@ -11,9 +11,9 @@ const module = defineNuxtModule({
     configKey: CONFIG_KEY,
     compatibility: {
       nuxt: "^3.0.0"
-    },
-    defaults: {}
+    }
   },
+  defaults: {},
   setup(_moduleOptions, nuxt) {
     const moduleOptions = {
       ..._moduleOptions,

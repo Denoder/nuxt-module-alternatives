@@ -1,6 +1,7 @@
 import { NuxtApp } from '#app';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { NuxtAxiosInstance } from '@nuxtjs-alt/axios';
+import * as NuxtSchema from '@nuxt/schema';
 
 declare type OpenIDConnectConfigurationDocument = {
     issuer?: string;
@@ -72,6 +73,8 @@ declare class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSch
     reset({ resetInterceptor }?: {
         resetInterceptor?: boolean;
     }): void;
+    protected isCookieServer(): boolean;
+    protected isCookieClient(): boolean;
     protected initializeRequestInterceptor(): void;
 }
 
@@ -125,6 +128,7 @@ interface Oauth2SchemeOptions extends SchemeOptions, TokenableSchemeOptions, Ref
     redirectUri: string;
     logoutRedirectUri: string;
     clientId: string | number;
+    clientSecretTransport: 'body' | 'aurthorization_header';
     scope: string | string[];
     state: string;
     codeChallengeMethod: 'implicit' | 'S256' | 'plain';
@@ -160,6 +164,53 @@ declare class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOp
     private _sha256;
     private _base64UrlEncode;
 }
+
+interface Auth0ProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+    domain: string;
+}
+declare function auth0(strategy: ProviderPartialOptions<Auth0ProviderOptions>): void;
+
+interface DiscordProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+}
+declare function discord(strategy: ProviderPartialOptions<DiscordProviderOptions>): void;
+
+interface FacebookProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+}
+declare function facebook(strategy: ProviderPartialOptions<FacebookProviderOptions>): void;
+
+interface GithubProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+}
+declare function github(strategy: ProviderPartialOptions<GithubProviderOptions>): void;
+
+interface GoogleProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+}
+declare function google(strategy: ProviderPartialOptions<GoogleProviderOptions>): void;
+
+interface LaravelJWTProviderOptions extends ProviderOptions, RefreshSchemeOptions {
+    url: string;
+}
+declare function laravelJWT(strategy: ProviderPartialOptions<LaravelJWTProviderOptions>): void;
+
+interface LaravelPassportProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+    url: string;
+}
+interface LaravelPassportPasswordProviderOptions extends ProviderOptions, RefreshSchemeOptions {
+    url: string;
+}
+declare type PartialPassportOptions = ProviderPartialOptions<LaravelPassportProviderOptions>;
+declare type PartialPassportPasswordOptions = ProviderPartialOptions<LaravelPassportPasswordProviderOptions>;
+declare function laravelPassport(strategy: PartialPassportOptions | PartialPassportPasswordOptions): void;
+
+interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOptions {
+    url: string;
+}
+declare function laravelSanctum(strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>): void;
+
+declare const ProviderAliases: {
+    'laravel/jwt': string;
+    'laravel/passport': string;
+    'laravel/sanctum': string;
+};
 
 interface ModuleOptions {
     enableMiddleware?: boolean;
@@ -200,6 +251,7 @@ interface ModuleOptions {
         [strategy: string]: Strategy;
     };
 }
+declare const moduleDefaults: ModuleOptions;
 
 interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
     configuration: string;
@@ -500,8 +552,26 @@ interface RefreshableScheme<OptionsT extends RefreshableSchemeOptions = Refresha
     refreshTokens(): Promise<HTTPResponse | void>;
 }
 
+interface ProviderOptions {
+    scheme: string;
+    clientSecret: string | number;
+}
+declare type ProviderOptionsKeys = Exclude<keyof ProviderOptions, 'clientSecret'>;
+declare type ProviderPartialOptions<Options extends ProviderOptions & SchemeOptions> = PartialExcept<Options, ProviderOptionsKeys>;
+
 declare type HTTPRequest = AxiosRequestConfig;
 declare type HTTPResponse = AxiosResponse;
+
+interface VueComponent {
+    options: object;
+    _Ctor: VueComponent;
+}
+declare type MatchedRoute = {
+    components: VueComponent[];
+};
+declare type Route = {
+    matched: MatchedRoute[];
+};
 
 interface Strategy extends SchemeOptions {
     provider?: string | ((...args: unknown[]) => unknown);
@@ -509,6 +579,7 @@ interface Strategy extends SchemeOptions {
     enabled: boolean;
     [option: string]: unknown;
 }
+declare type StrategyOptions<SOptions extends SchemeOptions = SchemeOptions> = ProviderPartialOptions<ProviderOptions & SOptions>;
 
 declare type ErrorListener = (...args: unknown[]) => void;
 declare type RedirectListener = (to: string, from: string) => string;
@@ -559,6 +630,17 @@ declare class Auth {
     hasScope(scope: string): boolean;
 }
 
+declare module '@nuxt/schema' {
+    export interface NuxtConfig {
+        ['auth']?: Partial<ModuleOptions>;
+    }
+    export interface NuxtOptions {
+        ['auth']?: ModuleOptions;
+    }
+}
+
+declare const module: NuxtSchema.NuxtModule<ModuleOptions>;
+
 declare module "#app" {
     export interface NuxtApp {
         $auth?: Auth;
@@ -568,4 +650,4 @@ declare module "#app" {
     }
 }
 
-export { Auth, Auth0Scheme, BaseScheme, ConfigurationDocument, ConfigurationDocumentRequestError, CookieScheme, CookieSchemeCookie, CookieSchemeEndpoints, CookieSchemeOptions, ErrorListener, ExpiredAuthSessionError, IdToken, LaravelJWTScheme, LocalScheme, LocalSchemeEndpoints, LocalSchemeOptions, Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions, OpenIDConnectScheme, OpenIDConnectSchemeEndpoints, OpenIDConnectSchemeOptions, RedirectListener, RefreshController, RefreshScheme, RefreshSchemeEndpoints, RefreshSchemeOptions, RefreshToken, RequestHandler, Storage, StorageOptions, Token, TokenStatus, TokenStatusEnum };
+export { Auth, Auth0ProviderOptions, Auth0Scheme, BaseScheme, ConfigurationDocument, ConfigurationDocumentRequestError, CookieScheme, CookieSchemeCookie, CookieSchemeEndpoints, CookieSchemeOptions, DiscordProviderOptions, EndpointsOption, ErrorListener, ExpiredAuthSessionError, FacebookProviderOptions, GithubProviderOptions, GoogleProviderOptions, HTTPRequest, HTTPResponse, IdToken, IdTokenableScheme, IdTokenableSchemeOptions, LaravelJWTProviderOptions, LaravelJWTScheme, LaravelPassportPasswordProviderOptions, LaravelPassportProviderOptions, LaravelSanctumProviderOptions, LocalScheme, LocalSchemeEndpoints, LocalSchemeOptions, MatchedRoute, ModuleOptions, Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions, OpenIDConnectConfigurationDocument, OpenIDConnectScheme, OpenIDConnectSchemeEndpoints, OpenIDConnectSchemeOptions, PartialExcept, PartialPassportOptions, PartialPassportPasswordOptions, ProviderAliases, ProviderOptions, ProviderOptionsKeys, ProviderPartialOptions, RecursivePartial, RedirectListener, RefreshController, RefreshScheme, RefreshSchemeEndpoints, RefreshSchemeOptions, RefreshToken, RefreshTokenOptions, RefreshableScheme, RefreshableSchemeOptions, RequestHandler, Route, Scheme, SchemeCheck, SchemeOptions, SchemePartialOptions, Storage, StorageOptions, Strategy, StrategyOptions, Token, TokenOptions, TokenStatus, TokenStatusEnum, TokenableScheme, TokenableSchemeOptions, UserCookieOptions, UserOptions, VueComponent, auth0, module as default, discord, facebook, github, google, laravelJWT, laravelPassport, laravelSanctum, moduleDefaults };

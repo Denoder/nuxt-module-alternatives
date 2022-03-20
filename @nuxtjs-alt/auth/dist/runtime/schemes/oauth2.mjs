@@ -22,6 +22,7 @@ const DEFAULTS = {
   redirectUri: null,
   logoutRedirectUri: null,
   clientId: null,
+  clientSecretTransport: "body",
   audience: null,
   grantType: null,
   responseMode: null,

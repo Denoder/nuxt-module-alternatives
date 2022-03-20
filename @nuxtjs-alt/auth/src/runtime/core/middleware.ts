@@ -1,6 +1,7 @@
 import { defineNuxtRouteMiddleware, useNuxtApp } from '#app'
 import { routeOption, getMatchedComponents, normalizePath } from '../utils'
 import type { RouteLocationNormalized } from 'vue-router'
+
 export default defineNuxtRouteMiddleware(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
 
     const ctx = useNuxtApp()

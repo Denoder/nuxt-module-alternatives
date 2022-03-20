@@ -1,5 +1,5 @@
 import type { NuxtApp } from "#app";
-import type { RecursivePartial } from '../../types'
+import type { RecursivePartial } from '../../type'
 import type { RouteLocationNormalized } from 'vue-router'
 
 export const isUnset = (o: unknown): boolean => typeof o === 'undefined' || o === null
@@ -74,8 +74,8 @@ export function normalizePath(path = '', ctx?: NuxtApp): string {
     let result = path.split('?')[0]
 
     // Remove base path
-    if (ctx && ctx.$config.app.baseURL) {
-        result = result.replace(ctx.$config.app.baseURL, '/')
+    if (ctx && ctx.$router.options.history.base) {
+        result = result.replace(ctx.$router.options.history.base, '/')
     }
 
     // Remove redundant / from the end of path

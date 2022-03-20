@@ -5,7 +5,7 @@ import type {
     UserCookieOptions,
     HTTPRequest,
     HTTPResponse
-} from '../../types'
+} from '../../type'
 import { BaseScheme } from './base'
 import { getProp } from '../utils'
 import type { Auth } from '../core'
@@ -88,7 +88,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         // Initialize request interceptor
         this.initializeRequestInterceptor()
 
-        if ((this.options.cookie.server && process.server) || (!this.options.cookie.server && process.client)) {
+        if (this.isCookieServer() || this.isCookieClient()) {
             // Fetch user once
             return this.$auth.fetchUserOnce()
         }
@@ -100,7 +100,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         if (this.options.cookie.name) {
             const cookies = this.$auth.$storage.getCookies()
 
-            if ((this.options.cookie.server && process.server) || (!this.options.cookie.server && process.client)) {
+            if (this.isCookieServer() || this.isCookieClient()) {
                 response.valid = Boolean(cookies[this.options.cookie.name])
             } else {
                 response.valid = true
@@ -145,7 +145,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
     fetchUser(endpoint?: HTTPRequest): Promise<HTTPResponse | void> {
         // Cookie is required but not available
 
-        if ((this.options.cookie.server && process.server) || (!this.options.cookie.server && process.client)) {
+        if (this.isCookieServer() || this.isCookieClient()) {
             if (!this.check().valid) {
                 return Promise.resolve()
             }
@@ -173,6 +173,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
                     const error = new Error(
                         `User Data response does not contain field ${this.options.user.property}`
                     )
+
                     return Promise.reject(error)
                 }
 
@@ -210,6 +211,14 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         if (resetInterceptor) {
             this.requestHandler.reset()
         }
+    }
+
+    protected isCookieServer(): boolean {
+        return this.options.cookie.server && process.server
+    }
+
+    protected isCookieClient(): boolean {
+        return !this.options.cookie.server && process.client
     }
 
     protected initializeRequestInterceptor(): void {

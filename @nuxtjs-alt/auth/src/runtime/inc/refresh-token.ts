@@ -1,6 +1,6 @@
 import jwtDecode from 'jwt-decode'
 import type { JwtPayload } from 'jwt-decode'
-import type { RefreshableScheme } from '../../types'
+import type { RefreshableScheme } from '../../type'
 import type { Storage } from '../core'
 import { addTokenPrefix } from '../utils'
 import { TokenStatus } from './token-status'

@@ -49,8 +49,8 @@ export default defineNuxtModule({
 
 declare module "#app" {
     export interface NuxtApp {
-        $pinia?: Pinia;
-        pinia?: Pinia;
+        $pinia: Pinia;
+        pinia: Pinia;
     }
     export interface NuxtConfig {
         pinia: ModuleOptions;

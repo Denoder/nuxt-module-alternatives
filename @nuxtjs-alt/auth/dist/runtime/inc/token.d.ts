@@ -1,4 +1,4 @@
-import type { TokenableScheme } from '../../types';
+import type { TokenableScheme } from '../../type';
 import type { Storage } from '../core';
 import { TokenStatus } from './token-status';
 export declare class Token {

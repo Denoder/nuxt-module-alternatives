@@ -4,7 +4,7 @@ import axios from 'axios'
 import bodyParser from 'body-parser'
 import requrl from 'requrl'
 import { addServerMiddleware } from '@nuxt/kit'
-import type { StrategyOptions, HTTPRequest } from '../../types'
+import type { StrategyOptions, HTTPRequest } from '../../type'
 import type {
     Oauth2SchemeOptions,
     RefreshSchemeOptions,
@@ -44,8 +44,8 @@ export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOption
 
     // Register endpoint
     addServerMiddleware({
-        path: endpoint,
-        handler: (req, res, next) => {
+        route: endpoint,
+        handle: (req, res, next) => {
             if (req.method !== 'POST') {
                 return next()
             }
@@ -85,6 +85,13 @@ export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOption
                 const headers = {
                     Accept: 'application/json',
                     'Content-Type': 'application/json'
+                }
+
+                if (strategy.clientSecretTransport === 'authorization_header') {
+                    // @ts-ignore
+                    headers.Authorization = 'Basic ' + Buffer.from(clientID + ':' + clientSecret).toString('base64')
+                    // client_secret is transported in auth header
+                    delete data.client_secret
                 }
 
                 if (useForms) {
@@ -132,8 +139,8 @@ export function initializePasswordGrantFlow<SOptions extends StrategyOptions<Ref
 
     // Register endpoint
     addServerMiddleware({
-        path: endpoint,
-        handler: (req, res, next) => {
+        route: endpoint,
+        handle: (req, res, next) => {
             if (req.method !== 'POST') {
                 return next()
             }

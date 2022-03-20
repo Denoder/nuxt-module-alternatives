@@ -9,7 +9,7 @@ import type {
     HTTPResponse,
     EndpointsOption,
     TokenableSchemeOptions
-} from '../../types'
+} from '../../type'
 import type { Auth } from '../core'
 import {
     encodeQuery,
@@ -55,6 +55,7 @@ export interface Oauth2SchemeOptions
     redirectUri: string
     logoutRedirectUri: string
     clientId: string | number
+    clientSecretTransport: 'body' | 'aurthorization_header'
     scope: string | string[]
     state: string
     codeChallengeMethod: 'implicit' | 'S256' | 'plain'
@@ -69,6 +70,7 @@ const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
     redirectUri: null,
     logoutRedirectUri: null,
     clientId: null,
+    clientSecretTransport: 'body',
     audience: null,
     grantType: null,
     responseMode: null,

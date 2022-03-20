@@ -40,7 +40,7 @@ export class CookieScheme extends BaseScheme {
       this.$auth.ctx.$axios.setHeader("referer", this.$auth.ctx.ssrContext.req.headers.host);
     }
     this.initializeRequestInterceptor();
-    if (this.options.cookie.server && process.server || !this.options.cookie.server && process.client) {
+    if (this.isCookieServer() || this.isCookieClient()) {
       return this.$auth.fetchUserOnce();
     }
   }
@@ -48,7 +48,7 @@ export class CookieScheme extends BaseScheme {
     const response = { valid: false };
     if (this.options.cookie.name) {
       const cookies = this.$auth.$storage.getCookies();
-      if (this.options.cookie.server && process.server || !this.options.cookie.server && process.client) {
+      if (this.isCookieServer() || this.isCookieClient()) {
         response.valid = Boolean(cookies[this.options.cookie.name]);
       } else {
         response.valid = true;
@@ -76,7 +76,7 @@ export class CookieScheme extends BaseScheme {
     return response;
   }
   fetchUser(endpoint) {
-    if (this.options.cookie.server && process.server || !this.options.cookie.server && process.client) {
+    if (this.isCookieServer() || this.isCookieClient()) {
       if (!this.check().valid) {
         return Promise.resolve();
       }
@@ -121,6 +121,12 @@ export class CookieScheme extends BaseScheme {
     if (resetInterceptor) {
       this.requestHandler.reset();
     }
+  }
+  isCookieServer() {
+    return this.options.cookie.server && process.server;
+  }
+  isCookieClient() {
+    return !this.options.cookie.server && process.client;
   }
   initializeRequestInterceptor() {
     this.requestHandler.initializeRequestInterceptor();

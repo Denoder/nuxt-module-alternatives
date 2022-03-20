@@ -1,4 +1,4 @@
-import type { RefreshableScheme, SchemePartialOptions, SchemeCheck, RefreshableSchemeOptions, UserOptions, SchemeOptions, HTTPResponse, EndpointsOption, TokenableSchemeOptions } from '../../types';
+import type { RefreshableScheme, SchemePartialOptions, SchemeCheck, RefreshableSchemeOptions, UserOptions, SchemeOptions, HTTPResponse, EndpointsOption, TokenableSchemeOptions } from '../../type';
 import type { Auth } from '../core';
 import { RefreshController, RequestHandler, Token, RefreshToken } from '../inc';
 import { BaseScheme } from './base';
@@ -18,6 +18,7 @@ export interface Oauth2SchemeOptions extends SchemeOptions, TokenableSchemeOptio
     redirectUri: string;
     logoutRedirectUri: string;
     clientId: string | number;
+    clientSecretTransport: 'body' | 'aurthorization_header';
     scope: string | string[];
     state: string;
     codeChallengeMethod: 'implicit' | 'S256' | 'plain';

@@ -1,3 +1,4 @@
+import * as NuxtSchema from '@nuxt/schema';
 import { AxiosStatic, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { IAxiosRetryConfig } from 'axios-retry';
 
@@ -7,48 +8,17 @@ interface NuxtAxiosInstance extends AxiosStatic {
     $delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
     $head<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
     $options<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
-    $post<T = any>(
-        url: string,
-        data?: any,
-        config?: AxiosRequestConfig
-    ): Promise<T>;
-    $put<T = any>(
-        url: string,
-        data?: any,
-        config?: AxiosRequestConfig
-    ): Promise<T>;
-    $patch<T = any>(
-        url: string,
-        data?: any,
-        config?: AxiosRequestConfig
-    ): Promise<T>;
-
+    $post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+    $put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+    $patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
     setBaseURL(baseURL: string): void;
-    setHeader(
-        name: string,
-        value?: string | false,
-        scopes?: string | string[]
-    ): void;
-    setToken(
-        token: string | false,
-        type?: string,
-        scopes?: string | string[]
-    ): void;
-
-    onRequest(
-        callback: (
-            config: AxiosRequestConfig
-        ) => void | AxiosRequestConfig | Promise<AxiosRequestConfig>
-    ): void;
-    onResponse<T = any>(
-        callback: (
-            response: AxiosResponse<T>
-        ) => void | AxiosResponse<T> | Promise<AxiosResponse<T>>
-    ): void;
+    setHeader(name: string, value?: string | false, scopes?: string | string[]): void;
+    setToken(token: string | false, type?: string, scopes?: string | string[]): void;
+    onRequest(callback: (config: AxiosRequestConfig) => void | AxiosRequestConfig | Promise<AxiosRequestConfig>): void;
+    onResponse<T = any>(callback: (response: AxiosResponse<T>) => void | AxiosResponse<T> | Promise<AxiosResponse<T>>): void;
     onError(callback: (error: AxiosError) => any): void;
     onRequestError(callback: (error: AxiosError) => any): void;
     onResponseError(callback: (error: AxiosError) => any): void;
-
     create(options?: AxiosRequestConfig): NuxtAxiosInstance;
 }
 
@@ -81,18 +51,29 @@ interface ModuleOptions {
 }
 
 declare module "axios" {
-    export interface AxiosRequestConfig {
+    interface AxiosRequestConfig {
         progress?: boolean;
     }
 }
 
-declare module "#app" {
-    export interface NuxtApp {
-        $axios?: NuxtAxiosInstance;
+declare module '@nuxt/schema' {
+    interface NuxtConfig {
+        ['axios']?: Partial<ModuleOptions>;
     }
-    export interface NuxtOptions {
-        axios?: ModuleOptions;
+    interface NuxtOptions {
+        ['axios']?: ModuleOptions;
     }
 }
 
-export { ModuleOptions, NuxtAxiosInstance };
+declare const module: NuxtSchema.NuxtModule<ModuleOptions>;
+
+declare module "#app" {
+    interface NuxtApp {
+        $axios: NuxtAxiosInstance;
+    }
+    interface NuxtOptions {
+        axios: ModuleOptions;
+    }
+}
+
+export { ModuleOptions, NuxtAxiosInstance, module as default };

@@ -1,4 +1,4 @@
-import { IdTokenableSchemeOptions } from '../../types'
+import { IdTokenableSchemeOptions } from '../../type'
 import { encodeQuery, parseQuery, normalizePath, getProp } from '../utils'
 import { IdToken, ConfigurationDocument } from '../inc'
 import type {
@@ -113,15 +113,15 @@ export class OpenIDConnectScheme<
             return response
         }
 
-        // Id token has expired. Force reset.
-        if (idTokenStatus.expired()) {
-            response.idTokenExpired = true
-            return response
-        }
-
         // Token has expired, Force reset.
         if (tokenStatus.expired()) {
             response.tokenExpired = true
+            return response
+        }
+
+        // Id token has expired. Force reset.
+        if (idTokenStatus.expired()) {
+            response.idTokenExpired = true
             return response
         }
 

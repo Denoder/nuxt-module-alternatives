@@ -1,4 +1,4 @@
-import type { RefreshableScheme, SchemePartialOptions, SchemeCheck, HTTPResponse, HTTPRequest, RefreshableSchemeOptions } from '../../types';
+import type { RefreshableScheme, SchemePartialOptions, SchemeCheck, HTTPResponse, HTTPRequest, RefreshableSchemeOptions } from '../../type';
 import type { Auth } from '../core';
 import { RefreshController, RefreshToken } from '../inc';
 import { LocalScheme, LocalSchemeEndpoints, LocalSchemeOptions } from './local';

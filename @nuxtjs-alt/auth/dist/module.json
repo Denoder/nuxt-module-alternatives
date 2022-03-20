@@ -1,35 +1,7 @@
 {
   "name": "@nuxtjs-alt/auth",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "configKey": "auth",
-  "defaults": {
-    "enableMiddleware": true,
-    "resetOnError": false,
-    "ignoreExceptions": false,
-    "scopeKey": "scope",
-    "rewriteRedirects": true,
-    "fullPathRedirect": false,
-    "watchLoggedIn": true,
-    "redirect": {
-      "login": "/login",
-      "logout": "/",
-      "home": "/",
-      "callback": "/login"
-    },
-    "pinia": {
-      "namespace": "auth"
-    },
-    "cookie": {
-      "prefix": "auth.",
-      "options": {
-        "path": "/"
-      }
-    },
-    "localStorage": {
-      "prefix": "auth."
-    },
-    "strategies": {}
-  },
   "compatibility": {
     "nuxt": "^3.0.0"
   }
