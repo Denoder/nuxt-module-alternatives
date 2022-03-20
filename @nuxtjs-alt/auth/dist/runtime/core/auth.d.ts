@@ -1,4 +1,4 @@
-import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme } from "../../types";
+import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme } from "../../type";
 import type { ModuleOptions } from "../../options";
 import { NuxtApp } from "#app";
 import { Storage } from "./storage";

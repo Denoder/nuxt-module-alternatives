@@ -1,5 +1,5 @@
 import { OpenIDConnectScheme } from '../schemes';
-import { OpenIDConnectConfigurationDocument } from '../../types';
+import { OpenIDConnectConfigurationDocument } from '../../type';
 import { Storage } from '../core/storage';
 /**
  * A metadata document that contains most of the OpenID Provider's information,

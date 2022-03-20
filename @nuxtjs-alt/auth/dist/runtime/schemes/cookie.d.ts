@@ -1,4 +1,4 @@
-import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCookieOptions, HTTPRequest, HTTPResponse } from '../../types';
+import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCookieOptions, HTTPRequest, HTTPResponse } from '../../type';
 import { BaseScheme } from './base';
 import type { Auth } from '../core';
 import { RequestHandler } from '../inc';
@@ -29,5 +29,7 @@ export declare class CookieScheme<OptionsT extends CookieSchemeOptions> extends 
     reset({ resetInterceptor }?: {
         resetInterceptor?: boolean;
     }): void;
+    protected isCookieServer(): boolean;
+    protected isCookieClient(): boolean;
     protected initializeRequestInterceptor(): void;
 }

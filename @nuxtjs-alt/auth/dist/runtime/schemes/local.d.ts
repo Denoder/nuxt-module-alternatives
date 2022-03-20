@@ -1,4 +1,4 @@
-import type { EndpointsOption, SchemePartialOptions, TokenableSchemeOptions, TokenableScheme, UserOptions, HTTPRequest, HTTPResponse, SchemeCheck } from '../../types';
+import type { EndpointsOption, SchemePartialOptions, TokenableSchemeOptions, TokenableScheme, UserOptions, HTTPRequest, HTTPResponse, SchemeCheck } from '../../type';
 import type { Auth } from '../core';
 import { Token, RequestHandler } from '../inc';
 import { BaseScheme } from './base';

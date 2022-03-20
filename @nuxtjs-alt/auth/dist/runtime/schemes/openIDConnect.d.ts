@@ -1,4 +1,4 @@
-import { IdTokenableSchemeOptions } from '../../types';
+import { IdTokenableSchemeOptions } from '../../type';
 import { IdToken, ConfigurationDocument } from '../inc';
 import type { Auth, HTTPResponse, SchemeCheck, SchemePartialOptions } from '../../index';
 import { Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions } from './oauth2';

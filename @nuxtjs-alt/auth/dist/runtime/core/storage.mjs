@@ -194,7 +194,7 @@ export class Storage {
     if (!this.options.localStorage) {
       return false;
     }
-    if (!process.client) {
+    if (process.server) {
       return false;
     }
     const test = "test";

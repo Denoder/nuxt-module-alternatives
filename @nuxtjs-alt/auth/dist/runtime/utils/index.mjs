@@ -33,8 +33,8 @@ export function getMatchedComponents(route, matches = []) {
 }
 export function normalizePath(path = "", ctx) {
   let result = path.split("?")[0];
-  if (ctx && ctx.$config.app.baseURL) {
-    result = result.replace(ctx.$config.app.baseURL, "/");
+  if (ctx && ctx.$router.options.history.base) {
+    result = result.replace(ctx.$router.options.history.base, "/");
   }
   if (result.charAt(result.length - 1) === "/") {
     result = result.slice(0, -1);

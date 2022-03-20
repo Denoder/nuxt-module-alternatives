@@ -8,7 +8,7 @@ import requrl from 'requrl';
 import { addServerMiddleware, resolvePath, requireModule, defineNuxtModule, createResolver, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.0.6";
+const version = "1.0.8";
 
 const moduleDefaults = {
   enableMiddleware: true,
@@ -54,8 +54,8 @@ function addAuthorize(strategy, useForms = false) {
   strategy.responseType = "code";
   const formMiddleware = bodyParser.urlencoded({ extended: true });
   addServerMiddleware({
-    path: endpoint,
-    handler: (req, res, next) => {
+    route: endpoint,
+    handle: (req, res, next) => {
       if (req.method !== "POST") {
         return next();
       }
@@ -89,6 +89,10 @@ function addAuthorize(strategy, useForms = false) {
           Accept: "application/json",
           "Content-Type": "application/json"
         };
+        if (strategy.clientSecretTransport === "authorization_header") {
+          headers.Authorization = "Basic " + Buffer.from(clientID + ":" + clientSecret).toString("base64");
+          delete data.client_secret;
+        }
         if (useForms) {
           data = qs.stringify(data);
           headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -118,8 +122,8 @@ function initializePasswordGrantFlow(strategy) {
   strategy.endpoints.refresh.url = endpoint;
   const formMiddleware = bodyParser.json();
   addServerMiddleware({
-    path: endpoint,
-    handler: (req, res, next) => {
+    route: endpoint,
+    handle: (req, res, next) => {
       if (req.method !== "POST") {
         return next();
       }
@@ -360,10 +364,6 @@ function laravelPassport(strategy) {
 }
 
 function laravelSanctum(strategy) {
-  const { url } = strategy;
-  if (!url) {
-    throw new Error("URL is required with Laravel Sanctum!");
-  }
   const endpointDefaults = {
     withCredentials: true,
     headers: {
@@ -376,35 +376,37 @@ function laravelSanctum(strategy) {
     scheme: "cookie",
     name: "laravelSanctum",
     cookie: {
-      name: "XSRF-TOKEN"
+      name: "XSRF-TOKEN",
+      server: true
     },
     endpoints: {
       csrf: {
         ...endpointDefaults,
-        url: url + "/sanctum/csrf-cookie"
+        url: `${strategy.url ? strategy.url : ""}/sanctum/csrf-cookie`
       },
       login: {
         ...endpointDefaults,
-        url: url + "/login"
+        url: `${strategy.url ? strategy.url : ""}/login`
       },
       logout: {
         ...endpointDefaults,
-        url: url + "/logout"
+        url: `${strategy.url ? strategy.url : ""}/logout`
       },
       user: {
         ...endpointDefaults,
-        url: url + "/api/user"
+        url: `${strategy.url ? strategy.url : ""}/api/user`
       }
     },
     user: {
       property: {
         client: false,
         server: false
-      }
-    }
+      },
+      autoFetch: true
+    },
+    ...strategy
   };
   assignDefaults(strategy, DEFAULTS);
-  assignAbsoluteEndpoints(strategy);
 }
 
 const ProviderAliases = {
@@ -512,11 +514,11 @@ const module = defineNuxtModule({
     name,
     version,
     configKey: CONFIG_KEY,
-    defaults: moduleDefaults,
     compatibility: {
       nuxt: "^3.0.0"
     }
   },
+  defaults: moduleDefaults,
   setup(moduleOptions, nuxt) {
     const options = defu(moduleOptions, moduleDefaults);
     const resolver = createResolver(import.meta.url);

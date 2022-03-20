@@ -18,8 +18,8 @@ export function addAuthorize(strategy, useForms = false) {
   strategy.responseType = "code";
   const formMiddleware = bodyParser.urlencoded({ extended: true });
   addServerMiddleware({
-    path: endpoint,
-    handler: (req, res, next) => {
+    route: endpoint,
+    handle: (req, res, next) => {
       if (req.method !== "POST") {
         return next();
       }
@@ -53,6 +53,10 @@ export function addAuthorize(strategy, useForms = false) {
           Accept: "application/json",
           "Content-Type": "application/json"
         };
+        if (strategy.clientSecretTransport === "authorization_header") {
+          headers.Authorization = "Basic " + Buffer.from(clientID + ":" + clientSecret).toString("base64");
+          delete data.client_secret;
+        }
         if (useForms) {
           data = qs.stringify(data);
           headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -82,8 +86,8 @@ export function initializePasswordGrantFlow(strategy) {
   strategy.endpoints.refresh.url = endpoint;
   const formMiddleware = bodyParser.json();
   addServerMiddleware({
-    path: endpoint,
-    handler: (req, res, next) => {
+    route: endpoint,
+    handle: (req, res, next) => {
       if (req.method !== "POST") {
         return next();
       }

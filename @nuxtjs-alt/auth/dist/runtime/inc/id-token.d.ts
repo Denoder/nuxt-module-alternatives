@@ -1,4 +1,4 @@
-import type { IdTokenableScheme } from '../../types';
+import type { IdTokenableScheme } from '../../type';
 import type { Storage } from '../core';
 import { TokenStatus } from './token-status';
 export declare class IdToken {
