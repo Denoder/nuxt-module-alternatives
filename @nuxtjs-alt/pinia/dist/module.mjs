@@ -1,7 +1,7 @@
 import { defineNuxtModule, createResolver, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/pinia";
-const version = "1.0.5";
+const version = "1.0.6";
 
 const CONFIG_KEY = "pinia";
 const module = defineNuxtModule({

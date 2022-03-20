@@ -1,6 +1,6 @@
 import { name, version } from '../package.json'
 import { defineNuxtModule, installModule, addPluginTemplate, createResolver } from '@nuxt/kit'
-import { ModuleOptions } from './options'
+import { ModuleOptions, NuxtAxiosInstance } from './options'
 
 const CONFIG_KEY = 'axios'
 
@@ -12,8 +12,8 @@ export default defineNuxtModule({
         compatibility: {
             nuxt: '^3.0.0'
         },
-        defaults: {} as ModuleOptions
     },
+    defaults: {} as ModuleOptions,
     setup(_moduleOptions, nuxt) {
         // Combine options
 
@@ -157,3 +157,12 @@ export default defineNuxtModule({
         console.debug(`browserBaseURL: ${options.browserBaseURL}`)
     }
 })
+
+declare module "#app" {
+    export interface NuxtApp {
+        $axios: NuxtAxiosInstance;
+    }
+    export interface NuxtOptions {
+        axios: ModuleOptions;
+    }
+}
