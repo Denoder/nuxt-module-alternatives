@@ -56,7 +56,7 @@ Laravel Sanctum wokrs a tiny bit differently, It inherits the same config as the
                     name: 'XSRF-TOKEN',
                 },
                 endpoints: {
-                    csrf: { url: '/sanctum/csrf-cookie' }
+                    csrf: { url: '/sanctum/csrf-cookie' },
                     login: { url: '/login' },
                     logout: { url: '/logout' },
                     user: { url: '/api/user' }
