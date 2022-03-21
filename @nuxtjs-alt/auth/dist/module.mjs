@@ -8,7 +8,7 @@ import requrl from 'requrl';
 import { addServerMiddleware, resolvePath, requireModule, defineNuxtModule, createResolver, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.0.8";
+const version = "1.0.9";
 
 const moduleDefaults = {
   enableMiddleware: true,
