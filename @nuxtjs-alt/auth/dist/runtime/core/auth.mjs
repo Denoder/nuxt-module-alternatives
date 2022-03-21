@@ -1,5 +1,5 @@
 import requrl from "requrl";
-import { useRouter } from "#app";
+import { useRouter, useRoute } from "#app";
 import {
   isRelativeURL,
   isSet,
@@ -73,7 +73,8 @@ export class Auth {
       if (process.client && this.options.watchLoggedIn) {
         this.$storage.watchState("loggedIn", (loggedIn) => {
           if (loggedIn) {
-            if (!routeOption(this.ctx.$router.currentRoute, "auth", false)) {
+            const route = useRoute();
+            if (!routeOption(route, "auth", false)) {
               this.redirect(loggedIn ? "home" : "logout");
             }
           }
@@ -242,10 +243,11 @@ export class Auth {
     noRouter: false
   }) {
     const router = useRouter();
+    const route = useRoute();
     if (!this.options.redirect) {
       return;
     }
-    const from = opt.route ? this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path : this.options.fullPathRedirect ? this.ctx.$router.currentRoute.fullPath : this.ctx.$router.currentRoute.path;
+    const from = opt.route ? this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path : this.options.fullPathRedirect ? route.fullPath : route.path;
     let to = this.options.redirect[name];
     if (!to) {
       return;
@@ -266,7 +268,7 @@ export class Auth {
     if (isSameURL(this.ctx, to, from)) {
       return;
     }
-    const queryString = Object.keys(opt.route ? opt.route.query : this.ctx.$router.currentRoute.query).map((key) => key + "=" + opt.route ? opt.route.query[key] : this.ctx.$router.currentRoute.query[key]).join("&");
+    const queryString = Object.keys(opt.route ? opt.route.query : route.query).map((key) => key + "=" + opt.route ? opt.route.query[key] : route.query[key]).join("&");
     if (opt.noRouter) {
       window.location.replace(to + (queryString ? "?" + queryString : ""));
     } else {
