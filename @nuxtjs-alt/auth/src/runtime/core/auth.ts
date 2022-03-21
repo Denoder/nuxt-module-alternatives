@@ -9,7 +9,7 @@ import type {
 } from "../../type";
 import type { RouteLocationNormalized } from 'vue-router'
 import type { ModuleOptions } from "../../options";
-import { NuxtApp, useRouter } from "#app";
+import { NuxtApp, useRouter, useRoute } from "#app";
 import {
     isRelativeURL,
     isSet,
@@ -129,11 +129,11 @@ export class Auth {
         } catch (error) {
             this.callOnError(error);
         } finally {
-            /* @ts-ignore */
             if (process.client && this.options.watchLoggedIn) {
                 this.$storage.watchState("loggedIn", (loggedIn) => {
                     if (loggedIn) {
-                        if (!routeOption(this.ctx.$router.currentRoute as RouteLocationNormalized,"auth",false)) {
+                        const route = useRoute();
+                        if (!routeOption(route as RouteLocationNormalized, "auth", false)) {
                             this.redirect(loggedIn ? "home" : "logout");
                         }
                     }
@@ -402,12 +402,13 @@ export class Auth {
         }
     ): void {
         const router = useRouter();
+        const route = useRoute();
 
         if (!this.options.redirect) {
             return;
         }
 
-        const from = opt.route ? this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path : this.options.fullPathRedirect ? this.ctx.$router.currentRoute.fullPath : this.ctx.$router.currentRoute.path;
+        const from = opt.route ? this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path : this.options.fullPathRedirect ? route.fullPath : route.path;
 
         let to = this.options.redirect[name];
 
@@ -441,7 +442,7 @@ export class Auth {
             return;
         }
 
-        const queryString = Object.keys(opt.route ? opt.route.query : this.ctx.$router.currentRoute.query).map((key) => key + "=" + opt.route ? opt.route.query[key] : this.ctx.$router.currentRoute.query[key]).join("&");
+        const queryString = Object.keys(opt.route ? opt.route.query : route.query).map((key) => key + "=" + opt.route ? opt.route.query[key] : route.query[key]).join("&");
 
         if (opt.noRouter) {
             window.location.replace(to + (queryString ? "?" + queryString : ""));
