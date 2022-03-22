@@ -16,9 +16,9 @@ The `@nuxtjs` folder has been removed, use `@nuxtjs-alt` instead (this is due to
 
 **Module Order**
 
-If you're using a combination of axios, pinia and auth you need to load them in `buildModules` in the following order.
+If you're using a combination of axios, pinia and auth you need to load them in `modules` in the following order.
 ```
-buildModules: [
+modules: [
     '@nuxtjs-alt/auth',
     '@nuxtjs-alt/axios',
     '@nuxtjs-alt/pinia',
@@ -30,7 +30,7 @@ buildModules: [
 - Add any of these modules to your `modules` directory of your nuxt 3 application. 
 - Then in your `package.json` add them as a local module.
 - Finally run `npm install` to have them symlinked.
-- You can then add them to the `modules` or `buildModules` like you would in Nuxt with the same named aliases.
+- You can then add them to the `modules` like you would in Nuxt with the same named aliases.
 
 Adding them to workspaces will install the dependencies. Alternatively you can use the npmjs releases.
 
