@@ -1,5 +1,6 @@
-import { NuxtApp } from '#app';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { RouteLocationNormalized } from 'vue-router';
+import { NuxtApp } from '#app';
 import { NuxtAxiosInstance } from '@nuxtjs-alt/axios';
 import * as NuxtSchema from '@nuxt/schema';
 
@@ -34,6 +35,137 @@ declare type OpenIDConnectConfigurationDocument = {
     service_documentation?: string;
     ui_locales_supported?: string[];
 };
+
+interface ModuleOptions {
+    globalMiddleware?: boolean;
+    plugins?: Array<string | {
+        src: string;
+        ssr: boolean;
+    }>;
+    ignoreExceptions: boolean;
+    resetOnError: boolean | ((...args: unknown[]) => boolean);
+    defaultStrategy: string | undefined;
+    watchLoggedIn: boolean;
+    rewriteRedirects: boolean;
+    fullPathRedirect: boolean;
+    scopeKey: string;
+    redirect: {
+        login: string;
+        logout: string;
+        callback: string;
+        home: string;
+    };
+    pinia: {
+        namespace: string;
+    };
+    cookie: {
+        prefix: string;
+        options: {
+            path: string;
+            expires?: number | Date;
+            maxAge?: number;
+            domain?: string;
+            secure?: boolean;
+        };
+    } | false;
+    localStorage: {
+        prefix: string;
+    } | false;
+    strategies: {
+        [strategy: string]: Strategy;
+    };
+}
+declare const moduleDefaults: ModuleOptions;
+
+declare type StorageOptions = ModuleOptions & {
+    initialState: {
+        user: null;
+        loggedIn: boolean;
+    };
+};
+declare class Storage {
+    ctx: NuxtApp;
+    options: StorageOptions;
+    store: any;
+    state: any;
+    private _state;
+    private _usePinia;
+    constructor(ctx: NuxtApp, options: StorageOptions);
+    setUniversal<V extends unknown>(key: string, value: V): V | void;
+    getUniversal(key: string): unknown;
+    syncUniversal(key: string, defaultValue?: unknown): unknown;
+    removeUniversal(key: string): void;
+    _initState(): void;
+    setState<V extends unknown>(key: string, value: V): V;
+    getState(key: string): unknown;
+    watchState(watchKey: string, fn: (value: unknown) => void): () => void;
+    removeState(key: string): void;
+    setLocalStorage<V extends unknown>(key: string, value: V): V | void;
+    getLocalStorage(key: string): unknown;
+    removeLocalStorage(key: string): void;
+    getCookies(): Record<string, unknown>;
+    setCookie<V extends unknown>(key: string, value: V, options?: {
+        prefix?: string;
+    }): V;
+    getCookie(key: string): unknown;
+    removeCookie(key: string, options?: {
+        prefix?: string;
+    }): void;
+    getPrefix(): string;
+    isLocalStorageEnabled(): boolean;
+    isCookiesEnabled(): boolean;
+}
+
+declare type ErrorListener = (...args: unknown[]) => void;
+declare type RedirectListener = (to: string, from: string) => string;
+declare class Auth {
+    ctx: NuxtApp;
+    options: ModuleOptions;
+    strategies: Record<string, Scheme>;
+    error: Error;
+    $storage: Storage;
+    $state: any;
+    private _errorListeners;
+    private _redirectListeners;
+    private _stateWarnShown;
+    private _getStateWarnShown;
+    constructor(ctx: NuxtApp, options: ModuleOptions);
+    get state(): any;
+    get strategy(): Scheme;
+    getStrategy(throwException?: boolean): Scheme | TokenableScheme | RefreshableScheme;
+    get user(): Record<string, unknown> | null;
+    get loggedIn(): boolean;
+    get busy(): boolean;
+    init(): Promise<void>;
+    getState(key: string): unknown;
+    registerStrategy(name: string, strategy: Scheme): void;
+    setStrategy(name: string): Promise<HTTPResponse | void>;
+    mounted(...args: unknown[]): Promise<HTTPResponse | void>;
+    loginWith(name: string, ...args: unknown[]): Promise<HTTPResponse | void>;
+    login(...args: unknown[]): Promise<HTTPResponse | void>;
+    fetchUser(...args: unknown[]): Promise<HTTPResponse | void>;
+    logout(...args: unknown[]): Promise<void>;
+    setUserToken(token: string | boolean, refreshToken?: string | boolean): Promise<HTTPResponse | void>;
+    reset(...args: unknown[]): void;
+    refreshTokens(): Promise<HTTPResponse | void>;
+    check(...args: unknown[]): SchemeCheck;
+    fetchUserOnce(...args: unknown[]): Promise<HTTPResponse | void>;
+    setUser(user: unknown): void;
+    request(endpoint: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse>;
+    requestWith(endpoint: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse>;
+    wrapLogin(promise: Promise<HTTPResponse | void>): Promise<HTTPResponse | void>;
+    onError(listener: ErrorListener): void;
+    callOnError(error: Error, payload?: {}): void;
+    redirect(name: string, opt?: {
+        route?: any;
+        noRouter?: boolean;
+    }): void;
+    onRedirect(listener: RedirectListener): void;
+    callOnRedirect(to: string, from: string): string;
+    hasScope(scope: string): boolean;
+}
+
+declare const AuthMiddleware: (to: RouteLocationNormalized, from: RouteLocationNormalized) => Promise<void>;
 
 declare class ConfigurationDocumentRequestError extends Error {
     constructor();
@@ -165,94 +297,6 @@ declare class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOp
     private _base64UrlEncode;
 }
 
-interface Auth0ProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
-    domain: string;
-}
-declare function auth0(strategy: ProviderPartialOptions<Auth0ProviderOptions>): void;
-
-interface DiscordProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
-}
-declare function discord(strategy: ProviderPartialOptions<DiscordProviderOptions>): void;
-
-interface FacebookProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
-}
-declare function facebook(strategy: ProviderPartialOptions<FacebookProviderOptions>): void;
-
-interface GithubProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
-}
-declare function github(strategy: ProviderPartialOptions<GithubProviderOptions>): void;
-
-interface GoogleProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
-}
-declare function google(strategy: ProviderPartialOptions<GoogleProviderOptions>): void;
-
-interface LaravelJWTProviderOptions extends ProviderOptions, RefreshSchemeOptions {
-    url: string;
-}
-declare function laravelJWT(strategy: ProviderPartialOptions<LaravelJWTProviderOptions>): void;
-
-interface LaravelPassportProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
-    url: string;
-}
-interface LaravelPassportPasswordProviderOptions extends ProviderOptions, RefreshSchemeOptions {
-    url: string;
-}
-declare type PartialPassportOptions = ProviderPartialOptions<LaravelPassportProviderOptions>;
-declare type PartialPassportPasswordOptions = ProviderPartialOptions<LaravelPassportPasswordProviderOptions>;
-declare function laravelPassport(strategy: PartialPassportOptions | PartialPassportPasswordOptions): void;
-
-interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOptions {
-    url: string;
-}
-declare function laravelSanctum(strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>): void;
-
-declare const ProviderAliases: {
-    'laravel/jwt': string;
-    'laravel/passport': string;
-    'laravel/sanctum': string;
-};
-
-interface ModuleOptions {
-    enableMiddleware?: boolean;
-    plugins?: Array<string | {
-        src: string;
-        ssr: boolean;
-    }>;
-    ignoreExceptions: boolean;
-    resetOnError: boolean | ((...args: unknown[]) => boolean);
-    defaultStrategy: string | undefined;
-    watchLoggedIn: boolean;
-    rewriteRedirects: boolean;
-    fullPathRedirect: boolean;
-    scopeKey: string;
-    redirect: {
-        login: string;
-        logout: string;
-        callback: string;
-        home: string;
-    };
-    pinia: {
-        namespace: string;
-    };
-    cookie: {
-        prefix: string;
-        options: {
-            path: string;
-            expires?: number | Date;
-            maxAge?: number;
-            domain?: string;
-            secure?: boolean;
-        };
-    } | false;
-    localStorage: {
-        prefix: string;
-    } | false;
-    strategies: {
-        [strategy: string]: Strategy;
-    };
-}
-declare const moduleDefaults: ModuleOptions;
-
 interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
     configuration: string;
 }
@@ -306,45 +350,6 @@ declare class LaravelJWTScheme extends RefreshScheme {
         isRefreshing?: boolean;
         updateOnRefresh?: boolean;
     }): void;
-}
-
-declare type StorageOptions = ModuleOptions & {
-    initialState: {
-        user: null;
-        loggedIn: boolean;
-    };
-};
-declare class Storage {
-    ctx: NuxtApp;
-    options: StorageOptions;
-    store: any;
-    state: any;
-    private _state;
-    private _usePinia;
-    constructor(ctx: NuxtApp, options: StorageOptions);
-    setUniversal<V extends unknown>(key: string, value: V): V | void;
-    getUniversal(key: string): unknown;
-    syncUniversal(key: string, defaultValue?: unknown): unknown;
-    removeUniversal(key: string): void;
-    _initState(): void;
-    setState<V extends unknown>(key: string, value: V): V;
-    getState(key: string): unknown;
-    watchState(watchKey: string, fn: (value: unknown) => void): () => void;
-    removeState(key: string): void;
-    setLocalStorage<V extends unknown>(key: string, value: V): V | void;
-    getLocalStorage(key: string): unknown;
-    removeLocalStorage(key: string): void;
-    getCookies(): Record<string, unknown>;
-    setCookie<V extends unknown>(key: string, value: V, options?: {
-        prefix?: string;
-    }): V;
-    getCookie(key: string): unknown;
-    removeCookie(key: string, options?: {
-        prefix?: string;
-    }): void;
-    getPrefix(): string;
-    isLocalStorageEnabled(): boolean;
-    isCookiesEnabled(): boolean;
 }
 
 /**
@@ -581,54 +586,52 @@ interface Strategy extends SchemeOptions {
 }
 declare type StrategyOptions<SOptions extends SchemeOptions = SchemeOptions> = ProviderPartialOptions<ProviderOptions & SOptions>;
 
-declare type ErrorListener = (...args: unknown[]) => void;
-declare type RedirectListener = (to: string, from: string) => string;
-declare class Auth {
-    ctx: NuxtApp;
-    options: ModuleOptions;
-    strategies: Record<string, Scheme>;
-    error: Error;
-    $storage: Storage;
-    $state: any;
-    private _errorListeners;
-    private _redirectListeners;
-    private _stateWarnShown;
-    private _getStateWarnShown;
-    constructor(ctx: NuxtApp, options: ModuleOptions);
-    get state(): any;
-    get strategy(): Scheme;
-    getStrategy(throwException?: boolean): Scheme | TokenableScheme | RefreshableScheme;
-    get user(): Record<string, unknown> | null;
-    get loggedIn(): boolean;
-    get busy(): boolean;
-    init(): Promise<void>;
-    getState(key: string): unknown;
-    registerStrategy(name: string, strategy: Scheme): void;
-    setStrategy(name: string): Promise<HTTPResponse | void>;
-    mounted(...args: unknown[]): Promise<HTTPResponse | void>;
-    loginWith(name: string, ...args: unknown[]): Promise<HTTPResponse | void>;
-    login(...args: unknown[]): Promise<HTTPResponse | void>;
-    fetchUser(...args: unknown[]): Promise<HTTPResponse | void>;
-    logout(...args: unknown[]): Promise<void>;
-    setUserToken(token: string | boolean, refreshToken?: string | boolean): Promise<HTTPResponse | void>;
-    reset(...args: unknown[]): void;
-    refreshTokens(): Promise<HTTPResponse | void>;
-    check(...args: unknown[]): SchemeCheck;
-    fetchUserOnce(...args: unknown[]): Promise<HTTPResponse | void>;
-    setUser(user: unknown): void;
-    request(endpoint: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse>;
-    requestWith(endpoint: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse>;
-    wrapLogin(promise: Promise<HTTPResponse | void>): Promise<HTTPResponse | void>;
-    onError(listener: ErrorListener): void;
-    callOnError(error: Error, payload?: {}): void;
-    redirect(name: string, opt?: {
-        route?: any | false;
-        noRouter?: boolean;
-    }): void;
-    onRedirect(listener: RedirectListener): void;
-    callOnRedirect(to: string, from: string): string;
-    hasScope(scope: string): boolean;
+interface Auth0ProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+    domain: string;
 }
+declare function auth0(strategy: ProviderPartialOptions<Auth0ProviderOptions>): void;
+
+interface DiscordProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+}
+declare function discord(strategy: ProviderPartialOptions<DiscordProviderOptions>): void;
+
+interface FacebookProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+}
+declare function facebook(strategy: ProviderPartialOptions<FacebookProviderOptions>): void;
+
+interface GithubProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+}
+declare function github(strategy: ProviderPartialOptions<GithubProviderOptions>): void;
+
+interface GoogleProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+}
+declare function google(strategy: ProviderPartialOptions<GoogleProviderOptions>): void;
+
+interface LaravelJWTProviderOptions extends ProviderOptions, RefreshSchemeOptions {
+    url: string;
+}
+declare function laravelJWT(strategy: ProviderPartialOptions<LaravelJWTProviderOptions>): void;
+
+interface LaravelPassportProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
+    url: string;
+}
+interface LaravelPassportPasswordProviderOptions extends ProviderOptions, RefreshSchemeOptions {
+    url: string;
+}
+declare type PartialPassportOptions = ProviderPartialOptions<LaravelPassportProviderOptions>;
+declare type PartialPassportPasswordOptions = ProviderPartialOptions<LaravelPassportPasswordProviderOptions>;
+declare function laravelPassport(strategy: PartialPassportOptions | PartialPassportPasswordOptions): void;
+
+interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOptions {
+    url: string;
+}
+declare function laravelSanctum(strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>): void;
+
+declare const ProviderAliases: {
+    'laravel/jwt': string;
+    'laravel/passport': string;
+    'laravel/sanctum': string;
+};
 
 declare module '@nuxt/schema' {
     export interface NuxtConfig {
@@ -643,11 +646,11 @@ declare const module: NuxtSchema.NuxtModule<ModuleOptions>;
 
 declare module "#app" {
     export interface NuxtApp {
-        $auth?: Auth;
+        $auth: Auth;
     }
     export interface NuxtConfig {
-        auth?: ModuleOptions;
+        auth: ModuleOptions;
     }
 }
 
-export { Auth, Auth0ProviderOptions, Auth0Scheme, BaseScheme, ConfigurationDocument, ConfigurationDocumentRequestError, CookieScheme, CookieSchemeCookie, CookieSchemeEndpoints, CookieSchemeOptions, DiscordProviderOptions, EndpointsOption, ErrorListener, ExpiredAuthSessionError, FacebookProviderOptions, GithubProviderOptions, GoogleProviderOptions, HTTPRequest, HTTPResponse, IdToken, IdTokenableScheme, IdTokenableSchemeOptions, LaravelJWTProviderOptions, LaravelJWTScheme, LaravelPassportPasswordProviderOptions, LaravelPassportProviderOptions, LaravelSanctumProviderOptions, LocalScheme, LocalSchemeEndpoints, LocalSchemeOptions, MatchedRoute, ModuleOptions, Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions, OpenIDConnectConfigurationDocument, OpenIDConnectScheme, OpenIDConnectSchemeEndpoints, OpenIDConnectSchemeOptions, PartialExcept, PartialPassportOptions, PartialPassportPasswordOptions, ProviderAliases, ProviderOptions, ProviderOptionsKeys, ProviderPartialOptions, RecursivePartial, RedirectListener, RefreshController, RefreshScheme, RefreshSchemeEndpoints, RefreshSchemeOptions, RefreshToken, RefreshTokenOptions, RefreshableScheme, RefreshableSchemeOptions, RequestHandler, Route, Scheme, SchemeCheck, SchemeOptions, SchemePartialOptions, Storage, StorageOptions, Strategy, StrategyOptions, Token, TokenOptions, TokenStatus, TokenStatusEnum, TokenableScheme, TokenableSchemeOptions, UserCookieOptions, UserOptions, VueComponent, auth0, module as default, discord, facebook, github, google, laravelJWT, laravelPassport, laravelSanctum, moduleDefaults };
+export { Auth, Auth0ProviderOptions, Auth0Scheme, AuthMiddleware, BaseScheme, ConfigurationDocument, ConfigurationDocumentRequestError, CookieScheme, CookieSchemeCookie, CookieSchemeEndpoints, CookieSchemeOptions, DiscordProviderOptions, EndpointsOption, ErrorListener, ExpiredAuthSessionError, FacebookProviderOptions, GithubProviderOptions, GoogleProviderOptions, HTTPRequest, HTTPResponse, IdToken, IdTokenableScheme, IdTokenableSchemeOptions, LaravelJWTProviderOptions, LaravelJWTScheme, LaravelPassportPasswordProviderOptions, LaravelPassportProviderOptions, LaravelSanctumProviderOptions, LocalScheme, LocalSchemeEndpoints, LocalSchemeOptions, MatchedRoute, ModuleOptions, Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions, OpenIDConnectConfigurationDocument, OpenIDConnectScheme, OpenIDConnectSchemeEndpoints, OpenIDConnectSchemeOptions, PartialExcept, PartialPassportOptions, PartialPassportPasswordOptions, ProviderAliases, ProviderOptions, ProviderOptionsKeys, ProviderPartialOptions, RecursivePartial, RedirectListener, RefreshController, RefreshScheme, RefreshSchemeEndpoints, RefreshSchemeOptions, RefreshToken, RefreshTokenOptions, RefreshableScheme, RefreshableSchemeOptions, RequestHandler, Route, Scheme, SchemeCheck, SchemeOptions, SchemePartialOptions, Storage, StorageOptions, Strategy, StrategyOptions, Token, TokenOptions, TokenStatus, TokenStatusEnum, TokenableScheme, TokenableSchemeOptions, UserCookieOptions, UserOptions, VueComponent, auth0, module as default, discord, facebook, github, google, laravelJWT, laravelPassport, laravelSanctum, moduleDefaults };

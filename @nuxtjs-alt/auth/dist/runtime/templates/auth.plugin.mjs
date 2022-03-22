@@ -1,13 +1,14 @@
-import { Auth, ExpiredAuthSessionError } from '#auth/runtime'
-import { defineNuxtPlugin } from '#app'
+import { Auth, ExpiredAuthSessionError, AuthMiddleware } from '#auth/runtime'
+import { defineNuxtPlugin, addRouteMiddleware } from '#app'
 
 // Active schemes
 <%= options.schemeImports.map(i => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n') %>
 
 export default defineNuxtPlugin(async ctx => {
-
     // Options
     const options = JSON.parse('<%= JSON.stringify(options.options) %>')
+
+    addRouteMiddleware('auth', AuthMiddleware, { global: options.globalMiddleware })
 
     // Create a new Auth instance
     const $auth = new Auth(ctx, options)

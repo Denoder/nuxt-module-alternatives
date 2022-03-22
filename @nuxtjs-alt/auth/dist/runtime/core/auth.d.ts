@@ -43,7 +43,7 @@ export declare class Auth {
     onError(listener: ErrorListener): void;
     callOnError(error: Error, payload?: {}): void;
     redirect(name: string, opt?: {
-        route?: any | false;
+        route?: any;
         noRouter?: boolean;
     }): void;
     onRedirect(listener: RedirectListener): void;

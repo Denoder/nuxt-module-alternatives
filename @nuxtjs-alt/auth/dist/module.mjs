@@ -8,10 +8,10 @@ import requrl from 'requrl';
 import { addServerMiddleware, resolvePath, requireModule, defineNuxtModule, createResolver, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.0.9";
+const version = "1.0.11";
 
 const moduleDefaults = {
-  enableMiddleware: true,
+  globalMiddleware: true,
   resetOnError: false,
   ignoreExceptions: false,
   scopeKey: "scope",
@@ -542,11 +542,6 @@ const module = defineNuxtModule({
         schemeImports
       }
     });
-    if (options.enableMiddleware) {
-      nuxt.hook("pages:middleware:extend", (middleware) => {
-        middleware.push({ name: "auth", path: resolver.resolve("runtime/core/middleware"), global: false });
-      });
-    }
     if (options.plugins) {
       options.plugins.forEach((p) => nuxt.options.plugins.push(p));
       delete options.plugins;
