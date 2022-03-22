@@ -1,11 +1,9 @@
 import { existsSync } from 'fs'
 import hash from 'hasha'
-// TODO: Decide if we should change this approach
-// eslint-disable-next-line import/namespace
 import * as AUTH_PROVIDERS from './providers'
 import { ProviderAliases } from './providers'
-import type { ModuleOptions } from './options'
-import type { Strategy } from './type'
+import type { ModuleOptions } from '../options'
+import type { Strategy } from '../type'
 import { resolvePath, requireModule } from '@nuxt/kit'
 
 const BuiltinSchemes = {

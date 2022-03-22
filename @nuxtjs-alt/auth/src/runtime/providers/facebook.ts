@@ -1,6 +1,6 @@
-import type { ProviderPartialOptions, ProviderOptions } from '../type'
-import type { Oauth2SchemeOptions } from '../runtime/schemes'
-import { assignDefaults } from '../runtime/utils/provider'
+import type { ProviderPartialOptions, ProviderOptions } from '../../type'
+import type { Oauth2SchemeOptions } from '../schemes'
+import { assignDefaults } from '../utils/provider'
 
 export interface FacebookProviderOptions
     extends ProviderOptions,

@@ -27,6 +27,7 @@ import {
     Token,
     RefreshToken
 } from '../inc'
+import { useRoute } from '#app'
 import { BaseScheme } from './base'
 
 export interface Oauth2SchemeEndpoints extends EndpointsOption {
@@ -341,10 +342,11 @@ export class Oauth2Scheme<
     }
 
     async _handleCallback(): Promise<boolean | void> {
+        const route = useRoute()
         // Handle callback only for specified route
         if (
             this.$auth.options.redirect &&
-            normalizePath(this.$auth.ctx.$router.currentRoute.path, this.$auth.ctx) !==
+            normalizePath(route.path, this.$auth.ctx) !==
             normalizePath(this.$auth.options.redirect.callback, this.$auth.ctx)
         ) {
             return
@@ -354,8 +356,8 @@ export class Oauth2Scheme<
             return
         }
 
-        const hash = parseQuery(this.$auth.ctx.$router.currentRoute.hash.substr(1))
-        const parsedQuery = Object.assign({}, this.$auth.ctx.$router.currentRoute.query, hash)
+        const hash = parseQuery(route.hash.substr(1))
+        const parsedQuery = Object.assign({}, route.query, hash)
         // accessToken/idToken
         let token: string = parsedQuery[this.options.token.property] as string
         // refresh token

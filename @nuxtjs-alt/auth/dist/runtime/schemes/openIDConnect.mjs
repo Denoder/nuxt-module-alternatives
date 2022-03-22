@@ -3,6 +3,7 @@ import { IdToken, ConfigurationDocument } from "../inc/index.mjs";
 import {
   Oauth2Scheme
 } from "./oauth2";
+import { useRoute } from "#app";
 const DEFAULTS = {
   name: "openIDConnect",
   responseType: "code",
@@ -115,14 +116,15 @@ export class OpenIDConnectScheme extends Oauth2Scheme {
     this.$auth.setUser(data);
   }
   async _handleCallback() {
-    if (this.$auth.options.redirect && normalizePath(this.$auth.ctx.$router.currentRoute.path) !== normalizePath(this.$auth.options.redirect.callback)) {
+    const route = useRoute();
+    if (this.$auth.options.redirect && normalizePath(route.path) !== normalizePath(this.$auth.options.redirect.callback)) {
       return;
     }
     if (process.server) {
       return;
     }
-    const hash = parseQuery(this.$auth.ctx.$router.currentRoute.hash.substr(1));
-    const parsedQuery = Object.assign({}, this.$auth.ctx.$router.currentRoute.query, hash);
+    const hash = parseQuery(route.hash.substr(1));
+    const parsedQuery = Object.assign({}, route.query, hash);
     let token = parsedQuery[this.options.token.property];
     let refreshToken;
     if (this.options.refreshToken.property) {

@@ -5,15 +5,15 @@ import type {
     RecursivePartial,
     ProviderPartialOptions,
     ProviderOptions
-} from '../type'
-import type { Oauth2SchemeOptions, RefreshSchemeOptions } from '../runtime/schemes'
+} from '../../type'
+import type { Oauth2SchemeOptions, RefreshSchemeOptions } from '../schemes'
 
 import {
     assignDefaults,
     addAuthorize,
     initializePasswordGrantFlow,
     assignAbsoluteEndpoints
-} from '../runtime/utils/provider'
+} from '../utils/provider'
 
 export interface LaravelPassportProviderOptions
     extends ProviderOptions,

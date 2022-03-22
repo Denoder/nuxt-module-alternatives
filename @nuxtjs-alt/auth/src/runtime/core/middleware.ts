@@ -1,8 +1,8 @@
-import { defineNuxtRouteMiddleware, useNuxtApp } from '#app'
+import { useNuxtApp } from '#app'
 import { routeOption, getMatchedComponents, normalizePath } from '../utils'
 import type { RouteLocationNormalized } from 'vue-router'
 
-export default defineNuxtRouteMiddleware(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
+export const AuthMiddleware = async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
 
     const ctx = useNuxtApp()
 
@@ -24,7 +24,7 @@ export default defineNuxtRouteMiddleware(async (to: RouteLocationNormalized, fro
     const pageIsInGuestMode = routeOption(to, 'auth', 'guest')
 
     // @ts-ignore
-    const insidePage = (page: string) => normalizePath(to.path, ctx) === normalizePath(page, ctx)
+    const insidePage = (page: any) => normalizePath(to.path, ctx) === normalizePath(page, ctx)
 
     if (ctx.$auth.$state.loggedIn) {
         // Perform scheme checks.
@@ -53,11 +53,11 @@ export default defineNuxtRouteMiddleware(async (to: RouteLocationNormalized, fro
                 ctx.$auth.reset()
             }
         }
-
-        // -- Guest --
-        // (Those passing `callback` at runtime need to mark their callback component
-        // with `auth: false` to avoid an unnecessary redirect from callback to login)
-    } else if (!pageIsInGuestMode && (!callback || !insidePage(callback))) {
+    }
+    // -- Guest --
+    // (Those passing `callback` at runtime need to mark their callback component
+    // with `auth: false` to avoid an unnecessary redirect from callback to login)
+    else if (!pageIsInGuestMode && (!callback || !insidePage(callback))) {
         ctx.$auth.redirect('login', { route: to })
     }
-});
+};
