@@ -23,7 +23,7 @@ the config would look like this
                     name: 'token',
                 },
                 endpoints: {
-                    csrf: false
+                    csrf: false,
                     login: { url: '/api/user/login', method: 'post' },
                     user: { url: '/api/user/me', method: 'get' }
                 },
