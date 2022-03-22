@@ -1,4 +1,5 @@
 **Instructions**
+
 This works a little bit differently from Nuxt 2. While I did try to retain the same essenece of it there are some major changes that had to be made. Firstly you are able to edit the store name, by default it is accessible via `$vuex` you can change this by altering the `storeName` property in your `vuex` config. You are also able to change the folder in which vuex will search for the store index, by default this is `store` you can change this via the `storeFolder` property. The file in the store folder must be an `index.js` or an `index.ts` file.
 
 **Config Example**
