@@ -7,7 +7,6 @@ import type {
     TokenableScheme,
     RefreshableScheme,
 } from "../../type";
-import type { RouteLocationNormalized } from 'vue-router'
 import type { ModuleOptions } from "../../options";
 import { NuxtApp, useRouter, useRoute } from "#app";
 import {
@@ -133,7 +132,7 @@ export class Auth {
                 this.$storage.watchState("loggedIn", (loggedIn) => {
                     if (loggedIn) {
                         const route = useRoute();
-                        if (!routeOption(route as RouteLocationNormalized, "auth", false)) {
+                        if (!routeOption(route, "auth", false)) {
                             this.redirect(loggedIn ? "home" : "logout");
                         }
                     }
@@ -396,7 +395,7 @@ export class Auth {
     redirect(
         name: string,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        opt: { route?: any | false; noRouter?: boolean } = {
+        opt: { route?: any; noRouter?: boolean } = {
             route: false,
             noRouter: false,
         }

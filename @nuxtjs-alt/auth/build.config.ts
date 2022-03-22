@@ -5,6 +5,7 @@ export default defineBuildConfig({
     externals: [
         "#app",
         "axios",
+        "vue-router",
         "follow-redirects",
         // Workspace Modules
         "@nuxtjs-alt/axios",

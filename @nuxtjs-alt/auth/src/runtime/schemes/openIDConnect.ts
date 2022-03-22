@@ -12,6 +12,7 @@ import {
     Oauth2SchemeEndpoints,
     Oauth2SchemeOptions
 } from './oauth2'
+import { useRoute } from '#app'
 
 export interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
     configuration: string
@@ -200,10 +201,11 @@ export class OpenIDConnectScheme<
     }
 
     async _handleCallback() {
+        const route = useRoute()
         // Handle callback only for specified route
         if (
             this.$auth.options.redirect &&
-            normalizePath(this.$auth.ctx.$router.currentRoute.path) !==
+            normalizePath(route.path) !==
             normalizePath(this.$auth.options.redirect.callback)
         ) {
             return
@@ -213,8 +215,8 @@ export class OpenIDConnectScheme<
             return
         }
 
-        const hash = parseQuery(this.$auth.ctx.$router.currentRoute.hash.substr(1))
-        const parsedQuery = Object.assign({}, this.$auth.ctx.$router.currentRoute.query, hash)
+        const hash = parseQuery(route.hash.substr(1))
+        const parsedQuery = Object.assign({}, route.query, hash)
 
         // accessToken/idToken
         let token: string = parsedQuery[this.options.token.property] as string

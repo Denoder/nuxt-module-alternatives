@@ -69,13 +69,13 @@ export function getMatchedComponents(
     )
 }
 
-export function normalizePath(path = '', ctx?: NuxtApp): string {
+export function normalizePath(path: string = '', ctx?: NuxtApp): string {
     // Remove query string
     let result = path.split('?')[0]
 
     // Remove base path
-    if (ctx && ctx.$router.options.history.base) {
-        result = result.replace(ctx.$router.options.history.base, '/')
+    if (ctx && ctx.$config.app.baseURL) {
+        result = result.replace(ctx.$config.app.baseURL, '/')
     }
 
     // Remove redundant / from the end of path

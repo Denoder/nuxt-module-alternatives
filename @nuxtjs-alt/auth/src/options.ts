@@ -1,7 +1,7 @@
 import type { Strategy } from './type'
 
 export interface ModuleOptions {
-    enableMiddleware?: boolean
+    globalMiddleware?: boolean
     plugins?: Array<string | { src: string; ssr: boolean }>
     ignoreExceptions: boolean
     resetOnError: boolean | ((...args: unknown[]) => boolean)
@@ -42,10 +42,10 @@ export interface ModuleOptions {
 }
 
 export const moduleDefaults: ModuleOptions = {
-    // -- Middleware Handle --
-    enableMiddleware: true,
+    // -- Enable Global Middleware --
+    globalMiddleware: true,
 
-    //  -- Error handling --
+    // -- Error handling --
 
     resetOnError: false,
 

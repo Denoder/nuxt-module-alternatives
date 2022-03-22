@@ -1,4 +1,4 @@
-import type { Auth } from "./runtime/index";
+import type { Auth } from ".";
 import { ModuleOptions } from "./options";
 import * as NuxtSchema from '@nuxt/schema';
 
@@ -15,10 +15,10 @@ declare const module: NuxtSchema.NuxtModule<ModuleOptions>;
 
 declare module "#app" {
     export interface NuxtApp {
-        $auth?: Auth;
+        $auth: Auth;
     }
     export interface NuxtConfig {
-        auth?: ModuleOptions;
+        auth: ModuleOptions;
     }
 }
 

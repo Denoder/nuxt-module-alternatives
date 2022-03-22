@@ -1,11 +1,10 @@
 **Information**
 
-This module is meant as an alternative to @nuxtjs/auth, except this is for nuxt3 only with no backwards compatibility support.
+This module is meant as an alternative to @nuxtjs/auth, except this is for nuxt3 only with no backwards compatibility support. This will only work with pinia, I had originally had it work with vuex, but since that is in maintenece mode, I decided to switch to pinia. If you find any bugs please do tell me, I'm still working on this.
 
-This will only work with pinia, I had originally had it work with vuex, but since that is in maintenece mode, I decided to switch to pinia. 
-The middleware is a little buggy I believe, but please do tell me if you find any bugs.
+**Typescript**
 
-Again if you find any bugs please do tell me, I'm still working on this.
+Please note, any issues regarding typescript is not a priorty for me. If you're having issues with it it'll be noted but not a priority, I normally have typescript disabled to focus on the functionality of the module.
 
 **Cookie-based auth**
 
@@ -23,7 +22,7 @@ the config would look like this
                     name: 'token',
                 },
                 endpoints: {
-                    csrf: false,
+                    csrf: false
                     login: { url: '/api/user/login', method: 'post' },
                     user: { url: '/api/user/me', method: 'get' }
                 },
@@ -73,9 +72,13 @@ Laravel Sanctum wokrs a tiny bit differently, It inherits the same config as the
     }
 ```
 
+**Oauth2**
+
+I believe oauth2 is using `addServerMiddleware` which doesn't work unless it's in a file format, so I'll need to spend some time to change this accordingly. (Will most likey need to do something similar to what im doing with `@nuxtjs-alt/proxy` to circumvent this issue.)
+
 **Middleware**
 
-For some reason the context of nuxt is not available when the middleware is set to global, so with that in mind, setting it to global has been disabled. As an alternative you may try to create your own middleware and disable this one by setting `enableMiddleware: false`
+Middleware is a mixed bag, it "should" work like the original only difference is that you're not using `router.middleware` to set the global middleware, instead you need to use the `globalMiddleware` param in `auth` and set it to true.
 
 **Depenencies Needed:**
 - @nuxtjs-alt/axios
