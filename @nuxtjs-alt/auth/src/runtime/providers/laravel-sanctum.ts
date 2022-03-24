@@ -14,6 +14,7 @@ export interface LaravelSanctumProviderOptions
 }
 
 export function laravelSanctum(
+    nuxt: any,
     strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>
 ): void {
 

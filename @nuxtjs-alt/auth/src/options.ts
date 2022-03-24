@@ -43,7 +43,7 @@ export interface ModuleOptions {
 
 export const moduleDefaults: ModuleOptions = {
     // -- Enable Global Middleware --
-    globalMiddleware: true,
+    globalMiddleware: false,
 
     // -- Error handling --
 

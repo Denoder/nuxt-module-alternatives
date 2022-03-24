@@ -28,7 +28,7 @@ export default defineNuxtModule({
         const resolver = createResolver(import.meta.url)
 
         // Resolve strategies
-        const { strategies, strategyScheme } = resolveStrategies(options)
+        const { strategies, strategyScheme } = resolveStrategies(nuxt, options)
         delete options.strategies
 
         // Resolve required imports
@@ -67,19 +67,19 @@ export default defineNuxtModule({
 })
 
 declare module '@nuxt/schema' {
-    export interface NuxtConfig { 
+    interface NuxtConfig { 
         ['auth']?: Partial<ModuleOptions> 
     }
-    export interface NuxtOptions { 
+    interface NuxtOptions { 
         ['auth']?: ModuleOptions 
     }
 }
 
 declare module "#app" {
-    export interface NuxtApp {
+    interface NuxtApp {
         $auth: Auth;
     }
-    export interface NuxtConfig {
+    interface NuxtConfig {
         auth: ModuleOptions;
     }
 }

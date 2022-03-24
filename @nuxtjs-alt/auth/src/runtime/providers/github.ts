@@ -7,6 +7,7 @@ export interface GithubProviderOptions
     Oauth2SchemeOptions { }
 
 export function github(
+    nuxt: any,
     strategy: ProviderPartialOptions<GithubProviderOptions>
 ): void {
     const DEFAULTS: typeof strategy = {
@@ -21,5 +22,5 @@ export function github(
 
     assignDefaults(strategy, DEFAULTS)
 
-    addAuthorize(strategy)
+    addAuthorize(nuxt, strategy)
 }

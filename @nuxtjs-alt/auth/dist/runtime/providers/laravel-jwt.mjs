@@ -1,5 +1,5 @@
 import { assignDefaults, assignAbsoluteEndpoints } from "../utils/provider.mjs";
-export function laravelJWT(strategy) {
+export function laravelJWT(nuxt, strategy) {
   const { url } = strategy;
   if (!url) {
     throw new Error("url is required for laravel jwt!");

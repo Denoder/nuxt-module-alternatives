@@ -6,6 +6,7 @@ export default defineBuildConfig({
         "#app",
         "axios",
         "vue-router",
+        "fs-extra",
         "follow-redirects",
         // Workspace Modules
         "@nuxtjs-alt/axios",

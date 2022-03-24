@@ -7,6 +7,7 @@ export interface FacebookProviderOptions
     Oauth2SchemeOptions { }
 
 export function facebook(
+    nuxt: any,
     strategy: ProviderPartialOptions<FacebookProviderOptions>
 ): void {
     const DEFAULTS: typeof strategy = {

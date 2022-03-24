@@ -106,9 +106,7 @@ const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
     codeChallengeMethod: 'implicit'
 }
 
-export class Oauth2Scheme<
-    OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOptions
-    >
+export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOptions>
     extends BaseScheme<OptionsT>
     implements RefreshableScheme {
     public req
@@ -117,20 +115,11 @@ export class Oauth2Scheme<
     public refreshController: RefreshController
     public requestHandler: RequestHandler
 
-    constructor(
-        $auth: Auth,
-        options: SchemePartialOptions<Oauth2SchemeOptions>,
-        ...defaults: SchemePartialOptions<Oauth2SchemeOptions>[]
-    ) {
-        super(
-            $auth,
-            options as OptionsT,
-            ...(defaults as OptionsT[]),
-            DEFAULTS as OptionsT
-        )
+    constructor($auth: Auth, options: SchemePartialOptions<Oauth2SchemeOptions>, ...defaults: SchemePartialOptions<Oauth2SchemeOptions>[]) {
+        super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT)
 
         // @ts-ignore
-        this.req = $auth.ctx.ssrContext.req
+        this.req = process.server ? $auth.ctx.ssrContext.req : ''
 
         // Initialize Token instance
         this.token = new Token(this, this.$auth.$storage)
@@ -146,25 +135,18 @@ export class Oauth2Scheme<
     }
 
     protected get scope(): string {
-        return Array.isArray(this.options.scope)
-            ? this.options.scope.join(' ')
-            : this.options.scope
+        return Array.isArray(this.options.scope) ? this.options.scope.join(' ') : this.options.scope
     }
 
     protected get redirectURI(): string {
         // @ts-ignore
         const basePath = this.$auth.ctx.$config.app.baseURL || ''
-        const path = normalizePath(
-            basePath + '/' + this.$auth.options.redirect.callback
-        ) // Don't pass in context since we want the base path
+        const path = normalizePath(basePath + '/' + this.$auth.options.redirect.callback) // Don't pass in context since we want the base path
         return this.options.redirectUri || urlJoin(requrl(this.req), path)
     }
 
     protected get logoutRedirectURI(): string {
-        return (
-            this.options.logoutRedirectUri ||
-            urlJoin(requrl(this.req), this.$auth.options.redirect.logout)
-        )
+        return (this.options.logoutRedirectUri || urlJoin(requrl(this.req), this.$auth.options.redirect.logout))
     }
 
     check(checkStatus = false): SchemeCheck {
@@ -513,7 +495,7 @@ export class Oauth2Scheme<
     protected generateRandomString(): string {
         const array = new Uint32Array(28) // this is of minimum required length for servers with PKCE-enabled
         window.crypto.getRandomValues(array)
-        return Array.from(array, (dec) => ('0' + dec.toString(16)).substr(-2)).join(
+        return Array.from(array, (dec) => ('0' + dec.toString(16)).slice(-2)).join(
             ''
         )
     }

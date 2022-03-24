@@ -3,4 +3,4 @@ import type { CookieSchemeOptions } from '../schemes';
 export interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOptions {
     url: string;
 }
-export declare function laravelSanctum(strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>): void;
+export declare function laravelSanctum(nuxt: any, strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>): void;

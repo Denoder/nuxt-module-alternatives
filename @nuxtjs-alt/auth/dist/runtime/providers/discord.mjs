@@ -1,5 +1,5 @@
 import { assignDefaults, addAuthorize } from "../utils/provider.mjs";
-export function discord(strategy) {
+export function discord(nuxt, strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
@@ -12,5 +12,5 @@ export function discord(strategy) {
     scope: ["identify", "email"]
   };
   assignDefaults(strategy, DEFAULTS);
-  addAuthorize(strategy, true);
+  addAuthorize(nuxt, strategy, true);
 }

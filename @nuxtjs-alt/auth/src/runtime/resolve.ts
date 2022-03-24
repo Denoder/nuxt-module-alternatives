@@ -23,6 +23,7 @@ export interface ImportOptions {
 }
 
 export function resolveStrategies(
+    nuxt: any,
     options: ModuleOptions
 ): { strategies: Strategy[]; strategyScheme: Record<string, ImportOptions> } {
     const strategies: Strategy[] = []
@@ -56,7 +57,7 @@ export function resolveStrategies(
         delete strategy.provider
 
         if (typeof provider === 'function') {
-            provider(strategy)
+            provider(nuxt, strategy)
         }
 
         // Default scheme (same as name)

@@ -3,10 +3,10 @@ import { ModuleOptions } from "./options";
 import * as NuxtSchema from '@nuxt/schema';
 
 declare module '@nuxt/schema' {
-    export interface NuxtConfig {
+    interface NuxtConfig {
         ['auth']?: Partial<ModuleOptions>;
     }
-    export interface NuxtOptions {
+    interface NuxtOptions {
         ['auth']?: ModuleOptions;
     }
 }
@@ -14,10 +14,10 @@ declare module '@nuxt/schema' {
 declare const module: NuxtSchema.NuxtModule<ModuleOptions>;
 
 declare module "#app" {
-    export interface NuxtApp {
+    interface NuxtApp {
         $auth: Auth;
     }
-    export interface NuxtConfig {
+    interface NuxtConfig {
         auth: ModuleOptions;
     }
 }

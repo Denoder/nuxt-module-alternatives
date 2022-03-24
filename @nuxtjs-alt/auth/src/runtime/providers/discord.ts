@@ -7,6 +7,7 @@ export interface DiscordProviderOptions
     Oauth2SchemeOptions { }
 
 export function discord(
+    nuxt: any,
     strategy: ProviderPartialOptions<DiscordProviderOptions>
 ): void {
     const DEFAULTS: typeof strategy = {
@@ -24,5 +25,5 @@ export function discord(
 
     assignDefaults(strategy, DEFAULTS)
 
-    addAuthorize(strategy, true)
+    addAuthorize(nuxt, strategy, true)
 }

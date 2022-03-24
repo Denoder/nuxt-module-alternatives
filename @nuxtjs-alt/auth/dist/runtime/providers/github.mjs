@@ -1,5 +1,5 @@
 import { assignDefaults, addAuthorize } from "../utils/provider.mjs";
-export function github(strategy) {
+export function github(nuxt, strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
@@ -10,5 +10,5 @@ export function github(strategy) {
     scope: ["user", "email"]
   };
   assignDefaults(strategy, DEFAULTS);
-  addAuthorize(strategy);
+  addAuthorize(nuxt, strategy);
 }

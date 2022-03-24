@@ -22,7 +22,7 @@ the config would look like this
                     name: 'token',
                 },
                 endpoints: {
-                    csrf: false
+                    csrf: false,
                     login: { url: '/api/user/login', method: 'post' },
                     user: { url: '/api/user/me', method: 'get' }
                 },
@@ -75,6 +75,7 @@ Laravel Sanctum wokrs a tiny bit differently, It inherits the same config as the
 **Oauth2**
 
 I believe oauth2 is using `addServerMiddleware` which doesn't work unless it's in a file format, so I'll need to spend some time to change this accordingly. (Will most likey need to do something similar to what im doing with `@nuxtjs-alt/proxy` to circumvent this issue.)
+If you're encountering issues regarding this please tell me.
 
 **Middleware**
 
@@ -90,3 +91,4 @@ Middleware is a mixed bag, it "should" work like the original only difference is
 - jwt-decode
 - requrl
 - @nuxt/kit
+- fs-extra

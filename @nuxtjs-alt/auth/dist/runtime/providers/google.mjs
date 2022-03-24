@@ -1,5 +1,5 @@
 import { assignDefaults } from "../utils/provider.mjs";
-export function google(strategy) {
+export function google(nuxt, strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {

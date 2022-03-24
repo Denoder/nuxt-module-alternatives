@@ -9,6 +9,7 @@ export interface Auth0ProviderOptions
 }
 
 export function auth0(
+    nuxt: any,
     strategy: ProviderPartialOptions<Auth0ProviderOptions>
 ): void {
     const DEFAULTS: typeof strategy = {

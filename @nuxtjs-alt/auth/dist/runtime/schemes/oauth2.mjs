@@ -60,7 +60,7 @@ const DEFAULTS = {
 export class Oauth2Scheme extends BaseScheme {
   constructor($auth, options, ...defaults) {
     super($auth, options, ...defaults, DEFAULTS);
-    this.req = $auth.ctx.ssrContext.req;
+    this.req = process.server ? $auth.ctx.ssrContext.req : "";
     this.token = new Token(this, this.$auth.$storage);
     this.refreshToken = new RefreshToken(this, this.$auth.$storage);
     this.refreshController = new RefreshController(this);
@@ -297,7 +297,7 @@ export class Oauth2Scheme extends BaseScheme {
   generateRandomString() {
     const array = new Uint32Array(28);
     window.crypto.getRandomValues(array);
-    return Array.from(array, (dec) => ("0" + dec.toString(16)).substr(-2)).join("");
+    return Array.from(array, (dec) => ("0" + dec.toString(16)).slice(-2)).join("");
   }
   _sha256(plain) {
     const encoder = new TextEncoder();

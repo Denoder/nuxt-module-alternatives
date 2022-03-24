@@ -12,7 +12,7 @@ const BuiltinSchemes = {
   laravelJWT: "LaravelJWTScheme",
   auth0: "Auth0Scheme"
 };
-export function resolveStrategies(options) {
+export function resolveStrategies(nuxt, options) {
   const strategies = [];
   const strategyScheme = {};
   for (const name of Object.keys(options.strategies)) {
@@ -29,7 +29,7 @@ export function resolveStrategies(options) {
     const provider = resolveProvider(strategy.provider);
     delete strategy.provider;
     if (typeof provider === "function") {
-      provider(strategy);
+      provider(nuxt, strategy);
     }
     if (!strategy.scheme) {
       strategy.scheme = strategy.name;

@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/auth",
-    "version": "1.0.11",
+    "version": "1.0.15",
     "description": "An alternative module to @nuxtjs/auth",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -33,14 +33,16 @@
         "body-parser": "latest",
         "cookie-es": "latest",
         "defu": "latest",
+        "fs-extra": "latest",
         "hasha": "latest",
         "jwt-decode": "latest",
         "requrl": "latest"
     },
     "devDependencies": {
         "@nuxt/module-builder": "latest",
+        "@types/fs-extra": "latest",
         "eslint": "latest",
-        "nuxt3": "^3.0.0-27466220.7c0d2e1"
+        "nuxt3": "latest"
     },
     "peerDependencies": {
         "vue": "*"

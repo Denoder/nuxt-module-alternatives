@@ -1,17 +1,14 @@
 import { existsSync } from 'fs';
 import hash from 'hasha';
-import qs from 'querystring';
+import fs from 'fs-extra';
 import defu from 'defu';
-import axios from 'axios';
-import bodyParser from 'body-parser';
-import requrl from 'requrl';
-import { addServerMiddleware, resolvePath, requireModule, defineNuxtModule, createResolver, addPluginTemplate } from '@nuxt/kit';
+import { createResolver, addServerMiddleware, resolvePath, requireModule, defineNuxtModule, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.0.11";
+const version = "1.0.15";
 
 const moduleDefaults = {
-  globalMiddleware: true,
+  globalMiddleware: false,
   resetOnError: false,
   ignoreExceptions: false,
   scopeKey: "scope",
@@ -43,7 +40,7 @@ const moduleDefaults = {
 function assignDefaults(strategy, defaults) {
   Object.assign(strategy, defu(strategy, defaults));
 }
-function addAuthorize(strategy, useForms = false) {
+function addAuthorize(nuxt, strategy, useForms = false) {
   const clientSecret = strategy.clientSecret;
   const clientID = strategy.clientId;
   const tokenEndpoint = strategy.endpoints.token;
@@ -52,67 +49,23 @@ function addAuthorize(strategy, useForms = false) {
   const endpoint = `/_auth/oauth/${strategy.name}/authorize`;
   strategy.endpoints.token = endpoint;
   strategy.responseType = "code";
-  const formMiddleware = bodyParser.urlencoded({ extended: true });
+  const resolver = createResolver(nuxt.options.srcDir);
+  const proxyDirectory = resolver.resolve("server/@auth");
+  const filePath = proxyDirectory + `/addAuthorize.ts`;
+  fs.outputFileSync(filePath, authorizeMiddlewareFile({
+    strategy,
+    useForms,
+    clientSecret,
+    clientID,
+    tokenEndpoint,
+    audience
+  }));
   addServerMiddleware({
     route: endpoint,
-    handle: (req, res, next) => {
-      if (req.method !== "POST") {
-        return next();
-      }
-      formMiddleware(req, res, () => {
-        const {
-          code,
-          code_verifier: codeVerifier,
-          redirect_uri: redirectUri = strategy.redirectUri,
-          response_type: responseType = strategy.responseType,
-          grant_type: grantType = strategy.grantType,
-          refresh_token: refreshToken
-        } = req.body;
-        if (grantType === "authorization_code" && !code) {
-          return next();
-        }
-        if (grantType === "refresh_token" && !refreshToken) {
-          return next();
-        }
-        let data = {
-          client_id: clientID,
-          client_secret: clientSecret,
-          refresh_token: refreshToken,
-          grant_type: grantType,
-          response_type: responseType,
-          redirect_uri: redirectUri,
-          audience,
-          code_verifier: codeVerifier,
-          code
-        };
-        const headers = {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        };
-        if (strategy.clientSecretTransport === "authorization_header") {
-          headers.Authorization = "Basic " + Buffer.from(clientID + ":" + clientSecret).toString("base64");
-          delete data.client_secret;
-        }
-        if (useForms) {
-          data = qs.stringify(data);
-          headers["Content-Type"] = "application/x-www-form-urlencoded";
-        }
-        axios.request({
-          method: "post",
-          url: tokenEndpoint,
-          data,
-          headers
-        }).then((response) => {
-          res.end(JSON.stringify(response.data));
-        }).catch((error) => {
-          res.statusCode = error.response.status;
-          res.end(JSON.stringify(error.response.data));
-        });
-      });
-    }
+    handle: filePath
   });
 }
-function initializePasswordGrantFlow(strategy) {
+function initializePasswordGrantFlow(nuxt, strategy) {
   const clientSecret = strategy.clientSecret;
   const clientId = strategy.clientId;
   const tokenEndpoint = strategy.endpoints.token;
@@ -120,47 +73,18 @@ function initializePasswordGrantFlow(strategy) {
   const endpoint = `/_auth/${strategy.name}/token`;
   strategy.endpoints.login.url = endpoint;
   strategy.endpoints.refresh.url = endpoint;
-  const formMiddleware = bodyParser.json();
+  const resolver = createResolver(nuxt.options.srcDir);
+  const proxyDirectory = resolver.resolve("server/@auth");
+  const filePath = proxyDirectory + `/passwordGrant.ts`;
+  fs.outputFileSync(filePath, passwordGrantMiddlewareFile({
+    strategy,
+    clientSecret,
+    clientId,
+    tokenEndpoint
+  }));
   addServerMiddleware({
     route: endpoint,
-    handle: (req, res, next) => {
-      if (req.method !== "POST") {
-        return next();
-      }
-      formMiddleware(req, res, () => {
-        const data = req.body;
-        if (!data.grant_type) {
-          data.grant_type = strategy.grantType;
-        }
-        if (!data.client_id) {
-          data.grant_type = clientId;
-        }
-        if (data.grant_type === "password" && (!data.username || !data.password)) {
-          return next(new Error("Invalid username or password"));
-        }
-        if (data.grant_type === "refresh_token" && !data.refresh_token) {
-          return next(new Error("Refresh token not provided"));
-        }
-        axios.request({
-          method: "post",
-          url: tokenEndpoint,
-          baseURL: requrl(req),
-          data: {
-            client_id: clientId,
-            client_secret: clientSecret,
-            ...data
-          },
-          headers: {
-            Accept: "application/json"
-          }
-        }).then((response) => {
-          res.end(JSON.stringify(response.data));
-        }).catch((error) => {
-          res.statusCode = error.response.status;
-          res.end(JSON.stringify(error.response.data));
-        });
-      });
-    }
+    handle: filePath
   });
 }
 function assignAbsoluteEndpoints(strategy) {
@@ -184,8 +108,178 @@ function assignAbsoluteEndpoints(strategy) {
     }
   }
 }
+function authorizeMiddlewareFile(opt) {
+  return `
+import axios from 'axios'
+import qs from 'querystring'
+import bodyParser from 'body-parser'
+import type { IncomingMessage, ServerResponse } from 'http'
 
-function auth0(strategy) {
+// Form data parser
+const formMiddleware = bodyParser.urlencoded({ extended: true })
+
+export default async (req: IncomingMessage, res: ServerResponse) => {
+
+    await new Promise<void>((resolve, reject) => {
+        const next = (err?: unknown) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
+        }
+
+        if (req.method !== 'POST') {
+            return next()
+        }
+    
+        formMiddleware(req, res, () => {
+            const {
+                code,
+                code_verifier: codeVerifier,
+                redirect_uri: redirectUri = ${opt.strategy.redirectUri},
+                response_type: responseType = ${opt.strategy.responseType},
+                grant_type: grantType = ${opt.strategy.grantType},
+                refresh_token: refreshToken
+            } = req.body
+    
+            // Grant type is authorization code, but code is not available
+            if (grantType === 'authorization_code' && !code) {
+                return next()
+            }
+    
+            // Grant type is refresh token, but refresh token is not available
+            if (grantType === 'refresh_token' && !refreshToken) {
+                return next()
+            }
+    
+            let data: qs.ParsedUrlQueryInput | string = {
+                client_id: ${opt.clientID},
+                client_secret: ${opt.clientSecret},
+                refresh_token: refreshToken,
+                grant_type: grantType,
+                response_type: responseType,
+                redirect_uri: redirectUri,
+                ${opt.audience},
+                code_verifier: codeVerifier,
+                code
+            }
+    
+            const headers = {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            }
+    
+            if (strategy.clientSecretTransport === 'authorization_header') {
+                // @ts-ignore
+                headers.Authorization = 'Basic ' + Buffer.from(${opt.clientID} + ':' + ${opt.clientSecret}).toString('base64')
+                // client_secret is transported in auth header
+                delete data.client_secret
+            }
+    
+            if (useForms) {
+                data = qs.stringify(data)
+                headers['Content-Type'] = 'application/x-www-form-urlencoded'
+            }
+    
+            axios
+                .request({
+                    method: 'post',
+                    url: ${opt.tokenEndpoint},
+                    data,
+                    headers
+                })
+                .then((response) => {
+                    res.end(JSON.stringify(response.data))
+                })
+                .catch((error) => {
+                    res.statusCode = error.response.status
+                    res.end(JSON.stringify(error.response.data))
+                })
+        })
+    })
+}
+`;
+}
+function passwordGrantMiddlewareFile(opt) {
+  return `
+import axios from 'axios'
+import requrl from 'requrl'
+import bodyParser from 'body-parser'
+import type { IncomingMessage, ServerResponse } from 'http'
+
+// Form data parser
+const formMiddleware = bodyParser.json()
+
+export default async (req: IncomingMessage, res: ServerResponse) => {
+
+    await new Promise<void>((resolve, reject) => {
+        const next = (err?: unknown) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
+        }
+
+        if (req.method !== 'POST') {
+            return next()
+        }
+    
+        formMiddleware(req, res, () => {
+            const data = req.body
+
+            // If \`grant_type\` is not defined, set default value
+            if (!data.grant_type) {
+                data.grant_type = ${opt.strategy.grantType}
+            }
+
+            // If \`client_id\` is not defined, set default value
+            if (!data.client_id) {
+                data.grant_type = ${opt.clientId}
+            }
+
+            // Grant type is password, but username or password is not available
+            if (
+                data.grant_type === 'password' &&
+                (!data.username || !data.password)
+            ) {
+                return next(new Error('Invalid username or password'))
+            }
+
+            // Grant type is refresh token, but refresh token is not available
+            if (data.grant_type === 'refresh_token' && !data.refresh_token) {
+                return next(new Error('Refresh token not provided'))
+            }
+
+            axios
+                .request({
+                    method: 'post',
+                    url: ${opt.tokenEndpoint},
+                    baseURL: requrl(req),
+                    data: {
+                        client_id: ${opt.clientId},
+                        client_secret: ${opt.clientSecret},
+                        ...data
+                    },
+                    headers: {
+                        Accept: 'application/json'
+                    }
+                })
+                .then((response) => {
+                    res.end(JSON.stringify(response.data))
+                })
+                .catch((error) => {
+                    res.statusCode = error.response.status
+                    res.end(JSON.stringify(error.response.data))
+                })
+        })
+    })
+}
+`;
+}
+
+function auth0(nuxt, strategy) {
   const DEFAULTS = {
     scheme: "auth0",
     endpoints: {
@@ -199,7 +293,7 @@ function auth0(strategy) {
   assignDefaults(strategy, DEFAULTS);
 }
 
-function discord(strategy) {
+function discord(nuxt, strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
@@ -212,10 +306,10 @@ function discord(strategy) {
     scope: ["identify", "email"]
   };
   assignDefaults(strategy, DEFAULTS);
-  addAuthorize(strategy, true);
+  addAuthorize(nuxt, strategy, true);
 }
 
-function facebook(strategy) {
+function facebook(nuxt, strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
@@ -227,7 +321,7 @@ function facebook(strategy) {
   assignDefaults(strategy, DEFAULTS);
 }
 
-function github(strategy) {
+function github(nuxt, strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
@@ -238,10 +332,10 @@ function github(strategy) {
     scope: ["user", "email"]
   };
   assignDefaults(strategy, DEFAULTS);
-  addAuthorize(strategy);
+  addAuthorize(nuxt, strategy);
 }
 
-function google(strategy) {
+function google(nuxt, strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
@@ -253,7 +347,7 @@ function google(strategy) {
   assignDefaults(strategy, DEFAULTS);
 }
 
-function laravelJWT(strategy) {
+function laravelJWT(nuxt, strategy) {
   const { url } = strategy;
   if (!url) {
     throw new Error("url is required for laravel jwt!");
@@ -299,7 +393,7 @@ function laravelJWT(strategy) {
 function isPasswordGrant(strategy) {
   return strategy.grantType === "password";
 }
-function laravelPassport(strategy) {
+function laravelPassport(nuxt, strategy) {
   const { url } = strategy;
   if (!url) {
     throw new Error("url is required is laravel passport!");
@@ -342,7 +436,7 @@ function laravelPassport(strategy) {
     };
     assignDefaults(strategy, _DEFAULTS);
     assignAbsoluteEndpoints(strategy);
-    initializePasswordGrantFlow(strategy);
+    initializePasswordGrantFlow(nuxt, strategy);
   } else {
     const _DEFAULTS = {
       ...defaults,
@@ -359,11 +453,11 @@ function laravelPassport(strategy) {
     };
     assignDefaults(strategy, _DEFAULTS);
     assignAbsoluteEndpoints(strategy);
-    addAuthorize(strategy);
+    addAuthorize(nuxt, strategy);
   }
 }
 
-function laravelSanctum(strategy) {
+function laravelSanctum(nuxt, strategy) {
   const endpointDefaults = {
     withCredentials: true,
     headers: {
@@ -437,7 +531,7 @@ const BuiltinSchemes = {
   laravelJWT: "LaravelJWTScheme",
   auth0: "Auth0Scheme"
 };
-function resolveStrategies(options) {
+function resolveStrategies(nuxt, options) {
   const strategies = [];
   const strategyScheme = {};
   for (const name of Object.keys(options.strategies)) {
@@ -454,7 +548,7 @@ function resolveStrategies(options) {
     const provider = resolveProvider(strategy.provider);
     delete strategy.provider;
     if (typeof provider === "function") {
-      provider(strategy);
+      provider(nuxt, strategy);
     }
     if (!strategy.scheme) {
       strategy.scheme = strategy.name;
@@ -522,7 +616,7 @@ const module = defineNuxtModule({
   setup(moduleOptions, nuxt) {
     const options = defu(moduleOptions, moduleDefaults);
     const resolver = createResolver(import.meta.url);
-    const { strategies, strategyScheme } = resolveStrategies(options);
+    const { strategies, strategyScheme } = resolveStrategies(nuxt, options);
     delete options.strategies;
     const _uniqueImports = /* @__PURE__ */ new Set();
     const schemeImports = Object.values(strategyScheme).filter((i) => {

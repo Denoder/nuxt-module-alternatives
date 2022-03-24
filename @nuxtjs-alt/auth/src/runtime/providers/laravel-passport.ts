@@ -39,6 +39,7 @@ function isPasswordGrant(
 }
 
 export function laravelPassport(
+    nuxt: any,
     strategy: PartialPassportOptions | PartialPassportPasswordOptions
 ): void {
     const { url } = strategy
@@ -93,7 +94,7 @@ export function laravelPassport(
         assignDefaults(strategy, _DEFAULTS)
 
         assignAbsoluteEndpoints(strategy)
-        initializePasswordGrantFlow(strategy)
+        initializePasswordGrantFlow(nuxt, strategy)
     } else {
         const _DEFAULTS: typeof strategy = {
             ...defaults,
@@ -108,9 +109,10 @@ export function laravelPassport(
             grantType: 'authorization_code',
             scope: '*'
         }
+
         assignDefaults(strategy, _DEFAULTS)
 
         assignAbsoluteEndpoints(strategy)
-        addAuthorize(strategy)
+        addAuthorize(nuxt, strategy)
     }
 }

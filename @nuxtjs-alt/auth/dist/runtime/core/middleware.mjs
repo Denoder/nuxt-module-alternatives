@@ -1,6 +1,6 @@
-import { useNuxtApp } from "#app";
+import { useNuxtApp, defineNuxtRouteMiddleware } from "#app";
 import { routeOption, getMatchedComponents, normalizePath } from "../utils/index.mjs";
-export const AuthMiddleware = async (to, from) => {
+const authMiddleWare = defineNuxtRouteMiddleware(async (to, from) => {
   const ctx = useNuxtApp();
   if (routeOption(to, "auth", false)) {
     return;
@@ -34,4 +34,5 @@ export const AuthMiddleware = async (to, from) => {
   } else if (!pageIsInGuestMode && (!callback || !insidePage(callback))) {
     ctx.$auth.redirect("login", { route: to });
   }
-};
+});
+export { authMiddleWare as default, authMiddleWare as AuthMiddleWare };

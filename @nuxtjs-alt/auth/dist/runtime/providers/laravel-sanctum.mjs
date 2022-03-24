@@ -1,5 +1,5 @@
 import { assignDefaults } from "../utils/provider.mjs";
-export function laravelSanctum(strategy) {
+export function laravelSanctum(nuxt, strategy) {
   const endpointDefaults = {
     withCredentials: true,
     headers: {

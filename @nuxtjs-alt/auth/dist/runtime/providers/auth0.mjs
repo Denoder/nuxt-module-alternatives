@@ -1,5 +1,5 @@
 import { assignDefaults } from "../utils/provider.mjs";
-export function auth0(strategy) {
+export function auth0(nuxt, strategy) {
   const DEFAULTS = {
     scheme: "auth0",
     endpoints: {

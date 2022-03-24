@@ -7,7 +7,7 @@ import {
 function isPasswordGrant(strategy) {
   return strategy.grantType === "password";
 }
-export function laravelPassport(strategy) {
+export function laravelPassport(nuxt, strategy) {
   const { url } = strategy;
   if (!url) {
     throw new Error("url is required is laravel passport!");
@@ -50,7 +50,7 @@ export function laravelPassport(strategy) {
     };
     assignDefaults(strategy, _DEFAULTS);
     assignAbsoluteEndpoints(strategy);
-    initializePasswordGrantFlow(strategy);
+    initializePasswordGrantFlow(nuxt, strategy);
   } else {
     const _DEFAULTS = {
       ...defaults,
@@ -67,6 +67,6 @@ export function laravelPassport(strategy) {
     };
     assignDefaults(strategy, _DEFAULTS);
     assignAbsoluteEndpoints(strategy);
-    addAuthorize(strategy);
+    addAuthorize(nuxt, strategy);
   }
 }

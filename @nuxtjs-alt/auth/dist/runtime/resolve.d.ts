@@ -5,7 +5,7 @@ export interface ImportOptions {
     as: string;
     from: string;
 }
-export declare function resolveStrategies(options: ModuleOptions): {
+export declare function resolveStrategies(nuxt: any, options: ModuleOptions): {
     strategies: Strategy[];
     strategyScheme: Record<string, ImportOptions>;
 };

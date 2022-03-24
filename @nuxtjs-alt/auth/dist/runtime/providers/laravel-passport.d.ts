@@ -8,4 +8,4 @@ export interface LaravelPassportPasswordProviderOptions extends ProviderOptions,
 }
 export declare type PartialPassportOptions = ProviderPartialOptions<LaravelPassportProviderOptions>;
 export declare type PartialPassportPasswordOptions = ProviderPartialOptions<LaravelPassportPasswordProviderOptions>;
-export declare function laravelPassport(strategy: PartialPassportOptions | PartialPassportPasswordOptions): void;
+export declare function laravelPassport(nuxt: any, strategy: PartialPassportOptions | PartialPassportPasswordOptions): void;

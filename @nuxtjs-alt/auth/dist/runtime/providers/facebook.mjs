@@ -1,5 +1,5 @@
 import { assignDefaults } from "../utils/provider.mjs";
-export function facebook(strategy) {
+export function facebook(nuxt, strategy) {
   const DEFAULTS = {
     scheme: "oauth2",
     endpoints: {
