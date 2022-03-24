@@ -130,7 +130,7 @@ export class Oauth2Scheme<
         )
 
         // @ts-ignore
-        this.req = $auth.ctx.ssrContext.req
+        this.req = process.server && $auth?.ctx?.ssrContext?.req || ''
 
         // Initialize Token instance
         this.token = new Token(this, this.$auth.$storage)
