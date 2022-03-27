@@ -1,106 +1,106 @@
-import { existsSync } from 'fs'
-import hash from 'hasha'
-import * as AUTH_PROVIDERS from './providers'
-import { ProviderAliases } from './providers'
-import type { ModuleOptions } from '../options'
-import type { Strategy } from '../type'
-import { resolvePath, requireModule } from '@nuxt/kit'
+import { existsSync } from "fs";
+import hash from "hasha";
+import * as AUTH_PROVIDERS from "./providers";
+import { ProviderAliases } from "./providers";
+import type { ModuleOptions } from "../options";
+import type { Strategy } from "../type";
+import { resolvePath, requireModule } from "@nuxt/kit";
 
 const BuiltinSchemes = {
-    local: 'LocalScheme',
-    cookie: 'CookieScheme',
-    oauth2: 'Oauth2Scheme',
-    openIDConnect: 'OpenIDConnectScheme',
-    refresh: 'RefreshScheme',
-    laravelJWT: 'LaravelJWTScheme',
-    auth0: 'Auth0Scheme'
-}
+    local: "LocalScheme",
+    cookie: "CookieScheme",
+    oauth2: "Oauth2Scheme",
+    openIDConnect: "OpenIDConnectScheme",
+    refresh: "RefreshScheme",
+    laravelJWT: "LaravelJWTScheme",
+    auth0: "Auth0Scheme",
+};
 
 export interface ImportOptions {
-    name: string
-    as: string
-    from: string
+    name: string;
+    as: string;
+    from: string;
 }
 
 export function resolveStrategies(
     nuxt: any,
     options: ModuleOptions
 ): { strategies: Strategy[]; strategyScheme: Record<string, ImportOptions> } {
-    const strategies: Strategy[] = []
-    const strategyScheme = {} as Record<string, ImportOptions>
+    const strategies: Strategy[] = [];
+    const strategyScheme = {} as Record<string, ImportOptions>;
 
     for (const name of Object.keys(options.strategies)) {
         if (
             !options.strategies[name] ||
             options.strategies[name].enabled === false
         ) {
-            continue
+            continue;
         }
 
         // Clone strategy
-        const strategy: Strategy = Object.assign({}, options.strategies[name])
+        const strategy: Strategy = Object.assign({}, options.strategies[name]);
 
         // Default name
         if (!strategy.name) {
-            strategy.name = name
+            strategy.name = name;
         }
 
         // Default provider (same as name)
         if (!strategy.provider) {
-            strategy.provider = strategy.name
+            strategy.provider = strategy.name;
         }
 
         // Try to resolve provider
         const provider: (...args: unknown[]) => unknown = resolveProvider(
             strategy.provider
-        )
-        delete strategy.provider
+        );
+        delete strategy.provider;
 
-        if (typeof provider === 'function') {
-            provider(nuxt, strategy)
+        if (typeof provider === "function") {
+            provider(nuxt, strategy);
         }
 
         // Default scheme (same as name)
         if (!strategy.scheme) {
-            strategy.scheme = strategy.name
+            strategy.scheme = strategy.name;
         }
 
         // Resolve and keep scheme needed for strategy
-        const schemeImport = resolveScheme(strategy.scheme)
-        delete strategy.scheme
-        strategyScheme[strategy.name] = schemeImport
+        const schemeImport = resolveScheme(strategy.scheme);
+        delete strategy.scheme;
+        strategyScheme[strategy.name] = schemeImport;
 
         // Add strategy to array
-        strategies.push(strategy)
+        strategies.push(strategy);
     }
 
     return {
         strategies,
-        strategyScheme
-    }
+        strategyScheme,
+    };
 }
 
 export function resolveScheme(scheme: string): ImportOptions {
-    if (typeof scheme !== 'string') {
-        return
+    if (typeof scheme !== "string") {
+        return;
     }
 
     if (BuiltinSchemes[scheme]) {
         return {
             name: BuiltinSchemes[scheme],
             as: BuiltinSchemes[scheme],
-            from: '#auth/runtime'
-        }
+            from: "#auth/runtime",
+        };
     }
 
-    const path = resolvePath(scheme)
+    const path = resolvePath(scheme);
     if (existsSync(path)) {
-        const _path = path.replace(/\\/g, '/')
+        const _path = path.replace(/\\/g, "/");
         return {
-            name: 'default',
-            as: 'Scheme$' + hash(_path).substr(0, 4),
-            from: _path
-        }
+            name: "default",
+            as: "Scheme$" + hash(_path).substr(0, 4),
+            from: _path,
+        };
     }
 }
 
@@ -108,25 +108,25 @@ export function resolveProvider(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
     provider: string | ((...args: unknown[]) => unknown)
 ): (...args: unknown[]) => unknown {
-    if (typeof provider === 'function') {
-        return provider
+    if (typeof provider === "function") {
+        return provider;
     }
 
-    if (typeof provider !== 'string') {
-        return
+    if (typeof provider !== "string") {
+        return;
     }
 
-    provider = (ProviderAliases[provider] || provider) as string
+    provider = (ProviderAliases[provider] || provider) as string;
 
     // eslint-disable-next-line import/namespace
     if (AUTH_PROVIDERS[provider]) {
         // eslint-disable-next-line import/namespace
-        return AUTH_PROVIDERS[provider]
+        return AUTH_PROVIDERS[provider];
     }
 
     try {
-        const m = requireModule(provider, { useESM: true })
-        return m.default || m
+        const m = requireModule(provider, { useESM: true });
+        return m.default || m;
     } catch (e) {
         // TODO: Check if e.code is not file not found, throw an error (can be parse error)
         // Ignore

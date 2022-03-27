@@ -1,4 +1,4 @@
-import type { ModuleOptions } from '../../options';
+import type { ModuleOptions } from "../../options";
 import { NuxtApp } from "#app";
 export declare type StorageOptions = ModuleOptions & {
     initialState: {
@@ -7,18 +7,16 @@ export declare type StorageOptions = ModuleOptions & {
     };
 };
 export declare class Storage {
+    #private;
     ctx: NuxtApp;
     options: StorageOptions;
-    store: any;
     state: any;
-    private _state;
-    private _usePinia;
     constructor(ctx: NuxtApp, options: StorageOptions);
     setUniversal<V extends unknown>(key: string, value: V): V | void;
     getUniversal(key: string): unknown;
     syncUniversal(key: string, defaultValue?: unknown): unknown;
     removeUniversal(key: string): void;
-    _initState(): void;
+    getStore(pinia: any): any;
     setState<V extends unknown>(key: string, value: V): V;
     getState(key: string): unknown;
     watchState(watchKey: string, fn: (value: unknown) => void): () => void;

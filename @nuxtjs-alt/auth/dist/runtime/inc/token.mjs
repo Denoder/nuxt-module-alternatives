@@ -12,16 +12,16 @@ export class Token {
   }
   set(tokenValue) {
     const token = addTokenPrefix(tokenValue, this.scheme.options.token.type);
-    this._setToken(token);
-    this._updateExpiration(token);
+    this.#setToken(token);
+    this.#updateExpiration(token);
     if (typeof token === "string") {
       this.scheme.requestHandler.setHeader(token);
     }
     return token;
   }
   sync() {
-    const token = this._syncToken();
-    this._syncExpiration();
+    const token = this.#syncToken();
+    this.#syncExpiration();
     if (typeof token === "string") {
       this.scheme.requestHandler.setHeader(token);
     }
@@ -29,25 +29,25 @@ export class Token {
   }
   reset() {
     this.scheme.requestHandler.clearHeader();
-    this._setToken(false);
-    this._setExpiration(false);
+    this.#setToken(false);
+    this.#setExpiration(false);
   }
   status() {
-    return new TokenStatus(this.get(), this._getExpiration());
+    return new TokenStatus(this.get(), this.#getExpiration());
   }
-  _getExpiration() {
+  #getExpiration() {
     const _key = this.scheme.options.token.expirationPrefix + this.scheme.name;
     return this.$storage.getUniversal(_key);
   }
-  _setExpiration(expiration) {
+  #setExpiration(expiration) {
     const _key = this.scheme.options.token.expirationPrefix + this.scheme.name;
     return this.$storage.setUniversal(_key, expiration);
   }
-  _syncExpiration() {
+  #syncExpiration() {
     const _key = this.scheme.options.token.expirationPrefix + this.scheme.name;
     return this.$storage.syncUniversal(_key);
   }
-  _updateExpiration(token) {
+  #updateExpiration(token) {
     let tokenExpiration;
     const _tokenIssuedAtMillis = Date.now();
     const _tokenTTLMillis = Number(this.scheme.options.token.maxAge) * 1e3;
@@ -60,13 +60,13 @@ export class Token {
         throw error;
       }
     }
-    return this._setExpiration(tokenExpiration || false);
+    return this.#setExpiration(tokenExpiration || false);
   }
-  _setToken(token) {
+  #setToken(token) {
     const _key = this.scheme.options.token.prefix + this.scheme.name;
     return this.$storage.setUniversal(_key, token);
   }
-  _syncToken() {
+  #syncToken() {
     const _key = this.scheme.options.token.prefix + this.scheme.name;
     return this.$storage.syncUniversal(_key);
   }

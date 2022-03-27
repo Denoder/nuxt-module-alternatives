@@ -1,66 +1,65 @@
 import type {
     ProviderPartialOptions,
     HTTPRequest,
-    ProviderOptions
-} from '../../type'
-import type { CookieSchemeOptions } from '../schemes'
+    ProviderOptions,
+} from "../../type";
+import type { CookieSchemeOptions } from "../schemes";
 
-import { assignDefaults } from '../utils/provider'
+import { assignDefaults } from "../utils/provider";
 
 export interface LaravelSanctumProviderOptions
     extends ProviderOptions,
-    CookieSchemeOptions {
-    url: string
+        CookieSchemeOptions {
+    url: string;
 }
 
 export function laravelSanctum(
     nuxt: any,
     strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>
 ): void {
-
     const endpointDefaults: Partial<HTTPRequest> = {
         withCredentials: true,
         headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-        }
-    }
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json",
+            Accept: "application/json",
+        },
+    };
 
     const DEFAULTS: typeof strategy = {
-        scheme: 'cookie',
-        name: 'laravelSanctum',
+        scheme: "cookie",
+        name: "laravelSanctum",
         cookie: {
-            name: 'XSRF-TOKEN',
-            server: true
+            name: "XSRF-TOKEN",
+            server: true,
         },
         endpoints: {
             csrf: {
                 ...endpointDefaults,
-                url: `${strategy.url ? strategy.url : ''}/sanctum/csrf-cookie`
+                url: `${strategy.url ? strategy.url : ""}/sanctum/csrf-cookie`,
             },
             login: {
                 ...endpointDefaults,
-                url: `${strategy.url ? strategy.url : ''}/login`
+                url: `${strategy.url ? strategy.url : ""}/login`,
             },
             logout: {
                 ...endpointDefaults,
-                url: `${strategy.url ? strategy.url : ''}/logout`
+                url: `${strategy.url ? strategy.url : ""}/logout`,
             },
             user: {
                 ...endpointDefaults,
-                url: `${strategy.url ? strategy.url : ''}/api/user`
-            }
+                url: `${strategy.url ? strategy.url : ""}/api/user`,
+            },
         },
         user: {
             property: {
                 client: false,
-                server: false
+                server: false,
             },
-            autoFetch: true
+            autoFetch: true,
         },
-        ...strategy
-    }
+        ...strategy,
+    };
 
-    assignDefaults(strategy, DEFAULTS)
+    assignDefaults(strategy, DEFAULTS);
 }

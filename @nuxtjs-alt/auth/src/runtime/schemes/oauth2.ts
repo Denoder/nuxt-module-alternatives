@@ -1,4 +1,4 @@
-import requrl from 'requrl'
+import requrl from "requrl";
 import type {
     RefreshableScheme,
     SchemePartialOptions,
@@ -8,9 +8,9 @@ import type {
     SchemeOptions,
     HTTPResponse,
     EndpointsOption,
-    TokenableSchemeOptions
-} from '../../type'
-import type { Auth } from '../core'
+    TokenableSchemeOptions,
+} from "../../type";
+import type { Auth } from "../core";
 import {
     encodeQuery,
     getProp,
@@ -18,60 +18,60 @@ import {
     parseQuery,
     removeTokenPrefix,
     urlJoin,
-    randomString
-} from '../utils'
+    randomString,
+} from "../utils";
 import {
     RefreshController,
     RequestHandler,
     ExpiredAuthSessionError,
     Token,
-    RefreshToken
-} from '../inc'
-import { useRoute } from '#app'
-import { BaseScheme } from './base'
+    RefreshToken,
+} from "../inc";
+import { useRoute } from "#app";
+import { BaseScheme } from "./base";
 
 export interface Oauth2SchemeEndpoints extends EndpointsOption {
-    authorization: string
-    token: string
-    userInfo: string
-    logout: string | false
+    authorization: string;
+    token: string;
+    userInfo: string;
+    logout: string | false;
 }
 
 export interface Oauth2SchemeOptions
     extends SchemeOptions,
-    TokenableSchemeOptions,
-    RefreshableSchemeOptions {
-    endpoints: Oauth2SchemeEndpoints
-    user: UserOptions
-    responseMode: 'query.jwt' | 'fragment.jwt' | 'form_post.jwt' | 'jwt'
-    responseType: 'code' | 'token' | 'id_token' | 'none' | string
+        TokenableSchemeOptions,
+        RefreshableSchemeOptions {
+    endpoints: Oauth2SchemeEndpoints;
+    user: UserOptions;
+    responseMode: "query.jwt" | "fragment.jwt" | "form_post.jwt" | "jwt";
+    responseType: "code" | "token" | "id_token" | "none" | string;
     grantType:
-    | 'implicit'
-    | 'authorization_code'
-    | 'client_credentials'
-    | 'password'
-    | 'refresh_token'
-    | 'urn:ietf:params:oauth:grant-type:device_code'
-    accessType: 'online' | 'offline'
-    redirectUri: string
-    logoutRedirectUri: string
-    clientId: string | number
-    clientSecretTransport: 'body' | 'aurthorization_header'
-    scope: string | string[]
-    state: string
-    codeChallengeMethod: 'implicit' | 'S256' | 'plain'
-    acrValues: string
-    audience: string
-    autoLogout: boolean
+        | "implicit"
+        | "authorization_code"
+        | "client_credentials"
+        | "password"
+        | "refresh_token"
+        | "urn:ietf:params:oauth:grant-type:device_code";
+    accessType: "online" | "offline";
+    redirectUri: string;
+    logoutRedirectUri: string;
+    clientId: string | number;
+    clientSecretTransport: "body" | "aurthorization_header";
+    scope: string | string[];
+    state: string;
+    codeChallengeMethod: "implicit" | "S256" | "plain";
+    acrValues: string;
+    audience: string;
+    autoLogout: boolean;
 }
 
 const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
-    name: 'oauth2',
+    name: "oauth2",
     accessType: null,
     redirectUri: null,
     logoutRedirectUri: null,
     clientId: null,
-    clientSecretTransport: 'body',
+    clientSecretTransport: "body",
     audience: null,
     grantType: null,
     responseMode: null,
@@ -81,72 +81,91 @@ const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
         logout: null,
         authorization: null,
         token: null,
-        userInfo: null
+        userInfo: null,
     },
     scope: [],
     token: {
-        property: 'access_token',
-        type: 'Bearer',
-        name: 'Authorization',
+        property: "access_token",
+        type: "Bearer",
+        name: "Authorization",
         maxAge: 1800,
         global: true,
-        prefix: '_token.',
-        expirationPrefix: '_token_expiration.'
+        prefix: "_token.",
+        expirationPrefix: "_token_expiration.",
     },
     refreshToken: {
-        property: 'refresh_token',
+        property: "refresh_token",
         maxAge: 60 * 60 * 24 * 30,
-        prefix: '_refresh_token.',
-        expirationPrefix: '_refresh_token_expiration.'
+        prefix: "_refresh_token.",
+        expirationPrefix: "_refresh_token_expiration.",
     },
     user: {
-        property: false
+        property: false,
     },
-    responseType: 'token',
-    codeChallengeMethod: 'implicit'
-}
+    responseType: "token",
+    codeChallengeMethod: "implicit",
+};
 
-export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOptions>
+export class Oauth2Scheme<
+        OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOptions
+    >
     extends BaseScheme<OptionsT>
-    implements RefreshableScheme {
-    public req
-    public token: Token
-    public refreshToken: RefreshToken
-    public refreshController: RefreshController
-    public requestHandler: RequestHandler
+    implements RefreshableScheme
+{
+    req;
+    token: Token;
+    refreshToken: RefreshToken;
+    refreshController: RefreshController;
+    requestHandler: RequestHandler;
 
-    constructor($auth: Auth, options: SchemePartialOptions<Oauth2SchemeOptions>, ...defaults: SchemePartialOptions<Oauth2SchemeOptions>[]) {
-        super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT)
+    constructor(
+        $auth: Auth,
+        options: SchemePartialOptions<Oauth2SchemeOptions>,
+        ...defaults: SchemePartialOptions<Oauth2SchemeOptions>[]
+    ) {
+        super(
+            $auth,
+            options as OptionsT,
+            ...(defaults as OptionsT[]),
+            DEFAULTS as OptionsT
+        );
 
         // @ts-ignore
-        this.req = process.server ? $auth.ctx.ssrContext.req : ''
+        this.req = process.server ? $auth.ctx.ssrContext.req : "";
 
         // Initialize Token instance
-        this.token = new Token(this, this.$auth.$storage)
+        this.token = new Token(this, this.$auth.$storage);
 
         // Initialize Refresh Token instance
-        this.refreshToken = new RefreshToken(this, this.$auth.$storage)
+        this.refreshToken = new RefreshToken(this, this.$auth.$storage);
 
         // Initialize Refresh Controller
-        this.refreshController = new RefreshController(this)
+        this.refreshController = new RefreshController(this);
 
         // Initialize Request Handler
-        this.requestHandler = new RequestHandler(this, this.$auth.ctx.$axios)
+        this.requestHandler = new RequestHandler(this, this.$auth.ctx.$axios);
     }
 
     protected get scope(): string {
-        return Array.isArray(this.options.scope) ? this.options.scope.join(' ') : this.options.scope
+        return Array.isArray(this.options.scope)
+            ? this.options.scope.join(" ")
+            : this.options.scope;
     }
 
     protected get redirectURI(): string {
         // @ts-ignore
-        const basePath = this.$auth.ctx.$config.app.baseURL || ''
-        const path = normalizePath(basePath + '/' + this.$auth.options.redirect.callback) // Don't pass in context since we want the base path
-        return this.options.redirectUri || urlJoin(requrl(this.req), path)
+        const basePath = this.$auth.ctx.$config.app.baseURL || "";
+        const path = normalizePath(
+            basePath + "/" + this.$auth.options.redirect.callback
+        ); // Don't pass in context since we want the base path
+        return this.options.redirectUri || urlJoin(requrl(this.req), path);
     }
 
     protected get logoutRedirectURI(): string {
-        return (this.options.logoutRedirectUri || urlJoin(requrl(this.req), this.$auth.options.redirect.logout))
+        return (
+            this.options.logoutRedirectUri ||
+            urlJoin(requrl(this.req), this.$auth.options.redirect.logout)
+        );
     }
 
     check(checkStatus = false): SchemeCheck {
@@ -154,78 +173,78 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             valid: false,
             tokenExpired: false,
             refreshTokenExpired: false,
-            isRefreshable: true
-        }
+            isRefreshable: true,
+        };
 
         // Sync tokens
-        const token = this.token.sync()
-        this.refreshToken.sync()
+        const token = this.token.sync();
+        this.refreshToken.sync();
 
         // Token is required but not available
         if (!token) {
-            return response
+            return response;
         }
 
         // Check status wasn't enabled, let it pass
         if (!checkStatus) {
-            response.valid = true
-            return response
+            response.valid = true;
+            return response;
         }
 
         // Get status
-        const tokenStatus = this.token.status()
-        const refreshTokenStatus = this.refreshToken.status()
+        const tokenStatus = this.token.status();
+        const refreshTokenStatus = this.refreshToken.status();
 
         // Refresh token has expired. There is no way to refresh. Force reset.
         if (refreshTokenStatus.expired()) {
-            response.refreshTokenExpired = true
-            return response
+            response.refreshTokenExpired = true;
+            return response;
         }
 
         // Token has expired, Force reset.
         if (tokenStatus.expired()) {
-            response.tokenExpired = true
-            return response
+            response.tokenExpired = true;
+            return response;
         }
 
-        response.valid = true
-        return response
+        response.valid = true;
+        return response;
     }
 
     async mounted(): Promise<HTTPResponse | void> {
-        const { tokenExpired, refreshTokenExpired } = this.check(true)
+        const { tokenExpired, refreshTokenExpired } = this.check(true);
 
         // Force reset if refresh token has expired
         // Or if `autoLogout` is enabled and token has expired
         if (refreshTokenExpired || (tokenExpired && this.options.autoLogout)) {
-            this.$auth.reset()
+            this.$auth.reset();
         }
 
         // Initialize request interceptor
         this.requestHandler.initializeRequestInterceptor(
             this.options.endpoints.token
-        )
+        );
 
         // Handle callbacks on page load
-        const redirected = await this._handleCallback()
+        const redirected = await this.#handleCallback();
 
         if (!redirected) {
-            return this.$auth.fetchUserOnce()
+            return this.$auth.fetchUserOnce();
         }
     }
 
     reset(): void {
-        this.$auth.setUser(false)
-        this.token.reset()
-        this.refreshToken.reset()
-        this.requestHandler.reset()
+        this.$auth.setUser(false);
+        this.token.reset();
+        this.refreshToken.reset();
+        this.requestHandler.reset();
     }
 
     async login(
         _opts: { state?: string; params?; nonce?: string } = {}
     ): Promise<void> {
         const opts = {
-            protocol: 'oauth2',
+            protocol: "oauth2",
             response_type: this.options.responseType,
             access_type: this.options.accessType,
             client_id: this.options.clientId,
@@ -235,11 +254,11 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             // https://auth0.com/docs/protocols/oauth2/oauth-state
             state: _opts.state || randomString(10),
             code_challenge_method: this.options.codeChallengeMethod,
-            ..._opts.params
-        }
+            ..._opts.params,
+        };
 
         if (this.options.audience) {
-            opts.audience = this.options.audience
+            opts.audience = this.options.audience;
         }
 
         // Set Nonce Value if response_type contains id_token to mitigate Replay Attacks
@@ -248,204 +267,218 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         // Keycloak uses nonce for token as well, so support that too
         // https://github.com/nuxt-community/auth-module/pull/709
         if (
-            opts.response_type.includes('token') ||
-            opts.response_type.includes('id_token')
+            opts.response_type.includes("token") ||
+            opts.response_type.includes("id_token")
         ) {
-            opts.nonce = _opts.nonce || randomString(10)
+            opts.nonce = _opts.nonce || randomString(10);
         }
 
         if (opts.code_challenge_method) {
             switch (opts.code_challenge_method) {
-                case 'plain':
-                case 'S256':
+                case "plain":
+                case "S256":
                     {
-                        const state = this.generateRandomString()
-                        this.$auth.$storage.setUniversal(this.name + '.pkce_state', state)
-                        const codeVerifier = this.generateRandomString()
+                        const state = this.generateRandomString();
                         this.$auth.$storage.setUniversal(
-                            this.name + '.pkce_code_verifier',
+                            this.name + ".pkce_state",
+                            state
+                        );
+                        const codeVerifier = this.generateRandomString();
+                        this.$auth.$storage.setUniversal(
+                            this.name + ".pkce_code_verifier",
                             codeVerifier
-                        )
-                        const codeChallenge = await this.pkceChallengeFromVerifier(
-                            codeVerifier,
-                            opts.code_challenge_method === 'S256'
-                        )
-                        opts.code_challenge = window.encodeURIComponent(codeChallenge)
+                        );
+                        const codeChallenge =
+                            await this.pkceChallengeFromVerifier(
+                                codeVerifier,
+                                opts.code_challenge_method === "S256"
+                            );
+                        opts.code_challenge =
+                            window.encodeURIComponent(codeChallenge);
                     }
-                    break
-                case 'implicit':
+                    break;
+                case "implicit":
                 default:
-                    break
+                    break;
             }
         }
 
         if (this.options.responseMode) {
-            opts.response_mode = this.options.responseMode
+            opts.response_mode = this.options.responseMode;
         }
 
         if (this.options.acrValues) {
-            opts.acr_values = this.options.acrValues
+            opts.acr_values = this.options.acrValues;
         }
 
-        this.$auth.$storage.setUniversal(this.name + '.state', opts.state)
+        this.$auth.$storage.setUniversal(this.name + ".state", opts.state);
 
-        const url = this.options.endpoints.authorization + '?' + encodeQuery(opts)
+        const url =
+            this.options.endpoints.authorization + "?" + encodeQuery(opts);
 
-        window.location.replace(url)
+        window.location.replace(url);
     }
 
     logout(): void {
         if (this.options.endpoints.logout) {
             const opts = {
-                client_id: this.options.clientId + '',
-                logout_uri: this.logoutRedirectURI
-            }
-            const url = this.options.endpoints.logout + '?' + encodeQuery(opts)
-            window.location.replace(url)
+                client_id: this.options.clientId + "",
+                logout_uri: this.logoutRedirectURI,
+            };
+            const url = this.options.endpoints.logout + "?" + encodeQuery(opts);
+            window.location.replace(url);
         }
-        return this.$auth.reset()
+        return this.$auth.reset();
     }
 
     async fetchUser(): Promise<void> {
         if (!this.check().valid) {
-            return
+            return;
         }
 
         if (!this.options.endpoints.userInfo) {
-            this.$auth.setUser({})
-            return
+            this.$auth.setUser({});
+            return;
         }
 
         const response = await this.$auth.requestWith({
-            url: this.options.endpoints.userInfo
-        })
+            url: this.options.endpoints.userInfo,
+        });
 
-        this.$auth.setUser(getProp(response.data, this.options.user.property))
+        this.$auth.setUser(getProp(response.data, this.options.user.property));
     }
 
-    async _handleCallback(): Promise<boolean | void> {
-        const route = useRoute()
+    async #handleCallback(): Promise<boolean | void> {
+        const route = useRoute();
         // Handle callback only for specified route
         if (
             this.$auth.options.redirect &&
             normalizePath(route.path, this.$auth.ctx) !==
-            normalizePath(this.$auth.options.redirect.callback, this.$auth.ctx)
+                normalizePath(
+                    this.$auth.options.redirect.callback,
+                    this.$auth.ctx
+                )
         ) {
-            return
+            return;
         }
         // Callback flow is not supported in server side
         if (process.server) {
-            return
+            return;
         }
 
-        const hash = parseQuery(route.hash.substr(1))
-        const parsedQuery = Object.assign({}, route.query, hash)
+        const hash = parseQuery(route.hash.substr(1));
+        const parsedQuery = Object.assign({}, route.query, hash);
         // accessToken/idToken
-        let token: string = parsedQuery[this.options.token.property] as string
+        let token: string = parsedQuery[this.options.token.property] as string;
         // refresh token
-        let refreshToken: string
+        let refreshToken: string;
 
         if (this.options.refreshToken.property) {
-            refreshToken = parsedQuery[this.options.refreshToken.property] as string
+            refreshToken = parsedQuery[
+                this.options.refreshToken.property
+            ] as string;
         }
 
         // Validate state
-        const state = this.$auth.$storage.getUniversal(this.name + '.state')
-        this.$auth.$storage.setUniversal(this.name + '.state', null)
+        const state = this.$auth.$storage.getUniversal(this.name + ".state");
+        this.$auth.$storage.setUniversal(this.name + ".state", null);
         if (state && parsedQuery.state !== state) {
-            return
+            return;
         }
 
         // -- Authorization Code Grant --
-        if (this.options.responseType === 'code' && parsedQuery.code) {
-            let codeVerifier
+        if (this.options.responseType === "code" && parsedQuery.code) {
+            let codeVerifier;
 
             // Retrieve code verifier and remove it from storage
             if (
                 this.options.codeChallengeMethod &&
-                this.options.codeChallengeMethod !== 'implicit'
+                this.options.codeChallengeMethod !== "implicit"
             ) {
                 codeVerifier = this.$auth.$storage.getUniversal(
-                    this.name + '.pkce_code_verifier'
-                )
+                    this.name + ".pkce_code_verifier"
+                );
                 this.$auth.$storage.setUniversal(
-                    this.name + '.pkce_code_verifier',
+                    this.name + ".pkce_code_verifier",
                     null
-                )
+                );
             }
 
             const response = await this.$auth.request({
-                method: 'post',
+                method: "post",
                 url: this.options.endpoints.token,
-                baseURL: '',
+                baseURL: "",
                 data: encodeQuery({
                     code: parsedQuery.code as string,
-                    client_id: this.options.clientId + '',
+                    client_id: this.options.clientId + "",
                     redirect_uri: this.redirectURI,
                     response_type: this.options.responseType,
                     audience: this.options.audience,
                     grant_type: this.options.grantType,
-                    code_verifier: codeVerifier
-                })
-            })
+                    code_verifier: codeVerifier,
+                }),
+            });
 
             token =
-                (getProp(response.data, this.options.token.property) as string) || token
+                (getProp(
+                    response.data,
+                    this.options.token.property
+                ) as string) || token;
             refreshToken =
                 (getProp(
                     response.data,
                     this.options.refreshToken.property
-                ) as string) || refreshToken
+                ) as string) || refreshToken;
         }
 
         if (!token || !token.length) {
-            return
+            return;
         }
 
         // Set token
-        this.token.set(token)
+        this.token.set(token);
 
         // Store refresh token
         if (refreshToken && refreshToken.length) {
-            this.refreshToken.set(refreshToken)
+            this.refreshToken.set(refreshToken);
         }
 
         // Redirect to home
         if (this.$auth.options.watchLoggedIn) {
-            this.$auth.redirect('home', { noRouter: true })
-            return true // True means a redirect happened
+            this.$auth.redirect("home", { noRouter: true });
+            return true; // True means a redirect happened
         }
     }
 
     async refreshTokens(): Promise<HTTPResponse | void> {
         // Get refresh token
-        const refreshToken = this.refreshToken.get()
+        const refreshToken = this.refreshToken.get();
 
         // Refresh token is required but not available
         if (!refreshToken) {
-            return
+            return;
         }
 
         // Get refresh token status
-        const refreshTokenStatus = this.refreshToken.status()
+        const refreshTokenStatus = this.refreshToken.status();
 
         // Refresh token is expired. There is no way to refresh. Force reset.
         if (refreshTokenStatus.expired()) {
-            this.$auth.reset()
+            this.$auth.reset();
 
-            throw new ExpiredAuthSessionError()
+            throw new ExpiredAuthSessionError();
         }
 
         // Delete current token from the request header before refreshing
-        this.requestHandler.clearHeader()
+        this.requestHandler.clearHeader();
 
         const response = await this.$auth
             .request({
-                method: 'post',
+                method: "post",
                 url: this.options.endpoints.token,
-                baseURL: '',
+                baseURL: "",
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    "Content-Type": "application/x-www-form-urlencoded",
                 },
                 data: encodeQuery({
                     refresh_token: removeTokenPrefix(
@@ -453,31 +486,34 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                         this.options.token.type
                     ),
                     scopes: this.scope,
-                    client_id: this.options.clientId + '',
-                    grant_type: 'refresh_token'
-                })
+                    client_id: this.options.clientId + "",
+                    grant_type: "refresh_token",
+                }),
             })
             .catch((error) => {
-                this.$auth.callOnError(error, { method: 'refreshToken' })
-                return Promise.reject(error)
-            })
+                this.$auth.callOnError(error, { method: "refreshToken" });
+                return Promise.reject(error);
+            });
 
-        this.updateTokens(response)
+        this.updateTokens(response);
 
-        return response
+        return response;
     }
 
     protected updateTokens(response: HTTPResponse): void {
-        const token = getProp(response.data, this.options.token.property) as string
+        const token = getProp(
+            response.data,
+            this.options.token.property
+        ) as string;
         const refreshToken = getProp(
             response.data,
             this.options.refreshToken.property
-        ) as string
+        ) as string;
 
-        this.token.set(token)
+        this.token.set(token);
 
         if (refreshToken) {
-            this.refreshToken.set(refreshToken)
+            this.refreshToken.set(refreshToken);
         }
     }
 
@@ -486,34 +522,34 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         hashValue: boolean
     ): Promise<string> {
         if (hashValue) {
-            const hashed = await this._sha256(v)
-            return this._base64UrlEncode(hashed)
+            const hashed = await this.#sha256(v);
+            return this.#base64UrlEncode(hashed);
         }
-        return v // plain is plain - url-encoded by default
+        return v; // plain is plain - url-encoded by default
     }
 
     protected generateRandomString(): string {
-        const array = new Uint32Array(28) // this is of minimum required length for servers with PKCE-enabled
-        window.crypto.getRandomValues(array)
-        return Array.from(array, (dec) => ('0' + dec.toString(16)).slice(-2)).join(
-            ''
-        )
+        const array = new Uint32Array(28); // this is of minimum required length for servers with PKCE-enabled
+        window.crypto.getRandomValues(array);
+        return Array.from(array, (dec) =>
+            ("0" + dec.toString(16)).slice(-2)
+        ).join("");
     }
 
-    private _sha256(plain: string): Promise<ArrayBuffer> {
-        const encoder = new TextEncoder()
-        const data = encoder.encode(plain)
-        return window.crypto.subtle.digest('SHA-256', data)
+    #sha256(plain: string): Promise<ArrayBuffer> {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(plain);
+        return window.crypto.subtle.digest("SHA-256", data);
     }
 
-    private _base64UrlEncode(str: ArrayBuffer): string {
+    #base64UrlEncode(str: ArrayBuffer): string {
         // Convert the ArrayBuffer to string using Uint8 array to convert to what btoa accepts.
         // btoa accepts chars only within ascii 0-255 and base64 encodes them.
         // Then convert the base64 encoded to base64url encoded
         //   (replace + with -, replace / with _, trim trailing =)
         return btoa(String.fromCharCode.apply(null, new Uint8Array(str)))
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '')
+            .replace(/\+/g, "-")
+            .replace(/\//g, "_")
+            .replace(/=+$/, "");
     }
 }

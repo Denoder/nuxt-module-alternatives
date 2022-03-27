@@ -1,13 +1,13 @@
 import type { Auth } from ".";
 import { ModuleOptions } from "./options";
-import * as NuxtSchema from '@nuxt/schema';
+import * as NuxtSchema from "@nuxt/schema";
 
-declare module '@nuxt/schema' {
+declare module "@nuxt/schema" {
     interface NuxtConfig {
-        ['auth']?: Partial<ModuleOptions>;
+        ["auth"]?: Partial<ModuleOptions>;
     }
     interface NuxtOptions {
-        ['auth']?: ModuleOptions;
+        ["auth"]?: ModuleOptions;
     }
 }
 

@@ -22,16 +22,14 @@ export type ErrorListener = (...args: unknown[]) => void;
 export type RedirectListener = (to: string, from: string) => string;
 
 export class Auth {
-    public ctx: NuxtApp;
-    public options: ModuleOptions;
-    public strategies: Record<string, Scheme> = {};
-    public error: Error;
-    public $storage: Storage;
-    public $state;
-    private _errorListeners: ErrorListener[] = [];
-    private _redirectListeners: RedirectListener[] = [];
-    private _stateWarnShown: boolean;
-    private _getStateWarnShown: boolean;
+    ctx: NuxtApp;
+    options: ModuleOptions;
+    strategies: Record<string, Scheme> = {};
+    error: Error;
+    $storage: Storage;
+    $state;
+    #errorListeners: ErrorListener[] = [];
+    #redirectListeners: RedirectListener[] = [];
 
     constructor(ctx: NuxtApp, options: ModuleOptions) {
         this.ctx = ctx;
@@ -45,24 +43,13 @@ export class Auth {
         this.$state = storage.state;
     }
 
-    // Backward compatibility
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    get state(): any {
-        if (!this._stateWarnShown) {
-            this._stateWarnShown = true;
-            // eslint-disable-next-line no-console
-            console.warn(
-                "[AUTH] $auth.state is deprecated. Please use $auth.$state or top level props like $auth.loggedIn"
-            );
-        }
-        return this.$state;
-    }
-
     get strategy(): Scheme {
         return this.getStrategy();
     }
 
-    getStrategy(throwException = true): Scheme | TokenableScheme | RefreshableScheme {
+    getStrategy(
+        throwException = true
+    ): Scheme | TokenableScheme | RefreshableScheme {
         if (throwException) {
             if (!this.$state.strategy) {
                 throw new Error("No strategy is set!");
@@ -93,7 +80,7 @@ export class Auth {
         return this.$storage.getState("busy") as boolean;
     }
 
-    async init(): Promise<void> {
+    init(): Auth | void {
         // Reset on error
         if (this.options.resetOnError) {
             this.onError((...args) => {
@@ -115,16 +102,11 @@ export class Auth {
                 "strategy",
                 this.options.defaultStrategy
             );
-
-            // Give up if still invalid
-            if (!this.getStrategy(false)) {
-                return Promise.resolve();
-            }
         }
 
         try {
             // Call mounted for active strategy on initial load
-            await this.mounted();
+            this.mounted();
         } catch (error) {
             this.callOnError(error);
         } finally {
@@ -139,17 +121,8 @@ export class Auth {
                 });
             }
         }
-    }
 
-    getState(key: string): unknown {
-        if (!this._getStateWarnShown) {
-            this._getStateWarnShown = true;
-            // eslint-disable-next-line no-console
-            console.warn(
-                "[AUTH] $auth.getState is deprecated. Please use $auth.$storage.getState() or top level props like $auth.loggedIn"
-            );
-        }
-        return this.$storage.getState(key);
+        return this;
     }
 
     registerStrategy(name: string, strategy: Scheme): void {
@@ -254,7 +227,10 @@ export class Auth {
     }
 
     reset(...args: unknown[]): void {
-        if ((<TokenableScheme>this.getStrategy()).token && !this.getStrategy().reset) {
+        if (
+            (<TokenableScheme>this.getStrategy()).token &&
+            !this.getStrategy().reset
+        ) {
             this.setUser(false);
             (<TokenableScheme>this.getStrategy()).token.reset();
             (<RefreshableScheme>this.getStrategy()).refreshToken.reset();
@@ -271,7 +247,9 @@ export class Auth {
         }
 
         return Promise.resolve(
-            (<RefreshableScheme>this.getStrategy()).refreshController.handleRefresh()
+            (<RefreshableScheme>(
+                this.getStrategy()
+            )).refreshController.handleRefresh()
         ).catch((error) => {
             this.callOnError(error, { method: "refreshTokens" });
             return Promise.reject(error);
@@ -315,7 +293,10 @@ export class Auth {
         endpoint: HTTPRequest,
         defaults: HTTPRequest = {}
     ): Promise<HTTPResponse> {
-        const _endpoint = typeof defaults === "object" ? Object.assign({}, defaults, endpoint) : endpoint;
+        const _endpoint =
+            typeof defaults === "object"
+                ? Object.assign({}, defaults, endpoint)
+                : endpoint;
 
         // Fix baseURL for relative endpoints
         if (_endpoint.baseURL === "") {
@@ -349,13 +330,20 @@ export class Auth {
         if ((<TokenableScheme>this.getStrategy()).token) {
             const token = (<TokenableScheme>this.getStrategy()).token.get();
 
-            const tokenName = (<TokenableScheme>this.getStrategy()).options.token.name || "Authorization";
+            const tokenName =
+                (<TokenableScheme>this.getStrategy()).options.token.name ||
+                "Authorization";
 
             if (!_endpoint.headers) {
                 _endpoint.headers = {};
             }
 
-            if (!_endpoint.headers[tokenName] && isSet(token) && token && typeof token === "string") {
+            if (
+                !_endpoint.headers[tokenName] &&
+                isSet(token) &&
+                token &&
+                typeof token === "string"
+            ) {
                 _endpoint.headers[tokenName] = token;
             }
         }
@@ -381,13 +369,13 @@ export class Auth {
     }
 
     onError(listener: ErrorListener): void {
-        this._errorListeners.push(listener);
+        this.#errorListeners.push(listener);
     }
 
     callOnError(error: Error, payload = {}): void {
         this.error = error;
 
-        for (const fn of this._errorListeners) {
+        for (const fn of this.#errorListeners) {
             fn(error, payload);
         }
     }
@@ -407,7 +395,13 @@ export class Auth {
             return;
         }
 
-        const from = opt.route ? this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path : this.options.fullPathRedirect ? route.fullPath : route.path;
+        const from = opt.route
+            ? this.options.fullPathRedirect
+                ? opt.route.fullPath
+                : opt.route.path
+            : this.options.fullPathRedirect
+            ? route.fullPath
+            : route.path;
 
         let to = this.options.redirect[name];
 
@@ -418,13 +412,17 @@ export class Auth {
         // Apply rewrites
         if (this.options.rewriteRedirects) {
             if (
-                name === "login" && isRelativeURL(from) && !isSameURL(this.ctx, to, from)
+                name === "login" &&
+                isRelativeURL(from) &&
+                !isSameURL(this.ctx, to, from)
             ) {
                 this.$storage.setUniversal("redirect", from);
             }
 
             if (name === "home") {
-                const redirect = this.$storage.getUniversal("redirect") as string;
+                const redirect = this.$storage.getUniversal(
+                    "redirect"
+                ) as string;
                 this.$storage.setUniversal("redirect", null);
 
                 if (isRelativeURL(redirect)) {
@@ -441,21 +439,29 @@ export class Auth {
             return;
         }
 
-        const queryString = Object.keys(opt.route ? opt.route.query : route.query).map((key) => key + "=" + opt.route ? opt.route.query[key] : route.query[key]).join("&");
+        const queryString = Object.keys(
+            opt.route ? opt.route.query : route.query
+        )
+            .map((key) =>
+                key + "=" + opt.route ? opt.route.query[key] : route.query[key]
+            )
+            .join("&");
 
         if (opt.noRouter) {
-            window.location.replace(to + (queryString ? "?" + queryString : ""));
+            window.location.replace(
+                to + (queryString ? "?" + queryString : "")
+            );
         } else {
             router.push(to + (queryString ? "?" + queryString : ""));
         }
     }
 
     onRedirect(listener: RedirectListener): void {
-        this._redirectListeners.push(listener);
+        this.#redirectListeners.push(listener);
     }
 
     callOnRedirect(to: string, from: string): string {
-        for (const fn of this._redirectListeners) {
+        for (const fn of this.#redirectListeners) {
             to = fn(to, from) || to;
         }
         return to;

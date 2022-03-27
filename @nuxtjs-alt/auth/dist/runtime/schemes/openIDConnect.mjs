@@ -73,7 +73,7 @@ export class OpenIDConnectScheme extends Oauth2Scheme {
       this.$auth.reset();
     }
     this.requestHandler.initializeRequestInterceptor(this.options.endpoints.token);
-    const redirected = await this._handleCallback();
+    const redirected = await this.#handleCallback();
     if (!redirected) {
       return this.$auth.fetchUserOnce();
     }
@@ -115,7 +115,7 @@ export class OpenIDConnectScheme extends Oauth2Scheme {
     });
     this.$auth.setUser(data);
   }
-  async _handleCallback() {
+  async #handleCallback() {
     const route = useRoute();
     if (this.$auth.options.redirect && normalizePath(route.path) !== normalizePath(this.$auth.options.redirect.callback)) {
       return;

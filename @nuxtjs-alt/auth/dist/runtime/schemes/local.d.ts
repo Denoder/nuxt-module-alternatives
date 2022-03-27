@@ -1,7 +1,7 @@
-import type { EndpointsOption, SchemePartialOptions, TokenableSchemeOptions, TokenableScheme, UserOptions, HTTPRequest, HTTPResponse, SchemeCheck } from '../../type';
-import type { Auth } from '../core';
-import { Token, RequestHandler } from '../inc';
-import { BaseScheme } from './base';
+import type { EndpointsOption, SchemePartialOptions, TokenableSchemeOptions, TokenableScheme, UserOptions, HTTPRequest, HTTPResponse, SchemeCheck } from "../../type";
+import type { Auth } from "../core";
+import { Token, RequestHandler } from "../inc";
+import { BaseScheme } from "./base";
 export interface LocalSchemeEndpoints extends EndpointsOption {
     login: HTTPRequest;
     logout: HTTPRequest | false;
@@ -19,7 +19,7 @@ export declare class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSche
     requestHandler: RequestHandler;
     constructor($auth: Auth, options: SchemePartialOptions<LocalSchemeOptions>, ...defaults: SchemePartialOptions<LocalSchemeOptions>[]);
     check(checkStatus?: boolean): SchemeCheck;
-    mounted({ tokenCallback, refreshTokenCallback }?: {
+    mounted({ tokenCallback, refreshTokenCallback, }?: {
         tokenCallback?: () => void;
         refreshTokenCallback?: any;
     }): Promise<HTTPResponse | void>;

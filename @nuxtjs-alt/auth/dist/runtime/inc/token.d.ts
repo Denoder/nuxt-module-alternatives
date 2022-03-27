@@ -1,7 +1,8 @@
-import type { TokenableScheme } from '../../type';
-import type { Storage } from '../core';
-import { TokenStatus } from './token-status';
+import type { TokenableScheme } from "../../type";
+import type { Storage } from "../core";
+import { TokenStatus } from "./token-status";
 export declare class Token {
+    #private;
     scheme: TokenableScheme;
     $storage: Storage;
     constructor(scheme: TokenableScheme, storage: Storage);
@@ -10,10 +11,4 @@ export declare class Token {
     sync(): string | boolean;
     reset(): void;
     status(): TokenStatus;
-    private _getExpiration;
-    private _setExpiration;
-    private _syncExpiration;
-    private _updateExpiration;
-    private _setToken;
-    private _syncToken;
 }

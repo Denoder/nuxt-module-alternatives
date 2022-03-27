@@ -61,7 +61,9 @@ export class CookieScheme extends BaseScheme {
   async login(endpoint) {
     this.$auth.reset();
     if (this.options.endpoints.csrf) {
-      await this.$auth.request(this.options.endpoints.csrf, { maxRedirects: 0 });
+      await this.$auth.request(this.options.endpoints.csrf, {
+        maxRedirects: 0
+      });
     }
     if (!this.options.endpoints.login) {
       return;

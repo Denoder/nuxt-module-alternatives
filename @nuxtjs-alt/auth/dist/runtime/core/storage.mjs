@@ -2,10 +2,14 @@ import { defineStore } from "pinia";
 import { parse, serialize } from "cookie-es";
 import { isUnset, isSet, decodeValue, encodeValue } from "../utils/index.mjs";
 export class Storage {
+  #store;
+  #initStore;
+  #state;
+  #piniaEnabled;
   constructor(ctx, options) {
     this.ctx = ctx;
     this.options = options;
-    this._initState();
+    this.#initState();
   }
   setUniversal(key, value) {
     if (isUnset(value)) {
@@ -47,11 +51,11 @@ export class Storage {
     this.removeLocalStorage(key);
     this.removeCookie(key);
   }
-  _initState() {
-    this._state = {};
-    this._usePinia = this.options.pinia && !!this.ctx.pinia;
-    if (this._usePinia) {
-      const useAuth = defineStore(this.options.pinia.namespace, {
+  #initState() {
+    this.#state = {};
+    this.#piniaEnabled = this.options.pinia && !!this.ctx.pinia;
+    if (this.#piniaEnabled) {
+      this.#store = defineStore(this.options.pinia.namespace, {
         state: () => this.options.initialState,
         actions: {
           SET(payload) {
@@ -59,20 +63,24 @@ export class Storage {
           }
         }
       });
-      const { $pinia } = this.ctx;
-      const authStore = useAuth($pinia);
-      this.store = authStore;
-      this.state = this.store.$state;
+      this.#initStore = this.getStore(this.ctx.$pinia);
+      this.state = this.#initStore.$state;
     } else {
       this.state = {};
-      console.warn("[AUTH] The pinia Store is not activated. This might cause issues in auth module behavior, like redirects not working properly.To activate it, see https://nuxtjs.org/docs/2.x/directory-structure/store");
+      console.warn("[AUTH] The pinia store is not activated. This might cause issues in auth module behavior, like redirects not working properly.To activate it, please install it and add it to your config after this module");
     }
+  }
+  getStore(pinia) {
+    if (pinia) {
+      return this.#store(pinia);
+    }
+    return this.#store();
   }
   setState(key, value) {
     if (key[0] === "_") {
-      this._state[key] = value;
-    } else if (this._usePinia) {
-      const { SET } = this.store;
+      this.#state[key] = value;
+    } else if (this.#piniaEnabled) {
+      const { SET } = this.#initStore;
       SET({ key, value });
     } else {
       this.state[key] = value;
@@ -83,12 +91,12 @@ export class Storage {
     if (key[0] !== "_") {
       return this.state[key];
     } else {
-      return this._state[key];
+      return this.#state[key];
     }
   }
   watchState(watchKey, fn) {
-    if (this._usePinia) {
-      return this.store.$onAction(({ name, args }) => {
+    if (this.#piniaEnabled) {
+      return this.#initStore.$onAction(({ name, args }) => {
         if (name === "SET") {
           const { key, value } = args[0];
           if (key === watchKey) {
@@ -165,7 +173,7 @@ export class Storage {
       if (!Array.isArray(cookies))
         cookies = [cookies];
       cookies.unshift(serializedCookie);
-      this.ctx.ssrContext.res.setHeader("Set-Cookie", cookies.filter((v, i, arr) => arr.findIndex((val) => val.startsWith(v.substr(0, v.indexOf("=")))) === i));
+      this.ctx.ssrContext.res.setHeader("Set-Cookie", cookies.filter((v, i, arr) => arr.findIndex((val) => val.startsWith(v.slice(0, v.indexOf("=")))) === i));
     }
     return value;
   }
@@ -204,7 +212,7 @@ export class Storage {
       return true;
     } catch (e) {
       if (!this.options.ignoreExceptions) {
-        console.warn("[AUTH] Local storage is enabled in config, but browser doesn't support it");
+        console.warn("[AUTH] Local storage is enabled in config, but the browser does not support it.");
       }
       return false;
     }
@@ -219,7 +227,7 @@ export class Storage {
     if (window.navigator.cookieEnabled) {
       return true;
     } else {
-      console.warn("[AUTH] Cookies is enabled in config, but browser doesn't support it");
+      console.warn("[AUTH] Cookies are enabled in config, but the browser does not support it.");
       return false;
     }
   }

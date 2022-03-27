@@ -1,5 +1,5 @@
-import type { ModuleOptions } from '../options';
-import type { Strategy } from '../type';
+import type { ModuleOptions } from "../options";
+import type { Strategy } from "../type";
 export interface ImportOptions {
     name: string;
     as: string;

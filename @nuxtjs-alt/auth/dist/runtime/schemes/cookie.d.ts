@@ -1,7 +1,7 @@
-import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCookieOptions, HTTPRequest, HTTPResponse } from '../../type';
-import { BaseScheme } from './base';
-import type { Auth } from '../core';
-import { RequestHandler } from '../inc';
+import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCookieOptions, HTTPRequest, HTTPResponse } from "../../type";
+import { BaseScheme } from "./base";
+import type { Auth } from "../core";
+import { RequestHandler } from "../inc";
 export interface CookieSchemeEndpoints extends EndpointsOption {
     login: HTTPRequest;
     logout: HTTPRequest | false;
