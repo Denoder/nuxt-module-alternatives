@@ -7,14 +7,14 @@ export class ConfigurationDocument {
     this.$storage = storage;
     this.key = "_configuration_document." + this.scheme.name;
   }
-  _set(value) {
+  #set(value) {
     return this.$storage.setState(this.key, value);
   }
   get() {
     return this.$storage.getState(this.key);
   }
   set(value) {
-    this._set(value);
+    this.#set(value);
     return value;
   }
   async request() {
@@ -82,6 +82,6 @@ export class ConfigurationDocument {
     });
   }
   reset() {
-    this._set(false);
+    this.#set(false);
   }
 }

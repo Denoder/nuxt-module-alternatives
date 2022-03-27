@@ -5,7 +5,7 @@ import defu from 'defu';
 import { createResolver, addServerMiddleware, resolvePath, requireModule, defineNuxtModule, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.0.15";
+const version = "1.1.0";
 
 const moduleDefaults = {
   globalMiddleware: false,
@@ -636,11 +636,18 @@ const module = defineNuxtModule({
         schemeImports
       }
     });
+    nuxt.hook("pages:middleware:extend", (middleware) => {
+      middleware.push({
+        name: "auth",
+        path: resolver.resolve("runtime/core/middleware"),
+        global: options.globalMiddleware
+      });
+    });
     if (options.plugins) {
       options.plugins.forEach((p) => nuxt.options.plugins.push(p));
       delete options.plugins;
     }
-    const runtime = resolver.resolve("runtime/index");
+    const runtime = resolver.resolve("runtime");
     nuxt.options.alias["#auth/runtime"] = runtime;
   }
 });

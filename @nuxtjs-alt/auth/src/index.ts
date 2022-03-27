@@ -1,5 +1,5 @@
 export * from './type'
 export * from './runtime'
-export * from './module'
 export * from './runtime/providers'
+export * from './module'
 export * from './options'

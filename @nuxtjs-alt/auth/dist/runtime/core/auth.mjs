@@ -11,8 +11,8 @@ import { Storage } from "./storage.mjs";
 export class Auth {
   constructor(ctx, options) {
     this.strategies = {};
-    this._errorListeners = [];
-    this._redirectListeners = [];
+    this.#errorListeners = [];
+    this.#redirectListeners = [];
     this.ctx = ctx;
     this.options = options;
     const initialState = { user: null, loggedIn: false };
@@ -20,13 +20,8 @@ export class Auth {
     this.$storage = storage;
     this.$state = storage.state;
   }
-  get state() {
-    if (!this._stateWarnShown) {
-      this._stateWarnShown = true;
-      console.warn("[AUTH] $auth.state is deprecated. Please use $auth.$state or top level props like $auth.loggedIn");
-    }
-    return this.$state;
-  }
+  #errorListeners;
+  #redirectListeners;
   get strategy() {
     return this.getStrategy();
   }
@@ -50,7 +45,7 @@ export class Auth {
   get busy() {
     return this.$storage.getState("busy");
   }
-  async init() {
+  init() {
     if (this.options.resetOnError) {
       this.onError((...args) => {
         if (typeof this.options.resetOnError !== "function" || this.options.resetOnError(...args)) {
@@ -61,12 +56,9 @@ export class Auth {
     this.$storage.syncUniversal("strategy", this.options.defaultStrategy);
     if (!this.getStrategy(false)) {
       this.$storage.setUniversal("strategy", this.options.defaultStrategy);
-      if (!this.getStrategy(false)) {
-        return Promise.resolve();
-      }
     }
     try {
-      await this.mounted();
+      this.mounted();
     } catch (error) {
       this.callOnError(error);
     } finally {
@@ -81,13 +73,7 @@ export class Auth {
         });
       }
     }
-  }
-  getState(key) {
-    if (!this._getStateWarnShown) {
-      this._getStateWarnShown = true;
-      console.warn("[AUTH] $auth.getState is deprecated. Please use $auth.$storage.getState() or top level props like $auth.loggedIn");
-    }
-    return this.$storage.getState(key);
+    return this;
   }
   registerStrategy(name, strategy) {
     this.strategies[name] = strategy;
@@ -230,11 +216,11 @@ export class Auth {
     });
   }
   onError(listener) {
-    this._errorListeners.push(listener);
+    this.#errorListeners.push(listener);
   }
   callOnError(error, payload = {}) {
     this.error = error;
-    for (const fn of this._errorListeners) {
+    for (const fn of this.#errorListeners) {
       fn(error, payload);
     }
   }
@@ -276,10 +262,10 @@ export class Auth {
     }
   }
   onRedirect(listener) {
-    this._redirectListeners.push(listener);
+    this.#redirectListeners.push(listener);
   }
   callOnRedirect(to, from) {
-    for (const fn of this._redirectListeners) {
+    for (const fn of this.#redirectListeners) {
       to = fn(to, from) || to;
     }
     return to;

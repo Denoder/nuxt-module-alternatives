@@ -1,44 +1,44 @@
-import type { Strategy } from './type'
+import type { Strategy } from "./type";
 
 export interface ModuleOptions {
-    globalMiddleware?: boolean
-    plugins?: Array<string | { src: string; ssr: boolean }>
-    ignoreExceptions: boolean
-    resetOnError: boolean | ((...args: unknown[]) => boolean)
-    defaultStrategy: string | undefined
-    watchLoggedIn: boolean
-    rewriteRedirects: boolean
-    fullPathRedirect: boolean
-    scopeKey: string
+    globalMiddleware?: boolean;
+    plugins?: Array<string | { src: string; ssr: boolean }>;
+    ignoreExceptions: boolean;
+    resetOnError: boolean | ((...args: unknown[]) => boolean);
+    defaultStrategy: string | undefined;
+    watchLoggedIn: boolean;
+    rewriteRedirects: boolean;
+    fullPathRedirect: boolean;
+    scopeKey: string;
     redirect: {
-        login: string
-        logout: string
-        callback: string
-        home: string
-    }
+        login: string;
+        logout: string;
+        callback: string;
+        home: string;
+    };
     pinia: {
-        namespace: string
-    }
+        namespace: string;
+    };
     cookie:
-    | {
-        prefix: string
-        options: {
-            path: string
-            expires?: number | Date
-            maxAge?: number
-            domain?: string
-            secure?: boolean
-        }
-    }
-    | false
+        | {
+              prefix: string;
+              options: {
+                  path: string;
+                  expires?: number | Date;
+                  maxAge?: number;
+                  domain?: string;
+                  secure?: boolean;
+              };
+          }
+        | false;
     localStorage:
-    | {
-        prefix: string
-    }
-    | false
+        | {
+              prefix: string;
+          }
+        | false;
     strategies: {
-        [strategy: string]: Strategy
-    }
+        [strategy: string]: Strategy;
+    };
 }
 
 export const moduleDefaults: ModuleOptions = {
@@ -53,7 +53,7 @@ export const moduleDefaults: ModuleOptions = {
 
     // -- Authorization --
 
-    scopeKey: 'scope',
+    scopeKey: "scope",
 
     // -- Redirects --
 
@@ -64,36 +64,36 @@ export const moduleDefaults: ModuleOptions = {
     watchLoggedIn: true,
 
     redirect: {
-        login: '/login',
-        logout: '/',
-        home: '/',
-        callback: '/login'
+        login: "/login",
+        logout: "/",
+        home: "/",
+        callback: "/login",
     },
 
     //  -- Pinia Store --
 
     pinia: {
-        namespace: 'auth'
+        namespace: "auth",
     },
 
     // -- Cookie Store --
 
     cookie: {
-        prefix: 'auth.',
+        prefix: "auth.",
         options: {
-            path: '/'
-        }
+            path: "/",
+        },
     },
 
     // -- localStorage Store --
 
     localStorage: {
-        prefix: 'auth.'
+        prefix: "auth.",
     },
 
     // -- Strategies --
 
     defaultStrategy: undefined /* will be auto set at module level */,
 
-    strategies: {}
-}
+    strategies: {},
+};

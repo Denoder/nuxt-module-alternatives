@@ -112,7 +112,7 @@ export class Oauth2Scheme extends BaseScheme {
       this.$auth.reset();
     }
     this.requestHandler.initializeRequestInterceptor(this.options.endpoints.token);
-    const redirected = await this._handleCallback();
+    const redirected = await this.#handleCallback();
     if (!redirected) {
       return this.$auth.fetchUserOnce();
     }
@@ -193,7 +193,7 @@ export class Oauth2Scheme extends BaseScheme {
     });
     this.$auth.setUser(getProp(response.data, this.options.user.property));
   }
-  async _handleCallback() {
+  async #handleCallback() {
     const route = useRoute();
     if (this.$auth.options.redirect && normalizePath(route.path, this.$auth.ctx) !== normalizePath(this.$auth.options.redirect.callback, this.$auth.ctx)) {
       return;
@@ -289,8 +289,8 @@ export class Oauth2Scheme extends BaseScheme {
   }
   async pkceChallengeFromVerifier(v, hashValue) {
     if (hashValue) {
-      const hashed = await this._sha256(v);
-      return this._base64UrlEncode(hashed);
+      const hashed = await this.#sha256(v);
+      return this.#base64UrlEncode(hashed);
     }
     return v;
   }
@@ -299,12 +299,12 @@ export class Oauth2Scheme extends BaseScheme {
     window.crypto.getRandomValues(array);
     return Array.from(array, (dec) => ("0" + dec.toString(16)).slice(-2)).join("");
   }
-  _sha256(plain) {
+  #sha256(plain) {
     const encoder = new TextEncoder();
     const data = encoder.encode(plain);
     return window.crypto.subtle.digest("SHA-256", data);
   }
-  _base64UrlEncode(str) {
+  #base64UrlEncode(str) {
     return btoa(String.fromCharCode.apply(null, new Uint8Array(str))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
 }

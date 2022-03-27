@@ -1,5 +1,5 @@
-import type { SchemeOptions } from '../../type';
-import type { Auth } from '../core';
+import type { SchemeOptions } from "../../type";
+import type { Auth } from "../core";
 export declare class BaseScheme<OptionsT extends SchemeOptions> {
     $auth: Auth;
     options: OptionsT;

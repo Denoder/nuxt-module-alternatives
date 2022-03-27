@@ -1,5 +1,5 @@
-import type { ProviderPartialOptions, ProviderOptions } from '../../type';
-import type { RefreshSchemeOptions } from '../schemes';
+import type { ProviderPartialOptions, ProviderOptions } from "../../type";
+import type { RefreshSchemeOptions } from "../schemes";
 export interface LaravelJWTProviderOptions extends ProviderOptions, RefreshSchemeOptions {
     url: string;
 }

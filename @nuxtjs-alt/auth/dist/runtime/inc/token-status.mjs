@@ -5,19 +5,20 @@ export var TokenStatusEnum;
   TokenStatusEnum2["EXPIRED"] = "EXPIRED";
 })(TokenStatusEnum || (TokenStatusEnum = {}));
 export class TokenStatus {
+  #status;
   constructor(token, tokenExpiresAt) {
-    this._status = this._calculate(token, tokenExpiresAt);
+    this.#status = this.#calculate(token, tokenExpiresAt);
   }
   unknown() {
-    return TokenStatusEnum.UNKNOWN === this._status;
+    return TokenStatusEnum.UNKNOWN === this.#status;
   }
   valid() {
-    return TokenStatusEnum.VALID === this._status;
+    return TokenStatusEnum.VALID === this.#status;
   }
   expired() {
-    return TokenStatusEnum.EXPIRED === this._status;
+    return TokenStatusEnum.EXPIRED === this.#status;
   }
-  _calculate(token, tokenExpiresAt) {
+  #calculate(token, tokenExpiresAt) {
     const now = Date.now();
     try {
       if (!token || !tokenExpiresAt) {

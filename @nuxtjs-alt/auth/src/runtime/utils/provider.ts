@@ -1,119 +1,126 @@
-import fs from 'fs-extra'
-import defu from 'defu'
-import { addServerMiddleware, createResolver } from '@nuxt/kit'
-import type { StrategyOptions, HTTPRequest } from '../../type'
+import fs from "fs-extra";
+import defu from "defu";
+import { addServerMiddleware, createResolver } from "@nuxt/kit";
+import type { StrategyOptions, HTTPRequest } from "../../type";
 import type {
     Oauth2SchemeOptions,
     RefreshSchemeOptions,
     LocalSchemeOptions,
-    CookieScemeOptions
-} from '../schemes'
+    CookieScemeOptions,
+} from "../schemes";
 
 export function assignDefaults<SOptions extends StrategyOptions>(
     strategy: SOptions,
     defaults: SOptions
 ): void {
-    Object.assign(strategy, defu(strategy, defaults))
+    Object.assign(strategy, defu(strategy, defaults));
 }
 
-export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOptions>>(
-    nuxt: any,
-    strategy: SOptions,
-    useForms: boolean = false
-): void {
+export function addAuthorize<
+    SOptions extends StrategyOptions<Oauth2SchemeOptions>
+>(nuxt: any, strategy: SOptions, useForms: boolean = false): void {
     // Get clientSecret, clientId, endpoints.token and audience
-    const clientSecret = strategy.clientSecret
-    const clientID = strategy.clientId
-    const tokenEndpoint = strategy.endpoints.token
-    const audience = strategy.audience
+    const clientSecret = strategy.clientSecret;
+    const clientID = strategy.clientId;
+    const tokenEndpoint = strategy.endpoints.token;
+    const audience = strategy.audience;
 
     // IMPORTANT: remove clientSecret from generated bundle
-    delete strategy.clientSecret
+    delete strategy.clientSecret;
 
     // Endpoint
-    const endpoint = `/_auth/oauth/${strategy.name}/authorize`
-    strategy.endpoints.token = endpoint
+    const endpoint = `/_auth/oauth/${strategy.name}/authorize`;
+    strategy.endpoints.token = endpoint;
 
     // Set response_type to code
-    strategy.responseType = 'code'
+    strategy.responseType = "code";
 
     // Handle Middleware File
-    const resolver = createResolver(nuxt.options.srcDir)
-    const proxyDirectory = resolver.resolve('server/@auth')
-    const filePath = proxyDirectory + `/addAuthorize.ts`
+    const resolver = createResolver(nuxt.options.srcDir);
+    const proxyDirectory = resolver.resolve("server/@auth");
+    const filePath = proxyDirectory + `/addAuthorize.ts`;
 
-    fs.outputFileSync(filePath, authorizeMiddlewareFile({
-        strategy,
-        useForms,
-        clientSecret,
-        clientID,
-        tokenEndpoint,
-        audience
-    }))
+    fs.outputFileSync(
+        filePath,
+        authorizeMiddlewareFile({
+            strategy,
+            useForms,
+            clientSecret,
+            clientID,
+            tokenEndpoint,
+            audience,
+        })
+    );
 
     // Register endpoint
     addServerMiddleware({
         route: endpoint,
-        handle: filePath
-    })
+        handle: filePath,
+    });
 }
 
-export function initializePasswordGrantFlow<SOptions extends StrategyOptions<RefreshSchemeOptions>>(
-    nuxt: any,
-    strategy: SOptions
-): void {
+export function initializePasswordGrantFlow<
+    SOptions extends StrategyOptions<RefreshSchemeOptions>
+>(nuxt: any, strategy: SOptions): void {
     // Get clientSecret, clientId, endpoints.login.url
-    const clientSecret = strategy.clientSecret
-    const clientId = strategy.clientId
-    const tokenEndpoint = strategy.endpoints.token as string
+    const clientSecret = strategy.clientSecret;
+    const clientId = strategy.clientId;
+    const tokenEndpoint = strategy.endpoints.token as string;
 
     // IMPORTANT: remove clientSecret from generated bundle
-    delete strategy.clientSecret
+    delete strategy.clientSecret;
 
     // Endpoint
-    const endpoint = `/_auth/${strategy.name}/token`
-    strategy.endpoints.login.url = endpoint
-    strategy.endpoints.refresh.url = endpoint
+    const endpoint = `/_auth/${strategy.name}/token`;
+    strategy.endpoints.login.url = endpoint;
+    strategy.endpoints.refresh.url = endpoint;
 
     // Handle Middleware File
-    const resolver = createResolver(nuxt.options.srcDir)
-    const proxyDirectory = resolver.resolve('server/@auth')
-    const filePath = proxyDirectory + `/passwordGrant.ts`
-    fs.outputFileSync(filePath, passwordGrantMiddlewareFile({
-        strategy,
-        clientSecret,
-        clientId,
-        tokenEndpoint
-    }))
+    const resolver = createResolver(nuxt.options.srcDir);
+    const proxyDirectory = resolver.resolve("server/@auth");
+    const filePath = proxyDirectory + `/passwordGrant.ts`;
+
+    fs.outputFileSync(
+        filePath,
+        passwordGrantMiddlewareFile({
+            strategy,
+            clientSecret,
+            clientId,
+            tokenEndpoint,
+        })
+    );
 
     // Register endpoint
     addServerMiddleware({
         route: endpoint,
-        handle: filePath
-    })
-
+        handle: filePath,
+    });
 }
 
 export function assignAbsoluteEndpoints<
-    SOptions extends StrategyOptions<(LocalSchemeOptions | Oauth2SchemeOptions | CookieScemeOptions) & { url: string }>
+    SOptions extends StrategyOptions<
+        (LocalSchemeOptions | Oauth2SchemeOptions | CookieScemeOptions) & {
+            url: string;
+        }
+    >
 >(strategy: SOptions): void {
-    const { url, endpoints } = strategy
+    const { url, endpoints } = strategy;
 
     if (endpoints) {
         for (const key of Object.keys(endpoints)) {
-            const endpoint = endpoints[key]
+            const endpoint = endpoints[key];
 
             if (endpoint) {
-                if (typeof endpoint === 'object') {
+                if (typeof endpoint === "object") {
                     if (!endpoint.url || endpoint.url.startsWith(url)) {
-                        continue
+                        continue;
                     }
-                    ; (endpoints[key] as HTTPRequest).url = url + endpoint.url
+                    (endpoints[key] as HTTPRequest).url = url + endpoint.url;
                 } else {
                     if (endpoint.startsWith(url)) {
-                        continue
+                        continue;
                     }
-                    endpoints[key] = url + endpoint
+                    endpoints[key] = url + endpoint;
                 }
             }
         }
@@ -121,7 +128,7 @@ export function assignAbsoluteEndpoints<
 }
 
 export function authorizeMiddlewareFile(opt: any): string {
-return `
+    return `
 import axios from 'axios'
 import qs from 'querystring'
 import bodyParser from 'body-parser'
@@ -211,11 +218,11 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
         })
     })
 }
-`
+`;
 }
 
 export function passwordGrantMiddlewareFile(opt: any): string {
-return `
+    return `
 import axios from 'axios'
 import requrl from 'requrl'
 import bodyParser from 'body-parser'
@@ -289,5 +296,5 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
         })
     })
 }
-`
-} 
+`;
+}

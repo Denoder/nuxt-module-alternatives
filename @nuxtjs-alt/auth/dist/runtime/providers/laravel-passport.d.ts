@@ -1,5 +1,5 @@
-import type { ProviderPartialOptions, ProviderOptions } from '../../type';
-import type { Oauth2SchemeOptions, RefreshSchemeOptions } from '../schemes';
+import type { ProviderPartialOptions, ProviderOptions } from "../../type";
+import type { Oauth2SchemeOptions, RefreshSchemeOptions } from "../schemes";
 export interface LaravelPassportProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
     url: string;
 }

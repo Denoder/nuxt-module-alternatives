@@ -12,35 +12,35 @@ export class IdToken {
   }
   set(tokenValue) {
     const idToken = addTokenPrefix(tokenValue, this.scheme.options.idToken.type);
-    this._setToken(idToken);
-    this._updateExpiration(idToken);
+    this.#setToken(idToken);
+    this.#updateExpiration(idToken);
     return idToken;
   }
   sync() {
-    const idToken = this._syncToken();
-    this._syncExpiration();
+    const idToken = this.#syncToken();
+    this.#syncExpiration();
     return idToken;
   }
   reset() {
-    this._setToken(false);
-    this._setExpiration(false);
+    this.#setToken(false);
+    this.#setExpiration(false);
   }
   status() {
-    return new TokenStatus(this.get(), this._getExpiration());
+    return new TokenStatus(this.get(), this.#getExpiration());
   }
-  _getExpiration() {
+  #getExpiration() {
     const _key = this.scheme.options.idToken.expirationPrefix + this.scheme.name;
     return this.$storage.getUniversal(_key);
   }
-  _setExpiration(expiration) {
+  #setExpiration(expiration) {
     const _key = this.scheme.options.idToken.expirationPrefix + this.scheme.name;
     return this.$storage.setUniversal(_key, expiration);
   }
-  _syncExpiration() {
+  #syncExpiration() {
     const _key = this.scheme.options.idToken.expirationPrefix + this.scheme.name;
     return this.$storage.syncUniversal(_key);
   }
-  _updateExpiration(idToken) {
+  #updateExpiration(idToken) {
     let idTokenExpiration;
     const _tokenIssuedAtMillis = Date.now();
     const _tokenTTLMillis = Number(this.scheme.options.idToken.maxAge) * 1e3;
@@ -53,13 +53,13 @@ export class IdToken {
         throw error;
       }
     }
-    return this._setExpiration(idTokenExpiration || false);
+    return this.#setExpiration(idTokenExpiration || false);
   }
-  _setToken(idToken) {
+  #setToken(idToken) {
     const _key = this.scheme.options.idToken.prefix + this.scheme.name;
     return this.$storage.setUniversal(_key, idToken);
   }
-  _syncToken() {
+  #syncToken() {
     const _key = this.scheme.options.idToken.prefix + this.scheme.name;
     return this.$storage.syncUniversal(_key);
   }

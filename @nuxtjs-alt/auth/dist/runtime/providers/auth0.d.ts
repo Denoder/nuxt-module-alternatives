@@ -1,5 +1,5 @@
-import type { ProviderOptions, ProviderPartialOptions } from '../../type';
-import type { Oauth2SchemeOptions } from '../schemes';
+import type { ProviderOptions, ProviderPartialOptions } from "../../type";
+import type { Oauth2SchemeOptions } from "../schemes";
 export interface Auth0ProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
     domain: string;
 }

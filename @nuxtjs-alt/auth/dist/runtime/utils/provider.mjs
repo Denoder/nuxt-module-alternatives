@@ -61,7 +61,6 @@ export function assignAbsoluteEndpoints(strategy) {
           if (!endpoint.url || endpoint.url.startsWith(url)) {
             continue;
           }
-          ;
           endpoints[key].url = url + endpoint.url;
         } else {
           if (endpoint.startsWith(url)) {

@@ -1,5 +1,5 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
-import * as _app from '#app';
+import { RouteLocationNormalized } from 'vue-router';
 import { NuxtApp } from '#app';
 import { NuxtAxiosInstance } from '@nuxtjs-alt/axios';
 import * as NuxtSchema from '@nuxt/schema';
@@ -84,18 +84,16 @@ declare type StorageOptions = ModuleOptions & {
     };
 };
 declare class Storage {
+    #private;
     ctx: NuxtApp;
     options: StorageOptions;
-    store: any;
     state: any;
-    private _state;
-    private _usePinia;
     constructor(ctx: NuxtApp, options: StorageOptions);
     setUniversal<V extends unknown>(key: string, value: V): V | void;
     getUniversal(key: string): unknown;
     syncUniversal(key: string, defaultValue?: unknown): unknown;
     removeUniversal(key: string): void;
-    _initState(): void;
+    getStore(pinia: any): any;
     setState<V extends unknown>(key: string, value: V): V;
     getState(key: string): unknown;
     watchState(watchKey: string, fn: (value: unknown) => void): () => void;
@@ -119,25 +117,20 @@ declare class Storage {
 declare type ErrorListener = (...args: unknown[]) => void;
 declare type RedirectListener = (to: string, from: string) => string;
 declare class Auth {
+    #private;
     ctx: NuxtApp;
     options: ModuleOptions;
     strategies: Record<string, Scheme>;
     error: Error;
     $storage: Storage;
     $state: any;
-    private _errorListeners;
-    private _redirectListeners;
-    private _stateWarnShown;
-    private _getStateWarnShown;
     constructor(ctx: NuxtApp, options: ModuleOptions);
-    get state(): any;
     get strategy(): Scheme;
     getStrategy(throwException?: boolean): Scheme | TokenableScheme | RefreshableScheme;
     get user(): Record<string, unknown> | null;
     get loggedIn(): boolean;
     get busy(): boolean;
-    init(): Promise<void>;
-    getState(key: string): unknown;
+    init(): Auth | void;
     registerStrategy(name: string, strategy: Scheme): void;
     setStrategy(name: string): Promise<HTTPResponse | void>;
     mounted(...args: unknown[]): Promise<HTTPResponse | void>;
@@ -165,7 +158,7 @@ declare class Auth {
     hasScope(scope: string): boolean;
 }
 
-declare const authMiddleWare: _app.RouteMiddleware;
+declare const middleware: (to: RouteLocationNormalized, from: RouteLocationNormalized) => void;
 
 declare class ConfigurationDocumentRequestError extends Error {
     constructor();
@@ -227,7 +220,7 @@ declare class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOptio
     requestHandler: RequestHandler;
     constructor($auth: Auth, options: SchemePartialOptions<LocalSchemeOptions>, ...defaults: SchemePartialOptions<LocalSchemeOptions>[]);
     check(checkStatus?: boolean): SchemeCheck;
-    mounted({ tokenCallback, refreshTokenCallback }?: {
+    mounted({ tokenCallback, refreshTokenCallback, }?: {
         tokenCallback?: () => void;
         refreshTokenCallback?: any;
     }): Promise<HTTPResponse | void>;
@@ -253,22 +246,23 @@ interface Oauth2SchemeEndpoints extends EndpointsOption {
 interface Oauth2SchemeOptions extends SchemeOptions, TokenableSchemeOptions, RefreshableSchemeOptions {
     endpoints: Oauth2SchemeEndpoints;
     user: UserOptions;
-    responseMode: 'query.jwt' | 'fragment.jwt' | 'form_post.jwt' | 'jwt';
-    responseType: 'code' | 'token' | 'id_token' | 'none' | string;
-    grantType: 'implicit' | 'authorization_code' | 'client_credentials' | 'password' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:device_code';
-    accessType: 'online' | 'offline';
+    responseMode: "query.jwt" | "fragment.jwt" | "form_post.jwt" | "jwt";
+    responseType: "code" | "token" | "id_token" | "none" | string;
+    grantType: "implicit" | "authorization_code" | "client_credentials" | "password" | "refresh_token" | "urn:ietf:params:oauth:grant-type:device_code";
+    accessType: "online" | "offline";
     redirectUri: string;
     logoutRedirectUri: string;
     clientId: string | number;
-    clientSecretTransport: 'body' | 'aurthorization_header';
+    clientSecretTransport: "body" | "aurthorization_header";
     scope: string | string[];
     state: string;
-    codeChallengeMethod: 'implicit' | 'S256' | 'plain';
+    codeChallengeMethod: "implicit" | "S256" | "plain";
     acrValues: string;
     audience: string;
     autoLogout: boolean;
 }
 declare class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOptions> extends BaseScheme<OptionsT> implements RefreshableScheme {
+    #private;
     req: any;
     token: Token;
     refreshToken: RefreshToken;
@@ -288,13 +282,10 @@ declare class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOp
     }): Promise<void>;
     logout(): void;
     fetchUser(): Promise<void>;
-    _handleCallback(): Promise<boolean | void>;
     refreshTokens(): Promise<HTTPResponse | void>;
     protected updateTokens(response: HTTPResponse): void;
     protected pkceChallengeFromVerifier(v: string, hashValue: boolean): Promise<string>;
     protected generateRandomString(): string;
-    private _sha256;
-    private _base64UrlEncode;
 }
 
 interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
@@ -304,6 +295,7 @@ interface OpenIDConnectSchemeOptions extends Oauth2SchemeOptions, IdTokenableSch
     endpoints: OpenIDConnectSchemeEndpoints;
 }
 declare class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = OpenIDConnectSchemeOptions> extends Oauth2Scheme<OptionsT> {
+    #private;
     idToken: IdToken;
     configurationDocument: ConfigurationDocument;
     constructor($auth: Auth, options: SchemePartialOptions<OpenIDConnectSchemeOptions>, ...defaults: SchemePartialOptions<OpenIDConnectSchemeOptions>[]);
@@ -313,7 +305,6 @@ declare class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = 
     reset(): void;
     logout(): void;
     fetchUser(): Promise<void>;
-    _handleCallback(): Promise<boolean>;
 }
 
 interface RefreshSchemeEndpoints extends LocalSchemeEndpoints {
@@ -362,11 +353,11 @@ declare class LaravelJWTScheme extends RefreshScheme {
  * More info: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
  */
 declare class ConfigurationDocument {
+    #private;
     scheme: OpenIDConnectScheme;
     $storage: Storage;
     key: string;
     constructor(scheme: OpenIDConnectScheme, storage: Storage);
-    _set(value: OpenIDConnectConfigurationDocument | boolean): boolean | OpenIDConnectConfigurationDocument;
     get(): OpenIDConnectConfigurationDocument;
     set(value: OpenIDConnectConfigurationDocument | boolean): boolean | OpenIDConnectConfigurationDocument;
     request(): Promise<void>;
@@ -381,12 +372,11 @@ declare class ExpiredAuthSessionError extends Error {
 }
 
 declare class RefreshController {
+    #private;
     scheme: RefreshableScheme;
     $auth: Auth;
-    private _refreshPromise;
     constructor(scheme: RefreshableScheme);
     handleRefresh(): Promise<HTTPResponse | void>;
-    private _doRefresh;
 }
 
 declare enum TokenStatusEnum {
@@ -395,15 +385,15 @@ declare enum TokenStatusEnum {
     EXPIRED = "EXPIRED"
 }
 declare class TokenStatus {
-    private readonly _status;
+    #private;
     constructor(token: string | boolean, tokenExpiresAt: number | false);
     unknown(): boolean;
     valid(): boolean;
     expired(): boolean;
-    private _calculate;
 }
 
 declare class RefreshToken {
+    #private;
     scheme: RefreshableScheme;
     $storage: Storage;
     constructor(scheme: RefreshableScheme, storage: Storage);
@@ -412,15 +402,10 @@ declare class RefreshToken {
     sync(): string | boolean;
     reset(): void;
     status(): TokenStatus;
-    private _getExpiration;
-    private _setExpiration;
-    private _syncExpiration;
-    private _updateExpiration;
-    private _setToken;
-    private _syncToken;
 }
 
 declare class RequestHandler {
+    #private;
     scheme: TokenableScheme | RefreshableScheme;
     axios: NuxtAxiosInstance;
     interceptor: number;
@@ -429,12 +414,10 @@ declare class RequestHandler {
     clearHeader(): void;
     initializeRequestInterceptor(refreshEndpoint?: string): void;
     reset(): void;
-    private _needToken;
-    private _getUpdatedRequestConfig;
-    private _requestHasAuthorizationHeader;
 }
 
 declare class Token {
+    #private;
     scheme: TokenableScheme;
     $storage: Storage;
     constructor(scheme: TokenableScheme, storage: Storage);
@@ -443,15 +426,10 @@ declare class Token {
     sync(): string | boolean;
     reset(): void;
     status(): TokenStatus;
-    private _getExpiration;
-    private _setExpiration;
-    private _syncExpiration;
-    private _updateExpiration;
-    private _setToken;
-    private _syncToken;
 }
 
 declare class IdToken {
+    #private;
     scheme: IdTokenableScheme;
     $storage: Storage;
     constructor(scheme: IdTokenableScheme, storage: Storage);
@@ -460,12 +438,6 @@ declare class IdToken {
     sync(): string | boolean;
     reset(): void;
     status(): TokenStatus;
-    private _getExpiration;
-    private _setExpiration;
-    private _syncExpiration;
-    private _updateExpiration;
-    private _setToken;
-    private _syncToken;
     userInfo(): unknown;
 }
 
@@ -561,7 +533,7 @@ interface ProviderOptions {
     scheme: string;
     clientSecret: string | number;
 }
-declare type ProviderOptionsKeys = Exclude<keyof ProviderOptions, 'clientSecret'>;
+declare type ProviderOptionsKeys = Exclude<keyof ProviderOptions, "clientSecret">;
 declare type ProviderPartialOptions<Options extends ProviderOptions & SchemeOptions> = PartialExcept<Options, ProviderOptionsKeys>;
 
 declare type HTTPRequest = AxiosRequestConfig;
@@ -628,17 +600,17 @@ interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOpt
 declare function laravelSanctum(nuxt: any, strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>): void;
 
 declare const ProviderAliases: {
-    'laravel/jwt': string;
-    'laravel/passport': string;
-    'laravel/sanctum': string;
+    "laravel/jwt": string;
+    "laravel/passport": string;
+    "laravel/sanctum": string;
 };
 
-declare module '@nuxt/schema' {
+declare module "@nuxt/schema" {
     interface NuxtConfig {
-        ['auth']?: Partial<ModuleOptions>;
+        ["auth"]?: Partial<ModuleOptions>;
     }
     interface NuxtOptions {
-        ['auth']?: ModuleOptions;
+        ["auth"]?: ModuleOptions;
     }
 }
 
@@ -653,4 +625,4 @@ declare module "#app" {
     }
 }
 
-export { Auth, Auth0ProviderOptions, Auth0Scheme, authMiddleWare as AuthMiddleWare, BaseScheme, ConfigurationDocument, ConfigurationDocumentRequestError, CookieScheme, CookieSchemeCookie, CookieSchemeEndpoints, CookieSchemeOptions, DiscordProviderOptions, EndpointsOption, ErrorListener, ExpiredAuthSessionError, FacebookProviderOptions, GithubProviderOptions, GoogleProviderOptions, HTTPRequest, HTTPResponse, IdToken, IdTokenableScheme, IdTokenableSchemeOptions, LaravelJWTProviderOptions, LaravelJWTScheme, LaravelPassportPasswordProviderOptions, LaravelPassportProviderOptions, LaravelSanctumProviderOptions, LocalScheme, LocalSchemeEndpoints, LocalSchemeOptions, MatchedRoute, ModuleOptions, Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions, OpenIDConnectConfigurationDocument, OpenIDConnectScheme, OpenIDConnectSchemeEndpoints, OpenIDConnectSchemeOptions, PartialExcept, PartialPassportOptions, PartialPassportPasswordOptions, ProviderAliases, ProviderOptions, ProviderOptionsKeys, ProviderPartialOptions, RecursivePartial, RedirectListener, RefreshController, RefreshScheme, RefreshSchemeEndpoints, RefreshSchemeOptions, RefreshToken, RefreshTokenOptions, RefreshableScheme, RefreshableSchemeOptions, RequestHandler, Route, Scheme, SchemeCheck, SchemeOptions, SchemePartialOptions, Storage, StorageOptions, Strategy, StrategyOptions, Token, TokenOptions, TokenStatus, TokenStatusEnum, TokenableScheme, TokenableSchemeOptions, UserCookieOptions, UserOptions, VueComponent, auth0, module as default, discord, facebook, github, google, laravelJWT, laravelPassport, laravelSanctum, moduleDefaults };
+export { Auth, Auth0ProviderOptions, Auth0Scheme, middleware as AuthMiddleware, BaseScheme, ConfigurationDocument, ConfigurationDocumentRequestError, CookieScheme, CookieSchemeCookie, CookieSchemeEndpoints, CookieSchemeOptions, DiscordProviderOptions, EndpointsOption, ErrorListener, ExpiredAuthSessionError, FacebookProviderOptions, GithubProviderOptions, GoogleProviderOptions, HTTPRequest, HTTPResponse, IdToken, IdTokenableScheme, IdTokenableSchemeOptions, LaravelJWTProviderOptions, LaravelJWTScheme, LaravelPassportPasswordProviderOptions, LaravelPassportProviderOptions, LaravelSanctumProviderOptions, LocalScheme, LocalSchemeEndpoints, LocalSchemeOptions, MatchedRoute, ModuleOptions, Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions, OpenIDConnectConfigurationDocument, OpenIDConnectScheme, OpenIDConnectSchemeEndpoints, OpenIDConnectSchemeOptions, PartialExcept, PartialPassportOptions, PartialPassportPasswordOptions, ProviderAliases, ProviderOptions, ProviderOptionsKeys, ProviderPartialOptions, RecursivePartial, RedirectListener, RefreshController, RefreshScheme, RefreshSchemeEndpoints, RefreshSchemeOptions, RefreshToken, RefreshTokenOptions, RefreshableScheme, RefreshableSchemeOptions, RequestHandler, Route, Scheme, SchemeCheck, SchemeOptions, SchemePartialOptions, Storage, StorageOptions, Strategy, StrategyOptions, Token, TokenOptions, TokenStatus, TokenStatusEnum, TokenableScheme, TokenableSchemeOptions, UserCookieOptions, UserOptions, VueComponent, auth0, module as default, discord, facebook, github, google, laravelJWT, laravelPassport, laravelSanctum, moduleDefaults };

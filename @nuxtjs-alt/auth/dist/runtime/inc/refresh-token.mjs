@@ -12,35 +12,35 @@ export class RefreshToken {
   }
   set(tokenValue) {
     const refreshToken = addTokenPrefix(tokenValue, this.scheme.options.refreshToken.type);
-    this._setToken(refreshToken);
-    this._updateExpiration(refreshToken);
+    this.#setToken(refreshToken);
+    this.#updateExpiration(refreshToken);
     return refreshToken;
   }
   sync() {
-    const refreshToken = this._syncToken();
-    this._syncExpiration();
+    const refreshToken = this.#syncToken();
+    this.#syncExpiration();
     return refreshToken;
   }
   reset() {
-    this._setToken(false);
-    this._setExpiration(false);
+    this.#setToken(false);
+    this.#setExpiration(false);
   }
   status() {
-    return new TokenStatus(this.get(), this._getExpiration());
+    return new TokenStatus(this.get(), this.#getExpiration());
   }
-  _getExpiration() {
+  #getExpiration() {
     const _key = this.scheme.options.refreshToken.expirationPrefix + this.scheme.name;
     return this.$storage.getUniversal(_key);
   }
-  _setExpiration(expiration) {
+  #setExpiration(expiration) {
     const _key = this.scheme.options.refreshToken.expirationPrefix + this.scheme.name;
     return this.$storage.setUniversal(_key, expiration);
   }
-  _syncExpiration() {
+  #syncExpiration() {
     const _key = this.scheme.options.refreshToken.expirationPrefix + this.scheme.name;
     return this.$storage.syncUniversal(_key);
   }
-  _updateExpiration(refreshToken) {
+  #updateExpiration(refreshToken) {
     let refreshTokenExpiration;
     const _tokenIssuedAtMillis = Date.now();
     const _tokenTTLMillis = Number(this.scheme.options.refreshToken.maxAge) * 1e3;
@@ -53,13 +53,13 @@ export class RefreshToken {
         throw error;
       }
     }
-    return this._setExpiration(refreshTokenExpiration || false);
+    return this.#setExpiration(refreshTokenExpiration || false);
   }
-  _setToken(refreshToken) {
+  #setToken(refreshToken) {
     const _key = this.scheme.options.refreshToken.prefix + this.scheme.name;
     return this.$storage.setUniversal(_key, refreshToken);
   }
-  _syncToken() {
+  #syncToken() {
     const _key = this.scheme.options.refreshToken.prefix + this.scheme.name;
     return this.$storage.syncUniversal(_key);
   }
