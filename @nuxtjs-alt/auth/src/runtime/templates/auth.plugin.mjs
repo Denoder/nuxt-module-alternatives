@@ -1,9 +1,9 @@
-import { Auth, ExpiredAuthSessionError, AuthMiddleware } from '#auth/runtime'
+import { Auth, ExpiredAuthSessionError } from '#auth/runtime'
 import { defineNuxtPlugin } from '#app'
 // Active schemes
 <%= options.schemeImports.map(i => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n') %>
 
-export default defineNuxtPlugin(nuxtApp => {
+export default defineNuxtPlugin(async nuxtApp => {
     // Options
     const options = JSON.parse('<%= JSON.stringify(options.options) %>')
 
@@ -20,9 +20,8 @@ export default defineNuxtPlugin(nuxtApp => {
     %>
 
     try {
-        nuxtApp.provide('auth', $auth.init())
-    }
-    catch (error) {
+        nuxtApp.provide('auth', await $auth.init())
+    } catch (error) {
             if (process.client) {
 
             // Don't console log expired auth session errors. This error is common, and expected to happen.

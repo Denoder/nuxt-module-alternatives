@@ -1,5 +1,4 @@
 import { useNuxtApp } from "#app";
-import { nextTick } from "vue";
 import { routeOption, getMatchedComponents, normalizePath } from "../utils/index.mjs";
 const middleware = (to, from) => {
   if (routeOption(to, "auth", false)) {
@@ -10,7 +9,7 @@ const middleware = (to, from) => {
   if (!Components.length) {
     return;
   }
-  nextTick(() => {
+  setTimeout(() => {
     const ctx = useNuxtApp();
     const { login, callback } = ctx.$auth.options.redirect;
     const pageIsInGuestMode = routeOption(to, "auth", "guest");

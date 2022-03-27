@@ -122,7 +122,7 @@ export class Storage {
                 },
             });
 
-            this.#initStore = this.getStore(this.ctx.$pinia);
+            this.#initStore = this.#store(this.ctx.pinia);
             this.state = this.#initStore.$state;
         } else {
             this.state = {};
@@ -135,12 +135,8 @@ export class Storage {
         }
     }
 
-    getStore(pinia): any {
-        if (pinia) {
-            return this.#store(pinia);
-        }
-
-        return this.#store();
+    getStore(pinia: any): any {
+        return pinia ? this.#store(pinia) : this.#initStore;
     }
 
     setState<V extends unknown>(key: string, value: V): V {

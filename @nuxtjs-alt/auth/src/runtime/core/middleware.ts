@@ -1,5 +1,4 @@
 import { useNuxtApp } from "#app";
-import { nextTick } from "vue";
 import { routeOption, getMatchedComponents, normalizePath } from "../utils";
 import type { RouteLocationNormalized } from "vue-router";
 
@@ -20,7 +19,7 @@ const middleware = (
         return;
     }
 
-    nextTick(() => {
+    setTimeout(() => {
         const ctx = useNuxtApp();
 
         const { login, callback } = ctx.$auth.options.redirect;
