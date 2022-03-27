@@ -63,7 +63,7 @@ export class Storage {
           }
         }
       });
-      this.#initStore = this.getStore(this.ctx.$pinia);
+      this.#initStore = this.#store(this.ctx.pinia);
       this.state = this.#initStore.$state;
     } else {
       this.state = {};
@@ -71,10 +71,7 @@ export class Storage {
     }
   }
   getStore(pinia) {
-    if (pinia) {
-      return this.#store(pinia);
-    }
-    return this.#store();
+    return pinia ? this.#store(pinia) : this.#initStore;
   }
   setState(key, value) {
     if (key[0] === "_") {

@@ -80,7 +80,7 @@ export class Auth {
         return this.$storage.getState("busy") as boolean;
     }
 
-    init(): Auth | void {
+    async init(): Promise<any> {
         // Reset on error
         if (this.options.resetOnError) {
             this.onError((...args) => {
@@ -102,11 +102,16 @@ export class Auth {
                 "strategy",
                 this.options.defaultStrategy
             );
+
+            // Give up if still invalid
+            if (!this.getStrategy(false)) {
+                return Promise.resolve();
+            }
         }
 
         try {
             // Call mounted for active strategy on initial load
-            this.mounted();
+            await this.mounted();
         } catch (error) {
             this.callOnError(error);
         } finally {

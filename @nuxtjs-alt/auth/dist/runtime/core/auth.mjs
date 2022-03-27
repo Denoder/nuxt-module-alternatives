@@ -45,7 +45,7 @@ export class Auth {
   get busy() {
     return this.$storage.getState("busy");
   }
-  init() {
+  async init() {
     if (this.options.resetOnError) {
       this.onError((...args) => {
         if (typeof this.options.resetOnError !== "function" || this.options.resetOnError(...args)) {
@@ -56,9 +56,12 @@ export class Auth {
     this.$storage.syncUniversal("strategy", this.options.defaultStrategy);
     if (!this.getStrategy(false)) {
       this.$storage.setUniversal("strategy", this.options.defaultStrategy);
+      if (!this.getStrategy(false)) {
+        return Promise.resolve();
+      }
     }
     try {
-      this.mounted();
+      await this.mounted();
     } catch (error) {
       this.callOnError(error);
     } finally {

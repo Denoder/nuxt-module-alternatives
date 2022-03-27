@@ -18,7 +18,7 @@ export declare class Auth {
     get user(): Record<string, unknown> | null;
     get loggedIn(): boolean;
     get busy(): boolean;
-    init(): Auth | void;
+    init(): Promise<any>;
     registerStrategy(name: string, strategy: Scheme): void;
     setStrategy(name: string): Promise<HTTPResponse | void>;
     mounted(...args: unknown[]): Promise<HTTPResponse | void>;
