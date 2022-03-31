@@ -2,15 +2,11 @@
 export const getAuthPlugin = (options): string => {
 return `
 import { Auth, ExpiredAuthSessionError } from '#auth/runtime'
-import { defineNuxtPlugin, useRouter } from '#app'
+import { defineNuxtPlugin } from '#app'
 // Active schemes
 ${options.schemeImports.map(i => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n')}
 
 export default defineNuxtPlugin(ctx => {
-    const router = useRouter();
-    router.beforeEach(async (to, from) => {
-        console.log("beforeEach");
-    })
 
     // Options
     const options = ${JSON.stringify(options.options, null, 2)}
