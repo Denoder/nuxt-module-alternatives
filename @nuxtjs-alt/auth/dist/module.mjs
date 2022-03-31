@@ -5,7 +5,7 @@ import defu from 'defu';
 import { createResolver, addServerMiddleware, resolvePath, requireModule, defineNuxtModule, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.1.4";
+const version = "1.1.5";
 
 const moduleDefaults = {
   globalMiddleware: false,
@@ -606,15 +606,11 @@ function resolveProvider(provider) {
 const getAuthPlugin = (options) => {
   return `
 import { Auth, ExpiredAuthSessionError } from '#auth/runtime'
-import { defineNuxtPlugin, useRouter } from '#app'
+import { defineNuxtPlugin } from '#app'
 // Active schemes
 ${options.schemeImports.map((i) => `import { ${i.name}${i.name !== i.as ? " as " + i.as : ""} } from '${i.from}'`).join("\n")}
 
 export default defineNuxtPlugin(ctx => {
-    const router = useRouter();
-    router.beforeEach(async (to, from) => {
-        console.log("beforeEach");
-    })
 
     // Options
     const options = ${JSON.stringify(options.options, null, 2)}
