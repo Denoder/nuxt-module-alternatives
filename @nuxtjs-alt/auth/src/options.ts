@@ -1,7 +1,8 @@
-import type { Strategy } from "./type";
+import type { Strategy } from "./types";
 
 export interface ModuleOptions {
     globalMiddleware?: boolean;
+    enableMiddleware?: boolean;
     plugins?: Array<string | { src: string; ssr: boolean }>;
     ignoreExceptions: boolean;
     resetOnError: boolean | ((...args: unknown[]) => boolean);
@@ -44,6 +45,8 @@ export interface ModuleOptions {
 export const moduleDefaults: ModuleOptions = {
     // -- Enable Global Middleware --
     globalMiddleware: false,
+
+    enableMiddleware: true,
 
     // -- Error handling --
 

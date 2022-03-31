@@ -38,6 +38,7 @@ declare type OpenIDConnectConfigurationDocument = {
 
 interface ModuleOptions {
     globalMiddleware?: boolean;
+    enableMiddleware?: boolean;
     plugins?: Array<string | {
         src: string;
         ssr: boolean;
@@ -130,7 +131,7 @@ declare class Auth {
     get user(): Record<string, unknown> | null;
     get loggedIn(): boolean;
     get busy(): boolean;
-    init(): Promise<any>;
+    init(): Promise<Auth | void>;
     registerStrategy(name: string, strategy: Scheme): void;
     setStrategy(name: string): Promise<HTTPResponse | void>;
     mounted(...args: unknown[]): Promise<HTTPResponse | void>;

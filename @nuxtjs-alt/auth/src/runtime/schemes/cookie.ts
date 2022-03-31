@@ -5,7 +5,7 @@ import type {
     UserCookieOptions,
     HTTPRequest,
     HTTPResponse,
-} from "../../type";
+} from "../../types";
 import { BaseScheme } from "./base";
 import { getProp } from "../utils";
 import type { Auth } from "../core";

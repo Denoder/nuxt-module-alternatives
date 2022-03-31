@@ -1,4 +1,4 @@
-import { IdTokenableSchemeOptions } from "../../type";
+import { IdTokenableSchemeOptions } from "../../types";
 import { encodeQuery, parseQuery, normalizePath, getProp } from "../utils";
 import { IdToken, ConfigurationDocument } from "../inc";
 import type {

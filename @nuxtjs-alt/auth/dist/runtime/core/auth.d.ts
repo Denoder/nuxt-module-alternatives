@@ -1,4 +1,4 @@
-import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme } from "../../type";
+import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme } from "../../types";
 import type { ModuleOptions } from "../../options";
 import { NuxtApp } from "#app";
 import { Storage } from "./storage";
@@ -18,7 +18,7 @@ export declare class Auth {
     get user(): Record<string, unknown> | null;
     get loggedIn(): boolean;
     get busy(): boolean;
-    init(): Promise<any>;
+    init(): Promise<Auth | void>;
     registerStrategy(name: string, strategy: Scheme): void;
     setStrategy(name: string): Promise<HTTPResponse | void>;
     mounted(...args: unknown[]): Promise<HTTPResponse | void>;

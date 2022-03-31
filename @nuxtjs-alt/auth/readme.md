@@ -74,12 +74,11 @@ Laravel Sanctum wokrs a tiny bit differently, It inherits the same config as the
 
 **Oauth2**
 
-I believe oauth2 is using `addServerMiddleware` which doesn't work unless it's in a file format, so I'll need to spend some time to change this accordingly. (Will most likey need to do something similar to what im doing with `@nuxtjs-alt/proxy` to circumvent this issue.)
-If you're encountering issues regarding this please tell me.
+I believe oauth2 is using `addServerMiddleware` which doesn't work unless it's in a file format, so I'll need to spend some time to change this accordingly. If you're encountering issues regarding this please tell me.
 
 **Middleware**
 
-Middleware is a mixed bag, it "should" work like the original only difference is that you're not using `router.middleware` to set the global middleware, instead you need to use the `globalMiddleware` param in `auth` and set it to true.
+For the time being, global middleware does not work, plugins cannot be accessed client side when global middleware is on, the only thing that can be accessed is the server state, so you may access the user state via nuxt's `useState()` method when using global middleware.
 
 **Depenencies Needed:**
 - @nuxtjs-alt/axios

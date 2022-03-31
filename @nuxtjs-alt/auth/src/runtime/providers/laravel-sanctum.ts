@@ -2,7 +2,7 @@ import type {
     ProviderPartialOptions,
     HTTPRequest,
     ProviderOptions,
-} from "../../type";
+} from "../../types";
 import type { CookieSchemeOptions } from "../schemes";
 
 import { assignDefaults } from "../utils/provider";

@@ -9,7 +9,7 @@ import type {
     HTTPResponse,
     EndpointsOption,
     TokenableSchemeOptions,
-} from "../../type";
+} from "../../types";
 import type { Auth } from "../core";
 import {
     encodeQuery,

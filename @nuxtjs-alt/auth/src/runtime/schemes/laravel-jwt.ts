@@ -1,4 +1,4 @@
-import type { HTTPResponse } from "../../type";
+import type { HTTPResponse } from "../../types";
 import { RefreshScheme } from "./refresh";
 
 export class LaravelJWTScheme extends RefreshScheme {

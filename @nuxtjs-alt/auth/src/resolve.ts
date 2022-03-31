@@ -1,9 +1,9 @@
 import { existsSync } from "fs";
 import hash from "hasha";
-import * as AUTH_PROVIDERS from "./providers";
-import { ProviderAliases } from "./providers";
-import type { ModuleOptions } from "../options";
-import type { Strategy } from "../type";
+import * as AUTH_PROVIDERS from "./runtime/providers";
+import { ProviderAliases } from "./runtime/providers";
+import type { ModuleOptions } from "./options";
+import type { Strategy } from "./types";
 import { resolvePath, requireModule } from "@nuxt/kit";
 
 const BuiltinSchemes = {

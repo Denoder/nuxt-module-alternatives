@@ -2,7 +2,7 @@ import type {
     TokenableScheme,
     RefreshableScheme,
     HTTPRequest,
-} from "../../type";
+} from "../../types";
 import { ExpiredAuthSessionError } from "./expired-auth-session-error";
 import { NuxtAxiosInstance } from "@nuxtjs-alt/axios";
 

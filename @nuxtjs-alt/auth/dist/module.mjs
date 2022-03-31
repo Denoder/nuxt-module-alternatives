@@ -5,10 +5,11 @@ import defu from 'defu';
 import { createResolver, addServerMiddleware, resolvePath, requireModule, defineNuxtModule, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.1.3";
+const version = "1.1.4";
 
 const moduleDefaults = {
   globalMiddleware: false,
+  enableMiddleware: true,
   resetOnError: false,
   ignoreExceptions: false,
   scopeKey: "scope",
@@ -602,6 +603,50 @@ function resolveProvider(provider) {
   }
 }
 
+const getAuthPlugin = (options) => {
+  return `
+import { Auth, ExpiredAuthSessionError } from '#auth/runtime'
+import { defineNuxtPlugin, useRouter } from '#app'
+// Active schemes
+${options.schemeImports.map((i) => `import { ${i.name}${i.name !== i.as ? " as " + i.as : ""} } from '${i.from}'`).join("\n")}
+
+export default defineNuxtPlugin(ctx => {
+    const router = useRouter();
+    router.beforeEach(async (to, from) => {
+        console.log("beforeEach");
+    })
+
+    // Options
+    const options = ${JSON.stringify(options.options, null, 2)}
+
+    // Create a new Auth instance
+    const $auth = new Auth(ctx, options)
+
+    // Register strategies
+    ${options.strategies.map((strategy) => {
+    const scheme = options.strategyScheme[strategy.name];
+    const schemeOptions = JSON.stringify(strategy, null, 2);
+    return `$auth.registerStrategy('${strategy.name}', new ${scheme.as}($auth, ${schemeOptions}));`;
+  }).join(";\n")}
+
+    ctx.provide('auth', $auth)
+
+    return $auth.init().catch(error => {
+        if (process.client) {
+    
+          // Don't console log expired auth session errors. This error is common, and expected to happen.
+          // The error happens whenever the user does an ssr request (reload/initial navigation) with an expired refresh
+          // token. We don't want to log this as an error.
+          if (error instanceof ExpiredAuthSessionError) {
+            return
+          }
+    
+          console.error('[ERROR] [AUTH]', error)
+        }
+    })
+})`;
+};
+
 const CONFIG_KEY = "auth";
 const module = defineNuxtModule({
   meta: {
@@ -614,8 +659,15 @@ const module = defineNuxtModule({
   },
   defaults: moduleDefaults,
   setup(moduleOptions, nuxt) {
-    const options = defu(moduleOptions, moduleDefaults);
+    const options = {
+      ...moduleDefaults,
+      ...moduleOptions
+    };
     const resolver = createResolver(import.meta.url);
+    const runtime = resolver.resolve("runtime");
+    const utils = resolver.resolve("runtime/utils");
+    nuxt.options.alias["#auth/utils"] = utils;
+    nuxt.options.alias["#auth/runtime"] = runtime;
     const { strategies, strategyScheme } = resolveStrategies(nuxt, options);
     delete options.strategies;
     const _uniqueImports = /* @__PURE__ */ new Set();
@@ -627,28 +679,22 @@ const module = defineNuxtModule({
     });
     options.defaultStrategy = options.defaultStrategy || strategies.length ? strategies[0].name : "";
     addPluginTemplate({
-      src: resolver.resolve("runtime/templates/auth.plugin.mjs"),
-      fileName: "auth.plugin.mjs",
-      options: {
-        options,
-        strategies,
-        strategyScheme,
-        schemeImports
-      }
+      getContents: () => getAuthPlugin({ options, strategies, strategyScheme, schemeImports }),
+      filename: "auth.plugin.mjs"
     });
-    nuxt.hook("pages:middleware:extend", (middleware) => {
-      middleware.push({
-        name: "auth",
-        path: resolver.resolve("runtime/core/middleware"),
-        global: options.globalMiddleware
+    if (options.enableMiddleware) {
+      nuxt.hook("pages:middleware:extend", (middleware) => {
+        middleware.push({
+          name: "auth",
+          path: resolver.resolve("runtime/core/middleware"),
+          global: options.globalMiddleware
+        });
       });
-    });
+    }
     if (options.plugins) {
       options.plugins.forEach((p) => nuxt.options.plugins.push(p));
       delete options.plugins;
     }
-    const runtime = resolver.resolve("runtime");
-    nuxt.options.alias["#auth/runtime"] = runtime;
   }
 });
 

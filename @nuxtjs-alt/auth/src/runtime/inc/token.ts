@@ -1,6 +1,6 @@
 import jwtDecode from "jwt-decode";
 import type { JwtPayload } from "jwt-decode";
-import type { TokenableScheme } from "../../type";
+import type { TokenableScheme } from "../../types";
 import type { Storage } from "../core";
 import { addTokenPrefix } from "../utils";
 import { TokenStatus } from "./token-status";

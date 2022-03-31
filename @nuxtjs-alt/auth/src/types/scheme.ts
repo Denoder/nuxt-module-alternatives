@@ -1,4 +1,4 @@
-import type { HTTPRequest, HTTPResponse } from "../type";
+import type { HTTPRequest, HTTPResponse } from "../types";
 import type { Auth } from "../runtime/core";
 import type {
     Token,

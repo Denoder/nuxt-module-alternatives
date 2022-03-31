@@ -6,7 +6,7 @@ import type {
     SchemeCheck,
     TokenableScheme,
     RefreshableScheme,
-} from "../../type";
+} from "../../types";
 import type { ModuleOptions } from "../../options";
 import { NuxtApp, useRouter, useRoute } from "#app";
 import {
@@ -80,7 +80,7 @@ export class Auth {
         return this.$storage.getState("busy") as boolean;
     }
 
-    async init(): Promise<any> {
+    async init(): Promise<Auth | void> {
         // Reset on error
         if (this.options.resetOnError) {
             this.onError((...args) => {
@@ -127,7 +127,7 @@ export class Auth {
             }
         }
 
-        return this;
+        return Promise.resolve(this);
     }
 
     registerStrategy(name: string, strategy: Scheme): void {

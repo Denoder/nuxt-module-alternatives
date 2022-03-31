@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import defu from "defu";
 import { addServerMiddleware, createResolver } from "@nuxt/kit";
-import type { StrategyOptions, HTTPRequest } from "../../type";
+import type { StrategyOptions, HTTPRequest } from "../../types";
 import type {
     Oauth2SchemeOptions,
     RefreshSchemeOptions,

@@ -76,7 +76,7 @@ export class Auth {
         });
       }
     }
-    return this;
+    return Promise.resolve(this);
   }
   registerStrategy(name, strategy) {
     this.strategies[name] = strategy;

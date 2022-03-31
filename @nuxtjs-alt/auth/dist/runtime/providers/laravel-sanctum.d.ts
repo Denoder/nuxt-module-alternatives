@@ -1,4 +1,4 @@
-import type { ProviderPartialOptions, ProviderOptions } from "../../type";
+import type { ProviderPartialOptions, ProviderOptions } from "../../types";
 import type { CookieSchemeOptions } from "../schemes";
 export interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOptions {
     url: string;

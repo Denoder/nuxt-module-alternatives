@@ -5,7 +5,7 @@ import type {
     RecursivePartial,
     ProviderPartialOptions,
     ProviderOptions,
-} from "../../type";
+} from "../../types";
 import type { Oauth2SchemeOptions, RefreshSchemeOptions } from "../schemes";
 
 import {

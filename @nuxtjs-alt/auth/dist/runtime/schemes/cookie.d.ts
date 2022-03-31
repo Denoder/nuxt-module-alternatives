@@ -1,4 +1,4 @@
-import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCookieOptions, HTTPRequest, HTTPResponse } from "../../type";
+import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCookieOptions, HTTPRequest, HTTPResponse } from "../../types";
 import { BaseScheme } from "./base";
 import type { Auth } from "../core";
 import { RequestHandler } from "../inc";

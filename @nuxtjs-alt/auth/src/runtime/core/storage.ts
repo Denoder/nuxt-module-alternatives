@@ -13,7 +13,6 @@ export type StorageOptions = ModuleOptions & {
 
 export class Storage {
     ctx: NuxtApp;
-
     options: StorageOptions;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     #store: any;

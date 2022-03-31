@@ -1,9 +1,9 @@
 import { name, version } from "../package.json";
 import { moduleDefaults, ModuleOptions } from "./options";
-import { resolveStrategies } from "./runtime/resolve";
+import { resolveStrategies } from "./resolve";
+import { getAuthPlugin } from "./plugin";
 import { defineNuxtModule, addPluginTemplate, createResolver } from "@nuxt/kit";
 import type { Auth } from ".";
-import defu from "defu";
 
 const CONFIG_KEY = "auth";
 
@@ -19,10 +19,19 @@ export default defineNuxtModule({
     defaults: moduleDefaults,
     setup(moduleOptions, nuxt) {
         // Merge all option sources
-        const options: ModuleOptions = defu(moduleOptions, moduleDefaults);
+        const options: ModuleOptions = {
+            ...moduleDefaults,
+            ...moduleOptions,
+        }
 
-        // resolver
+        // Resolver
         const resolver = createResolver(import.meta.url);
+
+        // Aliases
+        const runtime = resolver.resolve("runtime");
+        const utils = resolver.resolve("runtime/utils");
+        nuxt.options.alias["#auth/utils"] = utils;
+        nuxt.options.alias["#auth/runtime"] = runtime;
 
         // Resolve strategies
         const { strategies, strategyScheme } = resolveStrategies(nuxt, options);
@@ -44,33 +53,25 @@ export default defineNuxtModule({
 
         // Add auth plugin
         addPluginTemplate({
-            src: resolver.resolve("runtime/templates/auth.plugin.mjs"),
-            fileName: "auth.plugin.mjs",
-            options: {
-                options,
-                strategies,
-                strategyScheme,
-                schemeImports,
-            },
+            getContents: () => getAuthPlugin({ options, strategies, strategyScheme, schemeImports }),
+            filename: "auth.plugin.mjs"
         });
 
-        nuxt.hook("pages:middleware:extend", (middleware) => {
-            middleware.push({
-                name: "auth",
-                path: resolver.resolve("runtime/core/middleware"),
-                global: options.globalMiddleware,
+        if (options.enableMiddleware) {
+            nuxt.hook("pages:middleware:extend", (middleware) => {
+                middleware.push({
+                    name: "auth",
+                    path: resolver.resolve("runtime/core/middleware"),
+                    global: options.globalMiddleware,
+                });
             });
-        });
+        }
 
         // Extend auth with plugins
         if (options.plugins) {
             options.plugins.forEach((p: any) => nuxt.options.plugins.push(p));
             delete options.plugins;
         }
-
-        // Transpile and alias auth src
-        const runtime = resolver.resolve("runtime");
-        nuxt.options.alias["#auth/runtime"] = runtime;
     },
 });
 

@@ -1,4 +1,4 @@
-import type { RefreshableScheme } from "../../type";
+import type { RefreshableScheme } from "../../types";
 import type { Storage } from "../core";
 import { TokenStatus } from "./token-status";
 export declare class RefreshToken {

@@ -1,4 +1,4 @@
-import type { TokenableScheme, RefreshableScheme } from "../../type";
+import type { TokenableScheme, RefreshableScheme } from "../../types";
 import { NuxtAxiosInstance } from "@nuxtjs-alt/axios";
 export declare class RequestHandler {
     #private;
