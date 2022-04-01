@@ -3,7 +3,7 @@ import { createResolver, addServerMiddleware, defineNuxtModule } from '@nuxt/kit
 import fs from 'fs-extra';
 
 const name = "@nuxtjs-alt/proxy";
-const version = "1.0.8";
+const version = "1.0.9";
 
 function getProxyEntries(proxyOptions, defaults) {
   const applyDefaults = (opts) => ({ ...defaults, ...opts });
@@ -41,7 +41,6 @@ function createMiddlewareFile(opt) {
     const resolver = createResolver(opt.nuxt.options.srcDir);
     const proxyDirectory = resolver.resolve("server/proxy");
     const filePath = proxyDirectory + `/proxy-${opt.index}.ts`;
-    fs.emptyDirSync(proxyDirectory);
     fs.outputFileSync(filePath, proxyMiddlewareContent(opt.proxyEntry));
     addServerMiddleware({ handle: filePath });
   } catch (err) {
@@ -88,6 +87,9 @@ const module = defineNuxtModule({
       ws: true
     };
     const proxyEntries = getProxyEntries(options, defaults);
+    const resolver = createResolver(nuxt.options.srcDir);
+    const proxyDirectory = resolver.resolve("server/proxy");
+    fs.emptyDirSync(proxyDirectory);
     Object.values(proxyEntries).forEach((proxyEntry, index) => {
       if (process.env.NODE_ENV !== "production") {
         addServerMiddleware({ handle: createProxyMiddleware(proxyEntry.context, proxyEntry.options) });

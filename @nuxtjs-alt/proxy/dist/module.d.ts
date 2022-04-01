@@ -10,7 +10,7 @@ declare type NuxtProxyOptions = ProxyOptionsObject | ProxyOptionsArray;
 
 declare const _default: _nuxt_schema.NuxtModule<Options>;
 
-declare module "@nuxt/kit" {
+declare module "#app" {
     interface NuxtConfig {
         proxy?: NuxtProxyOptions;
     }

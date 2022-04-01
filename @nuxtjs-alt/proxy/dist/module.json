@@ -1,6 +1,6 @@
 {
   "name": "@nuxtjs-alt/proxy",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "configKey": "proxy",
   "compatibility": {
     "nuxt": "^3.0.0"

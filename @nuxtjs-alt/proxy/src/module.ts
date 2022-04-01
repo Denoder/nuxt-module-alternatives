@@ -1,7 +1,8 @@
 import { name, version } from '../package.json'
 import { createProxyMiddleware } from 'http-proxy-middleware'
-import { addServerMiddleware, defineNuxtModule } from '@nuxt/kit'
+import { addServerMiddleware, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { createMiddlewareFile, HttpProxyOptions, getProxyEntries, NuxtProxyOptions } from './options'
+import fs from 'fs-extra'
 
 const CONFIG_KEY = 'proxy' 
 
@@ -25,6 +26,10 @@ export default defineNuxtModule({
 
         // addServerMiddleware wont accept a function in build mode for some reason so to circumvent this we create a file for each entry
         // the folder will regenerate the files on every build
+        const resolver = createResolver(nuxt.options.srcDir)
+        const proxyDirectory = resolver.resolve('server/proxy')
+        fs.emptyDirSync(proxyDirectory)
+
         Object.values(proxyEntries).forEach((proxyEntry: any, index: number) => {
             if (process.env.NODE_ENV !== 'production') {
                 // dev mode works fine
@@ -37,7 +42,7 @@ export default defineNuxtModule({
     }
 })
 
-declare module "@nuxt/kit" {
+declare module "#app" {
     export interface NuxtConfig {
         proxy?: NuxtProxyOptions
     }

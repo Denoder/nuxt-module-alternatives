@@ -60,7 +60,6 @@ export function createMiddlewareFile(opt: {
         const proxyDirectory = resolver.resolve('server/proxy')
         const filePath = proxyDirectory + `/proxy-${opt.index}.ts`
 
-        fs.emptyDirSync(proxyDirectory)
         fs.outputFileSync(filePath, proxyMiddlewareContent(opt.proxyEntry))
         addServerMiddleware({ handle: filePath })
     }
