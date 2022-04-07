@@ -27,13 +27,14 @@ export default defineNuxtModule({
         // addServerMiddleware wont accept a function in build mode for some reason so to circumvent this we create a file for each entry
         // the folder will regenerate the files on every build
         const resolver = createResolver(nuxt.options.srcDir)
-        const proxyDirectory = resolver.resolve('server/proxy')
+        const proxyDirectory = resolver.resolve('server/middleware/@proxy')
         fs.emptyDirSync(proxyDirectory)
 
         Object.values(proxyEntries).forEach((proxyEntry: any, index: number) => {
             if (process.env.NODE_ENV !== 'production') {
                 // dev mode works fine
-                addServerMiddleware({ handle: createProxyMiddleware(proxyEntry.context, proxyEntry.options) })
+                // @ts-ignore
+                addServerMiddleware({ handler: createProxyMiddleware(proxyEntry.context, proxyEntry.options) })
             } else {
                 // production mode requires file creation (for some reason)
                 createMiddlewareFile({ proxyEntry, index, nuxt })

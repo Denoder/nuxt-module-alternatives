@@ -1,4 +1,3 @@
-
 export const getAuthPlugin = (options): string => {
 return `
 import { Auth, ExpiredAuthSessionError } from '#auth/runtime'
@@ -7,7 +6,6 @@ import { defineNuxtPlugin } from '#app'
 ${options.schemeImports.map(i => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n')}
 
 export default defineNuxtPlugin(ctx => {
-
     // Options
     const options = ${JSON.stringify(options.options, null, 2)}
 

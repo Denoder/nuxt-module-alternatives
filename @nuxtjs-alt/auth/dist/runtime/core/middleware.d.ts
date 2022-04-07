@@ -1,3 +1,2 @@
-import type { RouteLocationNormalized } from "vue-router";
-declare const middleware: (to: RouteLocationNormalized, from: RouteLocationNormalized) => void;
+declare const middleware: any;
 export { middleware as AuthMiddleware, middleware as default };

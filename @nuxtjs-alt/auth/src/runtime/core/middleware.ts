@@ -1,8 +1,8 @@
-import { useNuxtApp } from "#app";
+import { useNuxtApp, defineNuxtRouteMiddleware } from "#app";
 import { routeOption, getMatchedComponents, normalizePath } from "#auth/utils";
 import type { RouteLocationNormalized } from "vue-router";
 
-const middleware = (
+const middleware = defineNuxtRouteMiddleware((
     to: RouteLocationNormalized,
     from: RouteLocationNormalized
 ) => {
@@ -65,6 +65,6 @@ const middleware = (
     else if (!pageIsInGuestMode && (!callback || !insidePage(callback))) {
         ctx.$auth.redirect("login", { route: to });
     }
-};
+});
 
 export { middleware as AuthMiddleware, middleware as default };

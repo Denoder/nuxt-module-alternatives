@@ -1,5 +1,5 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { RouteLocationNormalized } from 'vue-router';
+import * as _app from '#app';
 import { NuxtApp } from '#app';
 import { NuxtAxiosInstance } from '@nuxtjs-alt/axios';
 import * as NuxtSchema from '@nuxt/schema';
@@ -159,7 +159,7 @@ declare class Auth {
     hasScope(scope: string): boolean;
 }
 
-declare const middleware: (to: RouteLocationNormalized, from: RouteLocationNormalized) => void;
+declare const middleware: _app.RouteMiddleware;
 
 declare class ConfigurationDocumentRequestError extends Error {
     constructor();

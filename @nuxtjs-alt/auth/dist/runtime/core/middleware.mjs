@@ -1,6 +1,6 @@
-import { useNuxtApp } from "#app";
+import { useNuxtApp, defineNuxtRouteMiddleware } from "#app";
 import { routeOption, getMatchedComponents, normalizePath } from "#auth/utils";
-const middleware = (to, from) => {
+const middleware = defineNuxtRouteMiddleware((to, from) => {
   if (routeOption(to, "auth", false)) {
     return;
   }
@@ -34,5 +34,5 @@ const middleware = (to, from) => {
   } else if (!pageIsInGuestMode && (!callback || !insidePage(callback))) {
     ctx.$auth.redirect("login", { route: to });
   }
-};
+});
 export { middleware as AuthMiddleware, middleware as default };
