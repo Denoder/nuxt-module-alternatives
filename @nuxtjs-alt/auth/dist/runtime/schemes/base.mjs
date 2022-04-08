@@ -1,4 +1,4 @@
-import defu from "defu";
+import { defu } from "defu";
 export class BaseScheme {
   constructor($auth, ...options) {
     this.$auth = $auth;

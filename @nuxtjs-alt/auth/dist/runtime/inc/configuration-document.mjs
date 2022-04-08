@@ -1,4 +1,4 @@
-import defu from "defu";
+import { defu } from "defu";
 import { ConfigurationDocumentRequestError } from "./configuration-document-request-error.mjs";
 const ConfigurationDocumentWarning = (message) => console.warn(`[AUTH] [OPENID CONNECT] Invalid configuration. ${message}`);
 export class ConfigurationDocument {

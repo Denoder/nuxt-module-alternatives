@@ -1,4 +1,4 @@
-import defu from "defu";
+import { defu } from "defu";
 import type { SchemeOptions } from "../../types";
 import type { Auth } from "../core";
 

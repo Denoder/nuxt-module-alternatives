@@ -1,5 +1,5 @@
 import fs from "fs-extra";
-import defu from "defu";
+import { defu } from "defu";
 import { createResolver } from "@nuxt/kit";
 export function assignDefaults(strategy, defaults) {
   Object.assign(strategy, defu(strategy, defaults));

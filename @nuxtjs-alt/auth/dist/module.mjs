@@ -1,11 +1,11 @@
 import { existsSync } from 'fs';
 import hash from 'hasha';
 import fs from 'fs-extra';
-import defu from 'defu';
+import { defu } from 'defu';
 import { createResolver, resolvePath, requireModule, defineNuxtModule, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.1.7";
+const version = "1.1.8";
 
 const moduleDefaults = {
   globalMiddleware: false,

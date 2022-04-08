@@ -1,4 +1,4 @@
-import defu from "defu";
+import { defu } from "defu";
 import { OpenIDConnectScheme, OpenIDConnectSchemeEndpoints } from "../schemes";
 import { OpenIDConnectConfigurationDocument } from "../../types";
 import { Storage } from "../core/storage";
