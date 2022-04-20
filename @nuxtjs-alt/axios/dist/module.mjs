@@ -1,7 +1,7 @@
 import { defineNuxtModule, createResolver, addPluginTemplate, installModule } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/axios";
-const version = "1.0.5";
+const version = "1.0.7";
 
 const CONFIG_KEY = "axios";
 const module = defineNuxtModule({
@@ -17,7 +17,7 @@ const module = defineNuxtModule({
   setup(_moduleOptions, nuxt) {
     const moduleOptions = {
       ..._moduleOptions,
-      ...nuxt.options.publicRuntimeConfig && nuxt.options.publicRuntimeConfig[CONFIG_KEY]
+      ...nuxt.options.runtimeConfig.public && nuxt.options.runtimeConfig.public[CONFIG_KEY]
     };
     const defaultPort = process.env.API_PORT || moduleOptions.port || process.env.PORT || process.env.npm_package_config_nuxt_port || nuxt.options.server && nuxt.options.server.port || 3e3;
     let defaultHost = process.env.API_HOST || moduleOptions.host || process.env.HOST || process.env.npm_package_config_nuxt_host || nuxt.options.server && nuxt.options.server.host || "localhost";

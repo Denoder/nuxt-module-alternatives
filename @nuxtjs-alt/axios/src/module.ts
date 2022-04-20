@@ -19,7 +19,7 @@ export default defineNuxtModule({
 
         const moduleOptions: ModuleOptions = {
             ..._moduleOptions,
-            ...(nuxt.options.publicRuntimeConfig && nuxt.options.publicRuntimeConfig[CONFIG_KEY])
+            ...(nuxt.options.runtimeConfig.public && nuxt.options.runtimeConfig.public[CONFIG_KEY])
         }
 
         // Default port

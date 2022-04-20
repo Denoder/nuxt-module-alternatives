@@ -196,7 +196,6 @@ const setupProgress = (axios) => {
 '<% } %>'
 
 export default defineNuxtPlugin(ctx => {
-
     // runtimeConfig
     const runtimeConfig = ctx.$config && ctx.$config.axios || {}
 
