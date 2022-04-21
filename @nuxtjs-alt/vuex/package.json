@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/vuex",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "A module to utitlize vuex with nuxt3",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -16,7 +16,7 @@
     "type": "module",
     "main": "./module.ts",
     "dependencies": {
-        "@nuxt/kit": "npm:@nuxt/kit-edge@latest",
+        "@nuxt/kit": "^3.0.0-rc.1",
         "vuex": "^4.0.2"
     },
     "peerDependencies": {

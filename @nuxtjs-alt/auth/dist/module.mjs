@@ -5,7 +5,7 @@ import { defu } from 'defu';
 import { createResolver, resolvePath, requireModule, defineNuxtModule, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.1.8";
+const version = "1.1.9";
 
 const moduleDefaults = {
   globalMiddleware: false,

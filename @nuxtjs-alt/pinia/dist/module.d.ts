@@ -8,20 +8,20 @@ interface ModuleOptions {
 declare const module: NuxtSchema.NuxtModule<ModuleOptions>;
 
 declare module "#app" {
-    export interface NuxtApp {
+    interface NuxtApp {
         $pinia: Pinia;
         pinia: Pinia;
     }
-    export interface NuxtConfig {
+    interface NuxtConfig {
         pinia: ModuleOptions;
     }
 }
 
 declare module '@nuxt/schema' {
-    export interface NuxtConfig {
+    interface NuxtConfig {
         ['pinia']?: Partial<ModuleOptions>;
     }
-    export interface NuxtOptions {
+    interface NuxtOptions {
         ['pinia']?: ModuleOptions;
     }
 }

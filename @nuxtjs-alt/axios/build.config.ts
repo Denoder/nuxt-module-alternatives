@@ -8,7 +8,6 @@ export default defineBuildConfig({
         "@nuxt/schema",
         "@nuxt/kit",
         "nuxt",
-        "nuxt3",
         "vue",
     ],
 });

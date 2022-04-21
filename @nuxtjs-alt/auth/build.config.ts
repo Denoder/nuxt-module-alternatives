@@ -14,6 +14,6 @@ export default defineBuildConfig({
         // Defaults
         "@nuxt/schema",
         "@nuxt/kit",
-        "nuxt3",
+        "nuxt",
     ]
 });

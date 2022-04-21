@@ -3,7 +3,7 @@ import { createResolver, defineNuxtModule, addServerMiddleware } from '@nuxt/kit
 import fs from 'fs-extra';
 
 const name = "@nuxtjs-alt/proxy";
-const version = "1.1.1";
+const version = "1.1.2";
 
 function getProxyEntries(proxyOptions, defaults) {
   const applyDefaults = (opts) => ({ ...defaults, ...opts });
