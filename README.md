@@ -51,7 +51,7 @@ Example `package.json`:
         "start": "node .output/server/index.mjs"
     },
     "devDependencies": {
-        "nuxt3": "latest"
+        "nuxt": "latest"
     },
     "dependencies": {
         "@nuxtjs-alt/axios": "file:modules/@nuxtjs-alt/axios",
@@ -75,7 +75,7 @@ or (yarn add/install)
         "start": "node .output/server/index.mjs"
     },
     "devDependencies": {
-        "nuxt3": "latest"
+        "nuxt": "npm:nuxt3@latest"
     },
     "dependencies": {
         "@nuxtjs-alt/axios": "latest",
