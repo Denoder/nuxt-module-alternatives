@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/axios",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "description": "An alternative module to @nuxtjs/axios",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",

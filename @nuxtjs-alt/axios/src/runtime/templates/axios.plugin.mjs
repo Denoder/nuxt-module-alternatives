@@ -197,7 +197,7 @@ const setupProgress = (axios) => {
 
 export default defineNuxtPlugin(ctx => {
     // runtimeConfig
-    const runtimeConfig = ctx.$config && ctx.$config.axios || {}
+    const runtimeConfig = ctx.$config && ctx.$config.public.axios || {}
 
     // baseURL
     const baseURL = process.client
