@@ -200,7 +200,7 @@ export default defineEventHandler(async (event) => {
                 event.res.end(JSON.stringify(error.response.data))
             })
     })
-}
+})
 `;
 }
 

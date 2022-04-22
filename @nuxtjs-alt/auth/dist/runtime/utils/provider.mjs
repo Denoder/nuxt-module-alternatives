@@ -149,7 +149,7 @@ export default defineEventHandler(async (event) => {
                 event.res.end(JSON.stringify(error.response.data))
             })
     })
-}
+})
 `;
 }
 export function passwordGrantMiddlewareFile(opt) {

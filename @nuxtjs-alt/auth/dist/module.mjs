@@ -5,7 +5,7 @@ import { defu } from 'defu';
 import { createResolver, resolvePath, requireModule, defineNuxtModule, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.1.10";
+const version = "1.1.11";
 
 const moduleDefaults = {
   globalMiddleware: false,
@@ -186,7 +186,7 @@ export default defineEventHandler(async (event) => {
                 event.res.end(JSON.stringify(error.response.data))
             })
     })
-}
+})
 `;
 }
 function passwordGrantMiddlewareFile(opt) {

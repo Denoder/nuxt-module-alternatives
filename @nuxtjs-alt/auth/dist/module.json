@@ -1,6 +1,6 @@
 {
   "name": "@nuxtjs-alt/auth",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "configKey": "auth",
   "compatibility": {
     "nuxt": "^3.0.0"
