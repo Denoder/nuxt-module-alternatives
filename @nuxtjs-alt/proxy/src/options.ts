@@ -72,12 +72,12 @@ export function proxyMiddlewareContent(entry: {
     options: HttpProxyOptions
 }): string {
 return `
-import type { IncomingMessage, ServerResponse } from 'http'
+import { defineEventHandler } from 'h3'
 import { createProxyMiddleware } from 'http-proxy-middleware'
 
 const middleware = createProxyMiddleware('${entry.context}', ${JSON.stringify(entry.options)})
 
-export default async (req: IncomingMessage, res: ServerResponse) => {
+export default defineEventHandler(async (event) => {
 
     await new Promise<void>((resolve, reject) => {
         const next = (err?: unknown) => {
@@ -89,7 +89,7 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
         }
 
         /* @ts-ignore */
-        middleware(req, res, next)
+        middleware(event.req, event.res, next)
     })
-}`
+})`
 }

@@ -122,21 +122,21 @@ export function authorizeMiddlewareFile(opt: any): string {
 import axios from 'axios'
 import qs from 'querystring'
 import bodyParser from 'body-parser'
-import type { IncomingMessage, ServerResponse } from 'http'
+import { defineEventHandler } from 'h3'
 
 // Form data parser
 const formMiddleware = bodyParser.urlencoded({ extended: true })
 
-export default async (req: IncomingMessage, res: ServerResponse, next) => {
-    if (!req.url.includes(${opt.endpoint})) {
+export default defineEventHandler(async (event) => {
+    if (!event.req.url.includes(${opt.endpoint})) {
         return next()
     }
 
-    if (req.method !== 'POST') {
+    if (event.req.method !== 'POST') {
         return next()
     }
 
-    formMiddleware(req, res, () => {
+    formMiddleware(event.req, event.res, () => {
         const {
             code,
             code_verifier: codeVerifier,
@@ -193,11 +193,11 @@ export default async (req: IncomingMessage, res: ServerResponse, next) => {
                 headers
             })
             .then((response) => {
-                res.end(JSON.stringify(response.data))
+                event.res.end(JSON.stringify(response.data))
             })
             .catch((error) => {
-                res.statusCode = error.response.status
-                res.end(JSON.stringify(error.response.data))
+                event.res.statusCode = error.response.status
+                event.res.end(JSON.stringify(error.response.data))
             })
     })
 }
@@ -209,22 +209,22 @@ export function passwordGrantMiddlewareFile(opt: any): string {
 import axios from 'axios'
 import requrl from 'requrl'
 import bodyParser from 'body-parser'
-import type { IncomingMessage, ServerResponse } from 'http'
+import { defineEventHandler } from 'h3'
 
 // Form data parser
 const formMiddleware = bodyParser.json()
 
-export default async (req: IncomingMessage, res: ServerResponsem, next) => {
-    if (!req.url.includes(${opt.endpoint})) {
+export default defineEventHandler(async (event) => {
+    if (!event.req.url.includes(${opt.endpoint})) {
         return next()
     }
 
-    if (req.method !== 'POST') {
+    if (event.req.method !== 'POST') {
         return next()
     }
 
-    formMiddleware(req, res, () => {
-        const data = req.body
+    formMiddleware(event.req, event.res, () => {
+        const data = event.req.body
 
         // If \`grant_type\` is not defined, set default value
         if (!data.grant_type) {
@@ -253,7 +253,7 @@ export default async (req: IncomingMessage, res: ServerResponsem, next) => {
             .request({
                 method: 'post',
                 url: ${opt.tokenEndpoint},
-                baseURL: requrl(req),
+                baseURL: requrl(event.req),
                 data: {
                     client_id: ${opt.clientId},
                     client_secret: ${opt.clientSecret},
@@ -264,13 +264,13 @@ export default async (req: IncomingMessage, res: ServerResponsem, next) => {
                 }
             })
             .then((response) => {
-                res.end(JSON.stringify(response.data))
+                event.res.end(JSON.stringify(response.data))
             })
             .catch((error) => {
-                res.statusCode = error.response.status
-                res.end(JSON.stringify(error.response.data))
+                event.res.statusCode = error.response.status
+                event.res.end(JSON.stringify(error.response.data))
             })
     })
-}
+})
 `;
 }
