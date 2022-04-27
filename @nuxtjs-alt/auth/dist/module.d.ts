@@ -72,6 +72,9 @@ interface ModuleOptions {
     localStorage: {
         prefix: string;
     } | false;
+    sessionStorage: {
+        prefix: string;
+    } | false;
     strategies: {
         [strategy: string]: Strategy;
     };
@@ -102,6 +105,13 @@ declare class Storage {
     setLocalStorage<V extends unknown>(key: string, value: V): V | void;
     getLocalStorage(key: string): unknown;
     removeLocalStorage(key: string): void;
+    getLocalStoragePrefix(): string;
+    isLocalStorageEnabled(): boolean;
+    setSessionStorage<V extends unknown>(key: string, value: V): V | void;
+    getSessionStorage(key: string): unknown;
+    removeSessionStorage(key: string): void;
+    getSessionStoragePrefix(): string;
+    isSessionStorageEnabled(): boolean;
     getCookies(): Record<string, unknown>;
     setCookie<V extends unknown>(key: string, value: V, options?: {
         prefix?: string;
@@ -110,8 +120,6 @@ declare class Storage {
     removeCookie(key: string, options?: {
         prefix?: string;
     }): void;
-    getPrefix(): string;
-    isLocalStorageEnabled(): boolean;
     isCookiesEnabled(): boolean;
 }
 

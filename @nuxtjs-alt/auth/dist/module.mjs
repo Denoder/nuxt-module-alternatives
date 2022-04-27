@@ -5,7 +5,7 @@ import { defu } from 'defu';
 import { createResolver, resolvePath, requireModule, defineNuxtModule, addPluginTemplate } from '@nuxt/kit';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.1.11";
+const version = "1.1.13";
 
 const moduleDefaults = {
   globalMiddleware: false,
@@ -32,6 +32,9 @@ const moduleDefaults = {
     }
   },
   localStorage: {
+    prefix: "auth."
+  },
+  sessionStorage: {
     prefix: "auth."
   },
   defaultStrategy: void 0,
@@ -114,77 +117,87 @@ import { defineEventHandler } from 'h3'
 const formMiddleware = bodyParser.urlencoded({ extended: true })
 
 export default defineEventHandler(async (event) => {
-    if (!event.req.url.includes(${opt.endpoint})) {
-        return next()
-    }
+    await new Promise<void>((resolve, reject) => {
+        const next = (err?: unknown) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
+        }
 
-    if (event.req.method !== 'POST') {
-        return next()
-    }
-
-    formMiddleware(event.req, event.res, () => {
-        const {
-            code,
-            code_verifier: codeVerifier,
-            redirect_uri: redirectUri = ${opt.strategy.redirectUri},
-            response_type: responseType = ${opt.strategy.responseType},
-            grant_type: grantType = ${opt.strategy.grantType},
-            refresh_token: refreshToken
-        } = req.body
-
-        // Grant type is authorization code, but code is not available
-        if (grantType === 'authorization_code' && !code) {
+        if (!event.req.url.includes(${opt.endpoint})) {
             return next()
         }
-
-        // Grant type is refresh token, but refresh token is not available
-        if (grantType === 'refresh_token' && !refreshToken) {
+    
+        if (event.req.method !== 'POST') {
             return next()
         }
-
-        let data: qs.ParsedUrlQueryInput | string = {
-            client_id: ${opt.clientID},
-            client_secret: ${opt.clientSecret},
-            refresh_token: refreshToken,
-            grant_type: grantType,
-            response_type: responseType,
-            redirect_uri: redirectUri,
-            ${opt.audience},
-            code_verifier: codeVerifier,
-            code
-        }
-
-        const headers = {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
-        }
-
-        if (strategy.clientSecretTransport === 'authorization_header') {
-            // @ts-ignore
-            headers.Authorization = 'Basic ' + Buffer.from(${opt.clientID} + ':' + ${opt.clientSecret}).toString('base64')
-            // client_secret is transported in auth header
-            delete data.client_secret
-        }
-
-        if (useForms) {
-            data = qs.stringify(data)
-            headers['Content-Type'] = 'application/x-www-form-urlencoded'
-        }
-
-        axios
-            .request({
-                method: 'post',
-                url: ${opt.tokenEndpoint},
-                data,
-                headers
-            })
-            .then((response) => {
-                event.res.end(JSON.stringify(response.data))
-            })
-            .catch((error) => {
-                event.res.statusCode = error.response.status
-                event.res.end(JSON.stringify(error.response.data))
-            })
+    
+        formMiddleware(event.req, event.res, () => {
+            const {
+                code,
+                code_verifier: codeVerifier,
+                redirect_uri: redirectUri = ${opt.strategy.redirectUri},
+                response_type: responseType = ${opt.strategy.responseType},
+                grant_type: grantType = ${opt.strategy.grantType},
+                refresh_token: refreshToken
+            } = req.body
+    
+            // Grant type is authorization code, but code is not available
+            if (grantType === 'authorization_code' && !code) {
+                return next()
+            }
+    
+            // Grant type is refresh token, but refresh token is not available
+            if (grantType === 'refresh_token' && !refreshToken) {
+                return next()
+            }
+    
+            let data: qs.ParsedUrlQueryInput | string = {
+                client_id: ${opt.clientID},
+                client_secret: ${opt.clientSecret},
+                refresh_token: refreshToken,
+                grant_type: grantType,
+                response_type: responseType,
+                redirect_uri: redirectUri,
+                ${opt.audience},
+                code_verifier: codeVerifier,
+                code
+            }
+    
+            const headers = {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            }
+    
+            if (strategy.clientSecretTransport === 'authorization_header') {
+                // @ts-ignore
+                headers.Authorization = 'Basic ' + Buffer.from(${opt.clientID} + ':' + ${opt.clientSecret}).toString('base64')
+                // client_secret is transported in auth header
+                delete data.client_secret
+            }
+    
+            if (useForms) {
+                data = qs.stringify(data)
+                headers['Content-Type'] = 'application/x-www-form-urlencoded'
+            }
+    
+            axios
+                .request({
+                    method: 'post',
+                    url: ${opt.tokenEndpoint},
+                    data,
+                    headers
+                })
+                .then((response) => {
+                    event.res.end(JSON.stringify(response.data))
+                })
+                .catch((error) => {
+                    event.res.statusCode = error.response.status
+                    event.res.end(JSON.stringify(error.response.data))
+                })
+        })
     })
 })
 `;
@@ -200,61 +213,71 @@ import { defineEventHandler } from 'h3'
 const formMiddleware = bodyParser.json()
 
 export default defineEventHandler(async (event) => {
-    if (!event.req.url.includes(${opt.endpoint})) {
-        return next()
-    }
-
-    if (event.req.method !== 'POST') {
-        return next()
-    }
-
-    formMiddleware(event.req, event.res, () => {
-        const data = event.req.body
-
-        // If \`grant_type\` is not defined, set default value
-        if (!data.grant_type) {
-            data.grant_type = ${opt.strategy.grantType}
+    await new Promise<void>((resolve, reject) => {
+        const next = (err?: unknown) => {
+            if (err) {
+                reject(err)
+            } else {
+                resolve()
+            }
         }
 
-        // If \`client_id\` is not defined, set default value
-        if (!data.client_id) {
-            data.grant_type = ${opt.clientId}
+        if (!event.req.url.includes(${opt.endpoint})) {
+            return next()
         }
-
-        // Grant type is password, but username or password is not available
-        if (
-            data.grant_type === 'password' &&
-            (!data.username || !data.password)
-        ) {
-            return next(new Error('Invalid username or password'))
+    
+        if (event.req.method !== 'POST') {
+            return next()
         }
-
-        // Grant type is refresh token, but refresh token is not available
-        if (data.grant_type === 'refresh_token' && !data.refresh_token) {
-            return next(new Error('Refresh token not provided'))
-        }
-
-        axios
-            .request({
-                method: 'post',
-                url: ${opt.tokenEndpoint},
-                baseURL: requrl(event.req),
-                data: {
-                    client_id: ${opt.clientId},
-                    client_secret: ${opt.clientSecret},
-                    ...data
-                },
-                headers: {
-                    Accept: 'application/json'
-                }
-            })
-            .then((response) => {
-                event.res.end(JSON.stringify(response.data))
-            })
-            .catch((error) => {
-                event.res.statusCode = error.response.status
-                event.res.end(JSON.stringify(error.response.data))
-            })
+    
+        formMiddleware(event.req, event.res, () => {
+            const data = event.req.body
+    
+            // If \`grant_type\` is not defined, set default value
+            if (!data.grant_type) {
+                data.grant_type = ${opt.strategy.grantType}
+            }
+    
+            // If \`client_id\` is not defined, set default value
+            if (!data.client_id) {
+                data.grant_type = ${opt.clientId}
+            }
+    
+            // Grant type is password, but username or password is not available
+            if (
+                data.grant_type === 'password' &&
+                (!data.username || !data.password)
+            ) {
+                return next(new Error('Invalid username or password'))
+            }
+    
+            // Grant type is refresh token, but refresh token is not available
+            if (data.grant_type === 'refresh_token' && !data.refresh_token) {
+                return next(new Error('Refresh token not provided'))
+            }
+    
+            axios
+                .request({
+                    method: 'post',
+                    url: ${opt.tokenEndpoint},
+                    baseURL: requrl(event.req),
+                    data: {
+                        client_id: ${opt.clientId},
+                        client_secret: ${opt.clientSecret},
+                        ...data
+                    },
+                    headers: {
+                        Accept: 'application/json'
+                    }
+                })
+                .then((response) => {
+                    event.res.end(JSON.stringify(response.data))
+                })
+                .catch((error) => {
+                    event.res.statusCode = error.response.status
+                    event.res.end(JSON.stringify(error.response.data))
+                })
+        })
     })
 })
 `;

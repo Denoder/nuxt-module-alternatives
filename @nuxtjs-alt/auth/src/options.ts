@@ -21,22 +21,27 @@ export interface ModuleOptions {
         namespace: string;
     };
     cookie:
-        | {
-              prefix: string;
-              options: {
-                  path: string;
-                  expires?: number | Date;
-                  maxAge?: number;
-                  domain?: string;
-                  secure?: boolean;
-              };
-          }
-        | false;
+        |   {
+                prefix: string;
+                options: {
+                    path: string;
+                    expires?: number | Date;
+                    maxAge?: number;
+                    domain?: string;
+                    secure?: boolean;
+                };
+            }
+        |   false;
     localStorage:
-        | {
-              prefix: string;
-          }
-        | false;
+        |   {
+                prefix: string;
+            }
+        |   false;
+    sessionStorage:
+        |   {
+                prefix: string;
+            }
+        |   false;
     strategies: {
         [strategy: string]: Strategy;
     };
@@ -91,6 +96,12 @@ export const moduleDefaults: ModuleOptions = {
     // -- localStorage Store --
 
     localStorage: {
+        prefix: "auth.",
+    },
+
+    // -- sessionStorage Store --
+
+    sessionStorage: {
         prefix: "auth.",
     },
 

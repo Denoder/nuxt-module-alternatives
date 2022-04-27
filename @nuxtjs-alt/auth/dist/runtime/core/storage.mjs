@@ -17,6 +17,7 @@ export class Storage {
     }
     this.setCookie(key, value);
     this.setLocalStorage(key, value);
+    this.setSessionStorage(key, value);
     this.setState(key, value);
     return value;
   }
@@ -30,6 +31,9 @@ export class Storage {
     }
     if (isUnset(value)) {
       value = this.getLocalStorage(key);
+    }
+    if (isUnset(value)) {
+      value = this.getSessionStorage(key);
     }
     if (isUnset(value)) {
       value = this.getState(key);
@@ -49,6 +53,7 @@ export class Storage {
   removeUniversal(key) {
     this.removeState(key);
     this.removeLocalStorage(key);
+    this.removeSessionStorage(key);
     this.removeCookie(key);
   }
   #initState() {
@@ -113,7 +118,7 @@ export class Storage {
     if (!this.isLocalStorageEnabled()) {
       return;
     }
-    const _key = this.getPrefix() + key;
+    const _key = this.getLocalStoragePrefix() + key;
     try {
       localStorage.setItem(_key, encodeValue(value));
     } catch (e) {
@@ -127,7 +132,7 @@ export class Storage {
     if (!this.isLocalStorageEnabled()) {
       return;
     }
-    const _key = this.getPrefix() + key;
+    const _key = this.getLocalStoragePrefix() + key;
     const value = localStorage.getItem(_key);
     return decodeValue(value);
   }
@@ -135,8 +140,90 @@ export class Storage {
     if (!this.isLocalStorageEnabled()) {
       return;
     }
-    const _key = this.getPrefix() + key;
+    const _key = this.getLocalStoragePrefix() + key;
     localStorage.removeItem(_key);
+  }
+  getLocalStoragePrefix() {
+    if (!this.options.localStorage) {
+      throw new Error("Cannot get prefix; localStorage is off");
+    }
+    return this.options.localStorage.prefix;
+  }
+  isLocalStorageEnabled() {
+    if (!this.options.localStorage) {
+      return false;
+    }
+    if (process.server) {
+      return false;
+    }
+    const test = "test";
+    try {
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      return true;
+    } catch (e) {
+      if (!this.options.ignoreExceptions) {
+        console.warn("[AUTH] Local storage is enabled in config, but the browser does not support it.");
+      }
+      return false;
+    }
+  }
+  setSessionStorage(key, value) {
+    if (isUnset(value)) {
+      return this.removeSessionStorage(key);
+    }
+    if (!this.isSessionStorageEnabled()) {
+      return;
+    }
+    const _key = this.getSessionStoragePrefix() + key;
+    try {
+      sessionStorage.setItem(_key, encodeValue(value));
+    } catch (e) {
+      if (!this.options.ignoreExceptions) {
+        throw e;
+      }
+    }
+    return value;
+  }
+  getSessionStorage(key) {
+    if (!this.isSessionStorageEnabled()) {
+      return;
+    }
+    const _key = this.getSessionStoragePrefix() + key;
+    const value = sessionStorage.getItem(_key);
+    return decodeValue(value);
+  }
+  removeSessionStorage(key) {
+    if (!this.isSessionStorageEnabled()) {
+      return;
+    }
+    const _key = this.getSessionStoragePrefix() + key;
+    sessionStorage.removeItem(_key);
+  }
+  getSessionStoragePrefix() {
+    if (!this.options.sessionStorage) {
+      throw new Error("Cannot get prefix; sessionStorage is off");
+    }
+    return this.options.sessionStorage.prefix;
+  }
+  isSessionStorageEnabled() {
+    if (!this.options.sessionStorage) {
+      return false;
+    }
+    if (process.server) {
+      return false;
+    }
+    const test = "test";
+    try {
+      sessionStorage.setItem(test, test);
+      sessionStorage.removeItem(test);
+      return true;
+    } catch (e) {
+      if (!this.options.ignoreExceptions) {
+        console.warn("[AUTH] Session storage is enabled in config, but the browser does not support it.");
+      }
+      return false;
+    }
   }
   getCookies() {
     if (!this.isCookiesEnabled()) {
@@ -188,31 +275,6 @@ export class Storage {
   }
   removeCookie(key, options) {
     this.setCookie(key, void 0, options);
-  }
-  getPrefix() {
-    if (!this.options.localStorage) {
-      throw new Error("Cannot get prefix; localStorage is off");
-    }
-    return this.options.localStorage.prefix;
-  }
-  isLocalStorageEnabled() {
-    if (!this.options.localStorage) {
-      return false;
-    }
-    if (process.server) {
-      return false;
-    }
-    const test = "test";
-    try {
-      localStorage.setItem(test, test);
-      localStorage.removeItem(test);
-      return true;
-    } catch (e) {
-      if (!this.options.ignoreExceptions) {
-        console.warn("[AUTH] Local storage is enabled in config, but the browser does not support it.");
-      }
-      return false;
-    }
   }
   isCookiesEnabled() {
     if (!this.options.cookie) {
