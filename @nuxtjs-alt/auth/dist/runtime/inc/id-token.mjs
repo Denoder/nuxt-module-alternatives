@@ -1,5 +1,5 @@
 import jwtDecode from "jwt-decode";
-import { addTokenPrefix } from "../utils/index.mjs";
+import { addTokenPrefix } from "../../utils";
 import { TokenStatus } from "./token-status.mjs";
 export class IdToken {
   constructor(scheme, storage) {

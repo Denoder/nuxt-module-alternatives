@@ -1,5 +1,5 @@
 import { BaseScheme } from "./base.mjs";
-import { getProp } from "../utils/index.mjs";
+import { getProp } from "../../utils";
 import { RequestHandler } from "../inc/index.mjs";
 const DEFAULTS = {
   name: "cookie",

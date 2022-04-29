@@ -1,9 +1,8 @@
 import { existsSync } from "fs";
 import hash from "hasha";
-import * as AUTH_PROVIDERS from "./runtime/providers";
-import { ProviderAliases } from "./runtime/providers";
-import type { ModuleOptions } from "./options";
-import type { Strategy } from "./types";
+import * as AUTH_PROVIDERS from "./providers";
+import { ProviderAliases } from "./providers";
+import type { Strategy, ModuleOptions } from "./types";
 import { resolvePath, requireModule } from "@nuxt/kit";
 
 const BuiltinSchemes = {
@@ -93,7 +92,7 @@ export function resolveScheme(scheme: string): ImportOptions {
         };
     }
 
-    const path = resolvePath(scheme);
+    const path = resolvePath(scheme) as any;
     if (existsSync(path)) {
         const _path = path.replace(/\\/g, "/");
         return {
@@ -125,7 +124,7 @@ export function resolveProvider(
     }
 
     try {
-        const m = requireModule(provider, { useESM: true });
+        const m = requireModule(provider);
         return m.default || m;
     } catch (e) {
         // TODO: Check if e.code is not file not found, throw an error (can be parse error)

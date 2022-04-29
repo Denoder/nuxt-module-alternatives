@@ -6,7 +6,7 @@ import {
   isSameURL,
   getProp,
   routeOption
-} from "../utils";
+} from "../../utils";
 import { Storage } from "./storage.mjs";
 export class Auth {
   constructor(ctx, options) {

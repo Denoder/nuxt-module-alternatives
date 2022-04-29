@@ -9,7 +9,7 @@ import type {
     SchemeCheck,
 } from "../../types";
 import type { Auth } from "../core";
-import { getProp } from "../utils";
+import { getProp } from "../../utils";
 import { Token, RequestHandler } from "../inc";
 import { BaseScheme } from "./base";
 

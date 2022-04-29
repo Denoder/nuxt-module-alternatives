@@ -1,5 +1,5 @@
-import type { ModuleOptions } from "../../options";
 import { NuxtApp } from "#app";
+import type { ModuleOptions } from "../../types";
 export declare type StorageOptions = ModuleOptions & {
     initialState: {
         user: null;

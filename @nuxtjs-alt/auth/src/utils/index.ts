@@ -1,5 +1,5 @@
 import type { NuxtApp } from "#app";
-import type { RecursivePartial } from "../../types";
+import type { RecursivePartial } from "../types";
 import type { RouteLocationNormalized } from "vue-router";
 
 export const isUnset = (o: unknown): boolean =>

@@ -1,4 +1,4 @@
-import { encodeQuery, parseQuery, normalizePath, getProp } from "../utils/index.mjs";
+import { encodeQuery, parseQuery, normalizePath, getProp } from "../../utils";
 import { IdToken, ConfigurationDocument } from "../inc/index.mjs";
 import {
   Oauth2Scheme

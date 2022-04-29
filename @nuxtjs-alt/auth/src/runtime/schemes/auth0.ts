@@ -1,4 +1,4 @@
-import { encodeQuery } from "../utils";
+import { encodeQuery } from "../../utils";
 import { Oauth2Scheme } from "../schemes/oauth2";
 
 export class Auth0Scheme extends Oauth2Scheme {

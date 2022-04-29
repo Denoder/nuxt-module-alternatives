@@ -6,8 +6,8 @@ import type {
     SchemeCheck,
     TokenableScheme,
     RefreshableScheme,
+    ModuleOptions
 } from "../../types";
-import type { ModuleOptions } from "../../options";
 import { NuxtApp, useRouter, useRoute } from "#app";
 import {
     isRelativeURL,
@@ -15,7 +15,7 @@ import {
     isSameURL,
     getProp,
     routeOption,
-} from "../utils";
+} from "../../utils";
 import { Storage } from "./storage";
 
 export type ErrorListener = (...args: unknown[]) => void;

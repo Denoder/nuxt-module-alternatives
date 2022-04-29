@@ -1,4 +1,4 @@
-import { getProp } from "../utils/index.mjs";
+import { getProp } from "../../utils";
 import { Token, RequestHandler } from "../inc/index.mjs";
 import { BaseScheme } from "./base.mjs";
 const DEFAULTS = {

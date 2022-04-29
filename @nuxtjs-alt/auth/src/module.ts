@@ -1,9 +1,9 @@
 import { name, version } from "../package.json";
-import { moduleDefaults, ModuleOptions } from "./options";
+import { moduleDefaults } from "./options";
+import { ModuleOptions } from "./types";
 import { resolveStrategies } from "./resolve";
 import { getAuthPlugin } from "./plugin";
 import { defineNuxtModule, addPluginTemplate, createResolver } from "@nuxt/kit";
-import type { Auth } from ".";
 
 const CONFIG_KEY = "auth";
 
@@ -29,8 +29,6 @@ export default defineNuxtModule({
 
         // Aliases
         const runtime = resolver.resolve("runtime");
-        const utils = resolver.resolve("runtime/utils");
-        nuxt.options.alias["#auth/utils"] = utils;
         nuxt.options.alias["#auth/runtime"] = runtime;
 
         // Resolve strategies
@@ -74,21 +72,3 @@ export default defineNuxtModule({
         }
     },
 });
-
-declare module "@nuxt/schema" {
-    interface NuxtConfig {
-        ["auth"]?: Partial<ModuleOptions>;
-    }
-    interface NuxtOptions {
-        ["auth"]?: ModuleOptions;
-    }
-}
-
-declare module "#app" {
-    interface NuxtApp {
-        $auth: Auth;
-    }
-    interface NuxtConfig {
-        auth: ModuleOptions;
-    }
-}

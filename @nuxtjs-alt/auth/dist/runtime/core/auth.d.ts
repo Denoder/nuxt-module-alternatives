@@ -1,5 +1,4 @@
-import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme } from "../../types";
-import type { ModuleOptions } from "../../options";
+import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions } from "../../types";
 import { NuxtApp } from "#app";
 import { Storage } from "./storage";
 export declare type ErrorListener = (...args: unknown[]) => void;

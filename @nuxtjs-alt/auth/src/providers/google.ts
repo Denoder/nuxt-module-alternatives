@@ -1,10 +1,8 @@
-import type { ProviderPartialOptions, ProviderOptions } from "../../types";
-import type { Oauth2SchemeOptions } from "../schemes";
+import type { ProviderPartialOptions, ProviderOptions } from "../types";
+import type { Oauth2SchemeOptions } from "../runtime";
 import { assignDefaults } from "../utils/provider";
 
-export interface GoogleProviderOptions
-    extends ProviderOptions,
-        Oauth2SchemeOptions {}
+export interface GoogleProviderOptions extends ProviderOptions, Oauth2SchemeOptions {}
 
 export function google(
     nuxt: any,

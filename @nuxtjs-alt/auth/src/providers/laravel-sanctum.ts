@@ -2,8 +2,8 @@ import type {
     ProviderPartialOptions,
     HTTPRequest,
     ProviderOptions,
-} from "../../types";
-import type { CookieSchemeOptions } from "../schemes";
+} from "../types";
+import type { CookieSchemeOptions } from "../runtime";
 
 import { assignDefaults } from "../utils/provider";
 

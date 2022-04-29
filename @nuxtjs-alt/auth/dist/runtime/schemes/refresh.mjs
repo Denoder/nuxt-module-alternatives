@@ -1,4 +1,4 @@
-import { cleanObj, getProp } from "../utils/index.mjs";
+import { cleanObj, getProp } from "../../utils";
 import {
   RefreshController,
   RefreshToken,

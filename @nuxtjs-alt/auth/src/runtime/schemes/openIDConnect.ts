@@ -1,12 +1,12 @@
 import { IdTokenableSchemeOptions } from "../../types";
-import { encodeQuery, parseQuery, normalizePath, getProp } from "../utils";
+import { encodeQuery, parseQuery, normalizePath, getProp } from "../../utils";
 import { IdToken, ConfigurationDocument } from "../inc";
+import { Auth } from "../index";
 import type {
-    Auth,
     HTTPResponse,
     SchemeCheck,
     SchemePartialOptions,
-} from "../../index";
+} from "../../types";
 import {
     Oauth2Scheme,
     Oauth2SchemeEndpoints,

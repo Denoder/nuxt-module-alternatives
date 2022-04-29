@@ -7,7 +7,7 @@ import type {
     RefreshableSchemeOptions,
 } from "../../types";
 import type { Auth } from "../core";
-import { cleanObj, getProp } from "../utils";
+import { cleanObj, getProp } from "../../utils";
 import {
     RefreshController,
     RefreshToken,

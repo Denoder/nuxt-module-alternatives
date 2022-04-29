@@ -7,7 +7,7 @@ import type {
     HTTPResponse,
 } from "../../types";
 import { BaseScheme } from "./base";
-import { getProp } from "../utils";
+import { getProp } from "../../utils";
 import type { Auth } from "../core";
 import { RequestHandler } from "../inc";
 

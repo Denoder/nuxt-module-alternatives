@@ -1,6 +1,6 @@
 // @ts-ignore
 import jwtDecode, { JwtPayload } from "jwt-decode";
-import { addTokenPrefix } from "../utils";
+import { addTokenPrefix } from "../../utils";
 import type { IdTokenableScheme } from "../../types";
 import type { Storage } from "../core";
 import { TokenStatus } from "./token-status";

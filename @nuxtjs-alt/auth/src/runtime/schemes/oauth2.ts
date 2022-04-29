@@ -19,7 +19,7 @@ import {
     removeTokenPrefix,
     urlJoin,
     randomString,
-} from "../utils";
+} from "../../utils";
 import {
     RefreshController,
     RequestHandler,

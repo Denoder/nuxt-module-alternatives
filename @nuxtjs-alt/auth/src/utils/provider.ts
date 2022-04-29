@@ -1,13 +1,13 @@
 import fs from "fs-extra";
 import { defu } from "defu";
 import { createResolver } from "@nuxt/kit";
-import type { StrategyOptions, HTTPRequest } from "../../types";
+import type { StrategyOptions, HTTPRequest } from "../types";
 import type {
     Oauth2SchemeOptions,
     RefreshSchemeOptions,
     LocalSchemeOptions,
-    CookieScemeOptions,
-} from "../schemes";
+    CookieSchemeOptions,
+} from "../runtime";
 
 export function assignDefaults<SOptions extends StrategyOptions>(
     strategy: SOptions,
@@ -89,7 +89,7 @@ export function initializePasswordGrantFlow<
 
 export function assignAbsoluteEndpoints<
     SOptions extends StrategyOptions<
-        (LocalSchemeOptions | Oauth2SchemeOptions | CookieScemeOptions) & {
+        (LocalSchemeOptions | Oauth2SchemeOptions | CookieSchemeOptions) & {
             url: string;
         }
     >

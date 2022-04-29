@@ -1,8 +1,8 @@
-import type { ModuleOptions } from "../../options";
 import { NuxtApp } from "#app";
 import { defineStore } from "pinia";
 import { parse, serialize } from "cookie-es";
-import { isUnset, isSet, decodeValue, encodeValue } from "../utils";
+import { isUnset, isSet, decodeValue, encodeValue } from "../../utils";
+import type { ModuleOptions } from "../../types";
 
 export type StorageOptions = ModuleOptions & {
     initialState: {

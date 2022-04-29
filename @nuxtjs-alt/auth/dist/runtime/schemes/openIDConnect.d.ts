@@ -1,6 +1,7 @@
 import { IdTokenableSchemeOptions } from "../../types";
 import { IdToken, ConfigurationDocument } from "../inc";
-import type { Auth, HTTPResponse, SchemeCheck, SchemePartialOptions } from "../../index";
+import { Auth } from "../index";
+import type { HTTPResponse, SchemeCheck, SchemePartialOptions } from "../../types";
 import { Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions } from "./oauth2";
 export interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
     configuration: string;

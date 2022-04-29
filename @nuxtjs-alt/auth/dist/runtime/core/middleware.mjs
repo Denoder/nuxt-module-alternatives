@@ -1,5 +1,5 @@
 import { useNuxtApp, defineNuxtRouteMiddleware } from "#app";
-import { routeOption, getMatchedComponents, normalizePath } from "#auth/utils";
+import { routeOption, getMatchedComponents, normalizePath } from "../../utils";
 const middleware = defineNuxtRouteMiddleware((to, from) => {
   if (routeOption(to, "auth", false)) {
     return;
