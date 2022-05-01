@@ -1,4 +1,4 @@
-export const getAuthPlugin = (options): string => {
+export const getAuthPlugin = (options: any): string => {
 return `
 import { Auth, ExpiredAuthSessionError } from '#auth/runtime'
 import { defineNuxtPlugin } from '#app'

@@ -45,4 +45,8 @@ export interface ModuleOptions {
     strategies: {
         [strategy: string]: Strategy;
     };
+    initialState?: {
+        user: null;
+        loggedIn: boolean;
+    };
 }

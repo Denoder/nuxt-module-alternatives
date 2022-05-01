@@ -4,16 +4,9 @@ import { parse, serialize } from "cookie-es";
 import { isUnset, isSet, decodeValue, encodeValue } from "../../utils";
 import type { ModuleOptions } from "../../types";
 
-export type StorageOptions = ModuleOptions & {
-    initialState: {
-        user: null;
-        loggedIn: boolean;
-    };
-};
-
 export class Storage {
     ctx: NuxtApp;
-    options: StorageOptions;
+    options: ModuleOptions;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     #store: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,7 +17,7 @@ export class Storage {
     #state: any;
     #piniaEnabled: boolean;
 
-    constructor(ctx: NuxtApp, options: StorageOptions) {
+    constructor(ctx: NuxtApp, options: ModuleOptions) {
         this.ctx = ctx;
         this.options = options;
 

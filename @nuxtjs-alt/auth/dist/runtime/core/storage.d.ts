@@ -1,17 +1,11 @@
 import { NuxtApp } from "#app";
 import type { ModuleOptions } from "../../types";
-export declare type StorageOptions = ModuleOptions & {
-    initialState: {
-        user: null;
-        loggedIn: boolean;
-    };
-};
 export declare class Storage {
     #private;
     ctx: NuxtApp;
-    options: StorageOptions;
+    options: ModuleOptions;
     state: any;
-    constructor(ctx: NuxtApp, options: StorageOptions);
+    constructor(ctx: NuxtApp, options: ModuleOptions);
     setUniversal<V extends unknown>(key: string, value: V): V | void;
     getUniversal(key: string): unknown;
     syncUniversal(key: string, defaultValue?: unknown): unknown;

@@ -1,9 +1,9 @@
 import { name, version } from "../package.json";
 import { moduleDefaults } from "./options";
-import { ModuleOptions } from "./types";
 import { resolveStrategies } from "./resolve";
 import { getAuthPlugin } from "./plugin";
 import { defineNuxtModule, addPluginTemplate, createResolver } from "@nuxt/kit";
+import type { ModuleOptions } from "./types";
 
 const CONFIG_KEY = "auth";
 
@@ -44,10 +44,7 @@ export default defineNuxtModule({
         });
 
         // Set defaultStrategy
-        options.defaultStrategy =
-            options.defaultStrategy || strategies.length
-                ? strategies[0].name
-                : "";
+        options.defaultStrategy = options.defaultStrategy || strategies.length ? strategies[0].name : "";
 
         // Add auth plugin
         addPluginTemplate({
