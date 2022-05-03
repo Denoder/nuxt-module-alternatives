@@ -6,8 +6,8 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Proxy Module: [Nuxt Community Repository](https://github.com/nuxt-community/proxy-module)
 - Nuxt Auth Module: [Nuxt Community Repository](https://github.com/nuxt-community/auth-module)
 - Nuxt Google Fonts Module: [Nuxt Community Repository](https://github.com/nuxt-community/google-fonts-module)
+- Nuxt Vuetify Module: [Nuxt Community Repository](https://github.com/nuxt-community/vuetify-module)
 - VueJS/Nuxt Pinia: [VueJS/Nuxt Pinia Repository](https://github.com/vuejs/pinia)
-- Nuxt Element Plus: ?
 - Nuxt Vuex: ?
 
 **Other Information**
@@ -56,10 +56,10 @@ Example `package.json`:
     "dependencies": {
         "@nuxtjs-alt/axios": "file:modules/@nuxtjs-alt/axios",
         "@nuxtjs-alt/auth": "file:modules/@nuxtjs-alt/auth",
-        "@nuxtjs-alt/element-plus": "file:modules/@nuxtjs-alt/element-plus",
         "@nuxtjs-alt/google-fonts": "file:modules/@nuxtjs-alt/google-fonts",
         "@nuxtjs-alt/pinia": "file:modules/@nuxtjs-alt/pinia",
         "@nuxtjs-alt/proxy": "file:modules/@nuxtjs-alt/proxy",
+        "@nuxtjs-alt/vuetify": "file:modules/@nuxtjs-alt/vuetify",
         "@nuxtjs-alt/vuex": "file:modules/@nuxtjs-alt/vuex" // Deprecated
     }
 }
@@ -80,10 +80,10 @@ or (yarn add/install)
     "dependencies": {
         "@nuxtjs-alt/axios": "latest",
         "@nuxtjs-alt/auth": "latest",
-        "@nuxtjs-alt/element-plus": "latest",
         "@nuxtjs-alt/google-fonts": "latest",
         "@nuxtjs-alt/pinia": "latest",
         "@nuxtjs-alt/proxy": "latest",
+        "@nuxtjs-alt/vuetify": "latest",
         "@nuxtjs-alt/vuex": "latest" // Deprecated
     }
 }
