@@ -27,7 +27,7 @@ import {
     Token,
     RefreshToken,
 } from "../inc";
-import { useRoute } from "#app";
+import { useActiveRoute } from "#app";
 import { BaseScheme } from "./base";
 
 export interface Oauth2SchemeEndpoints extends EndpointsOption {
@@ -349,7 +349,7 @@ export class Oauth2Scheme<
     }
 
     async #handleCallback(): Promise<boolean | void> {
-        const route = useRoute();
+        const route = useActiveRoute();
         // Handle callback only for specified route
         if (
             this.$auth.options.redirect &&

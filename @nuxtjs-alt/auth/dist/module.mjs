@@ -7,7 +7,7 @@ import { createResolver, resolvePath, requireModule, defineNuxtModule, addPlugin
 import { getAuthPlugin } from './plugin.mjs';
 
 const name = "@nuxtjs-alt/auth";
-const version = "1.1.16";
+const version = "1.1.17";
 
 function assignDefaults(strategy, defaults) {
   Object.assign(strategy, defu(strategy, defaults));

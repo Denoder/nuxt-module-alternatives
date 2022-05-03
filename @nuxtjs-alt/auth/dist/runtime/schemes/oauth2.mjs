@@ -15,7 +15,7 @@ import {
   Token,
   RefreshToken
 } from "../inc";
-import { useRoute } from "#app";
+import { useActiveRoute } from "#app";
 import { BaseScheme } from "./base.mjs";
 const DEFAULTS = {
   name: "oauth2",
@@ -194,7 +194,7 @@ export class Oauth2Scheme extends BaseScheme {
     this.$auth.setUser(getProp(response.data, this.options.user.property));
   }
   async #handleCallback() {
-    const route = useRoute();
+    const route = useActiveRoute();
     if (this.$auth.options.redirect && normalizePath(route.path, this.$auth.ctx) !== normalizePath(this.$auth.options.redirect.callback, this.$auth.ctx)) {
       return;
     }
