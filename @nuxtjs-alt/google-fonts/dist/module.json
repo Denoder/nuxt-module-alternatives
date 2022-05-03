@@ -1,8 +1,0 @@
-{
-  "name": "@nuxtjs-alt/google-fonts",
-  "version": "1.0.2",
-  "configKey": "googleFonts",
-  "compatibility": {
-    "nuxt": "^3.0.0"
-  }
-}
