@@ -2,12 +2,11 @@ import { name, version } from "../package.json";
 import { defineNuxtModule, addVitePlugin, extendViteConfig, addPluginTemplate, createResolver } from '@nuxt/kit'
 import ViteComponents from 'unplugin-vue-components/vite'
 import { VuetifyResolver } from './resolver'
-import vuetify from '@vuetify/vite-plugin';
 
 interface ModuleOptions {
     config: object
-    styles: object
     plugins: Array<any>
+    customVariables: Array<string>
 }
 
 export default defineNuxtModule({
@@ -21,14 +20,43 @@ export default defineNuxtModule({
     },
     defaults: {
         config: {},
-        styles: {},
-        plugins: []
+        plugins: [],
+        customVariables: [],
     } as ModuleOptions,
     async setup(moduleOptions, nuxt) {
 
         const options = {
             ...moduleOptions,
             ...nuxt.options['vuetify']
+        }
+
+        // Custom variables
+        if (options.customVariables && options.customVariables.length > 0) {
+            const sassImports = options.customVariables
+            .map(path => `@import '${path}'`)
+            .join('\n')
+
+            const scssImports = options.customVariables
+            .map(path => `@import '${path}';`)
+            .join('\n')
+
+            extendViteConfig(config => {
+                const sassOptions = {
+                    preprocessorOptions: {
+                        sass: {
+                            additionalData: [...sassImports].join('\n')
+                        },
+                        scss: {
+                            additionalData: [...scssImports].join('\n')
+                        }
+                    }
+                }
+
+                config.css = {
+                    ...config.css,
+                    ...sassOptions
+                }
+            })
         }
 
         const vitePlugins = [
@@ -38,11 +66,9 @@ export default defineNuxtModule({
                     ...options.plugins
                 ],
             }),
-            vuetify({ autoImport: false, ...options.styles }),
         ];
 
         vitePlugins.forEach(plugin => {
-            // @ts-ignore
             addVitePlugin(plugin)
         })
 

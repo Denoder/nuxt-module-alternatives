@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/vuetify",
-    "version": "0.0.1",
+    "version": "0.0.3",
     "description": "A module to handle vuetify 3",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
