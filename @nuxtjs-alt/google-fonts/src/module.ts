@@ -1,6 +1,7 @@
 import { name, version } from '../package.json'
-import { DownloadOptions, GoogleFonts, GoogleFontsHelper } from 'google-fonts-helper'
+import { constructURL, merge, isValidURL, parse, download } from './helper'
 import { createResolver, defineNuxtModule } from '@nuxt/kit'
+import type { DownloadOptions, GoogleFonts } from './shims'
 
 export interface ModuleOptions extends Partial<DownloadOptions & GoogleFonts> {
     prefetch?: boolean;
@@ -48,33 +49,30 @@ export default defineNuxtModule({
             ...moduleOptions,
         }
 
-        const googleFontsHelper = new GoogleFontsHelper({
+        // merge fonts from valid head link
+        // @ts-ignore
+        const fontsParsed = (nuxt.options.app.head.link || []).filter(link => isValidURL(link.href)).map(link => parse(link.href))
+
+        if (fontsParsed.length) {
+            merge(...fontsParsed)
+        }
+
+        // construct google fonts url
+        const url = constructURL({
             families: options.families,
             display: options.display,
             subsets: options.subsets,
             text: options.text
         })
 
-        // merge fonts from valid head link
-        // @ts-ignore
-        const fontsParsed = (nuxt.options.meta.link || []).filter(link => GoogleFontsHelper.isValidURL(link.href)).map(link => GoogleFontsHelper.parse(link.href))
-
-        if (fontsParsed.length) {
-            googleFontsHelper.merge(...fontsParsed)
-        }
-
-        // construct google fonts url
-        const url = googleFontsHelper.constructURL()
-
         if (!url) {
             console.warn('No provided fonts.')
-
             return
         }
 
         // remove fonts
         // @ts-ignore
-        nuxt.options.meta.link = (nuxt.options.meta.link || []).filter(link => !GoogleFontsHelper.isValidURL(link.href))
+        nuxt.options.app.head.link = (nuxt.options.app.head.link || []).filter(link => !isValidURL(link.href))
 
         // download
         if (options.download) {
@@ -83,7 +81,7 @@ export default defineNuxtModule({
             const resolver = createResolver(outputDir)
 
             try {
-                await GoogleFontsHelper.download(url, {
+                await download(url, {
                     base64: options.base64,
                     overwriting: options.overwriting,
                     outputDir,
@@ -106,7 +104,7 @@ export default defineNuxtModule({
         // https://developer.mozilla.org/en-US/docs/Web/Performance/dns-prefetch
         if (options.prefetch) {
             // @ts-ignore
-            nuxt.options.meta.link.push({
+            nuxt.options.app.head.link.push({
                 hid: 'gf-prefetch',
                 rel: 'dns-prefetch',
                 href: 'https://fonts.gstatic.com/'
@@ -117,7 +115,7 @@ export default defineNuxtModule({
         // connect to domain of font files
         if (options.preconnect) {
             // @ts-ignore
-            nuxt.options.meta.link.push({
+            nuxt.options.app.head.link.push({
                 hid: 'gf-preconnect',
                 rel: 'preconnect',
                 href: 'https://fonts.gstatic.com/',
@@ -129,7 +127,7 @@ export default defineNuxtModule({
         // optionally increase loading priority
         if (options.preload) {
             // @ts-ignore
-            nuxt.options.meta.link.push({
+            nuxt.options.app.head.link.push({
                 hid: 'gf-preload',
                 rel: 'preload',
                 as: 'style',
@@ -140,7 +138,7 @@ export default defineNuxtModule({
         // append CSS
         if (options.useStylesheet) {
             // @ts-ignore
-            nuxt.options.meta.link.push({
+            nuxt.options.app.head.link.push({
                 hid: 'gf-style',
                 rel: 'stylesheet',
                 href: url
@@ -151,29 +149,29 @@ export default defineNuxtModule({
 
         // JS to inject CSS
         // @ts-ignore
-        nuxt.options.meta.script = nuxt.options.meta.script || []
+        nuxt.options.app.head.script = nuxt.options.app.head.script || []
         // @ts-ignore
-        nuxt.options.meta.script.push({
+        nuxt.options.app.head.script.push({
             hid: 'gf-script',
             innerHTML: `(function(){var l=document.createElement('link');l.rel="stylesheet";l.href="${url}";document.querySelector("head").appendChild(l);})();`
         })
 
         // no-JS fallback
         // @ts-ignore
-        nuxt.options.meta.noscript = nuxt.options.meta.noscript || []
+        nuxt.options.app.head.noscript = nuxt.options.app.head.noscript || []
         // @ts-ignore
-        nuxt.options.meta.noscript.push({
+        nuxt.options.app.head.noscript.push({
             hid: 'gf-noscript',
             innerHTML: `<link rel="stylesheet" href="${url}">`
         })
 
         // Disable sanitazions
         // @ts-ignore
-        nuxt.options.meta.__dangerouslyDisableSanitizersByTagID = nuxt.options.meta.__dangerouslyDisableSanitizersByTagID || {}
+        nuxt.options.app.head.__dangerouslyDisableSanitizersByTagID = nuxt.options.app.head.__dangerouslyDisableSanitizersByTagID || {}
         // @ts-ignore
-        nuxt.options.meta.__dangerouslyDisableSanitizersByTagID['gf-script'] = ['innerHTML']
+        nuxt.options.app.head.__dangerouslyDisableSanitizersByTagID['gf-script'] = ['innerHTML']
         // @ts-ignore
-        nuxt.options.meta.__dangerouslyDisableSanitizersByTagID['gf-noscript'] = ['innerHTML']
+        nuxt.options.app.head.__dangerouslyDisableSanitizersByTagID['gf-noscript'] = ['innerHTML']
     }
 })
 

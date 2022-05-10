@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/google-fonts",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "description": "An alternative module to @nuxtjs/google-fonts",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "suthor": "Teranode",
@@ -15,18 +15,28 @@
     "license": "MIT",
     "type": "module",
     "main": "./dist/module.mjs",
+    "types": "./dist/types.d.ts",
     "scripts": {
+        "dev": "nuxi dev playground",
+        "dev:build": "nuxi build playground",
+        "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
         "prepack": "nuxt-module-build"
     },
     "files": [
         "dist"
     ],
     "dependencies": {
-        "@nuxt/kit": "npm:@nuxt/kit-edge@latest",
-        "google-fonts-helper": "latest"
+        "@nuxt/kit": "^3.0.0-rc.1",
+        "deepmerge": "^4.2.2",
+        "fs-extra": "^10.1.0",
+        "hookable": "^5.1.1",
+        "ohmyfetch": "^0.4.16",
+        "ufo": "^0.8.4"
     },
     "devDependencies": {
-        "@nuxt/module-builder": "latest"
+        "@nuxt/module-builder": "latest",
+        "@types/fs-extra": "latest",
+        "nuxt": "^3.0.0-rc.1"
     },
     "repository": {
         "type": "git",

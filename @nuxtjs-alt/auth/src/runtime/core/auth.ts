@@ -306,7 +306,7 @@ export class Auth {
         // Fix baseURL for relative endpoints
         if (_endpoint.baseURL === "") {
             /* @ts-ignore */
-            _endpoint.baseURL = requrl(this.ctx.ssrContext.req);
+            _endpoint.baseURL = requrl(process.server ? this.ctx.ssrContext?.req : "");
         }
 
         if (!this.ctx.$axios) {
