@@ -1,0 +1,38 @@
+{
+    "name": "@nuxtjs-alt/svg-sprite",
+    "version": "0.0.2",
+    "license": "MIT",
+    "type": "module",
+    "exports": {
+        ".": {
+            "import": "./dist/module.mjs",
+            "require": "./dist/module.cjs"
+        }
+    },
+    "main": "./dist/module.mjs",
+    "types": "./dist/types.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "prepack": "nuxt-module-build",
+        "dev": "nuxi dev playground",
+        "dev:build": "nuxi build playground",
+        "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground"
+    },
+    "dependencies": {
+        "@nuxt/kit": "^3.0.0-rc.3",
+        "chalk": "^5.0.1",
+        "chokidar": "^3.5.2",
+        "consola": "^2.15.3",
+        "fs-extra": "^10.0.0",
+        "hookable": "^5.0.0",
+        "svgo": "^2.8.0"
+    },
+    "devDependencies": {
+        "@nuxt/module-builder": "latest",
+        "@nuxtjs/eslint-config-typescript": "latest",
+        "eslint": "latest",
+        "nuxt": "^3.0.0-rc.3"
+    }
+}

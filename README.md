@@ -6,6 +6,7 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Proxy Module: [Nuxt Community Repository](https://github.com/nuxt-community/proxy-module)
 - Nuxt Auth Module: [Nuxt Community Repository](https://github.com/nuxt-community/auth-module)
 - Nuxt Google Fonts Module: [Nuxt Community Repository](https://github.com/nuxt-community/google-fonts-module)
+- Nuxt SVG Sprite Module: [Nuxt Community Repository](https://github.com/nuxt-community/svg-sprite-module)
 - Nuxt Vuetify Module: [Nuxt Community Repository](https://github.com/nuxt-community/vuetify-module)
 - VueJS/Nuxt Pinia: [VueJS/Nuxt Pinia Repository](https://github.com/vuejs/pinia)
 - Nuxt Vuex: ?
@@ -59,6 +60,7 @@ Example `package.json`:
         "@nuxtjs-alt/google-fonts": "file:modules/@nuxtjs-alt/google-fonts",
         "@nuxtjs-alt/pinia": "file:modules/@nuxtjs-alt/pinia",
         "@nuxtjs-alt/proxy": "file:modules/@nuxtjs-alt/proxy",
+        "@nuxtjs-alt/svg-sprite": "file:modules/@nuxtjs-alt/vuetify",
         "@nuxtjs-alt/vuetify": "file:modules/@nuxtjs-alt/vuetify",
         "@nuxtjs-alt/vuex": "file:modules/@nuxtjs-alt/vuex" // Deprecated
     }
@@ -83,6 +85,7 @@ or (yarn add/install)
         "@nuxtjs-alt/google-fonts": "latest",
         "@nuxtjs-alt/pinia": "latest",
         "@nuxtjs-alt/proxy": "latest",
+        "@nuxtjs-alt/svg-sprite": "latest",
         "@nuxtjs-alt/vuetify": "latest",
         "@nuxtjs-alt/vuex": "latest" // Deprecated
     }

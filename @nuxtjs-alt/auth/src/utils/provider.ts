@@ -118,7 +118,7 @@ export function assignAbsoluteEndpoints<
 }
 
 export function authorizeMiddlewareFile(opt: any): string {
-    return `
+return `
 import axios from 'axios'
 import qs from 'querystring'
 import bodyParser from 'body-parser'
@@ -126,6 +126,7 @@ import { defineEventHandler } from 'h3'
 
 // Form data parser
 const formMiddleware = bodyParser.urlencoded({ extended: true })
+const options = ${JSON.stringify(opt)}
 
 export default defineEventHandler(async (event) => {
     await new Promise<void>((resolve, reject) => {
@@ -137,7 +138,7 @@ export default defineEventHandler(async (event) => {
             }
         }
 
-        if (!event.req.url.includes(${opt.endpoint})) {
+        if (!event.req.url.includes(options.endpoint)) {
             return next()
         }
     
@@ -149,11 +150,11 @@ export default defineEventHandler(async (event) => {
             const {
                 code,
                 code_verifier: codeVerifier,
-                redirect_uri: redirectUri = ${opt.strategy.redirectUri},
-                response_type: responseType = ${opt.strategy.responseType},
-                grant_type: grantType = ${opt.strategy.grantType},
+                redirect_uri: redirectUri = options.strategy.redirectUri,
+                response_type: responseType = options.strategy.responseType,
+                grant_type: grantType = options.strategy.grantType,
                 refresh_token: refreshToken
-            } = req.body
+            } = event.req.body
     
             // Grant type is authorization code, but code is not available
             if (grantType === 'authorization_code' && !code) {
@@ -166,13 +167,13 @@ export default defineEventHandler(async (event) => {
             }
     
             let data: qs.ParsedUrlQueryInput | string = {
-                client_id: ${opt.clientID},
-                client_secret: ${opt.clientSecret},
+                client_id: options.clientID,
+                client_secret: options.clientSecret,
                 refresh_token: refreshToken,
                 grant_type: grantType,
                 response_type: responseType,
                 redirect_uri: redirectUri,
-                ${opt.audience},
+                audience: options.audience,
                 code_verifier: codeVerifier,
                 code
             }
@@ -182,14 +183,14 @@ export default defineEventHandler(async (event) => {
                 'Content-Type': 'application/json'
             }
     
-            if (strategy.clientSecretTransport === 'authorization_header') {
+            if (options.strategy.clientSecretTransport === 'authorization_header') {
                 // @ts-ignore
-                headers.Authorization = 'Basic ' + Buffer.from(${opt.clientID} + ':' + ${opt.clientSecret}).toString('base64')
+                headers.Authorization = 'Basic ' + Buffer.from(options.clientID + ':' + options.clientSecret).toString('base64')
                 // client_secret is transported in auth header
                 delete data.client_secret
             }
     
-            if (useForms) {
+            if (options.useForms) {
                 data = qs.stringify(data)
                 headers['Content-Type'] = 'application/x-www-form-urlencoded'
             }
@@ -197,7 +198,7 @@ export default defineEventHandler(async (event) => {
             axios
                 .request({
                     method: 'post',
-                    url: ${opt.tokenEndpoint},
+                    url: options.tokenEndpoint,
                     data,
                     headers
                 })
@@ -215,7 +216,7 @@ export default defineEventHandler(async (event) => {
 }
 
 export function passwordGrantMiddlewareFile(opt: any): string {
-    return `
+return `
 import axios from 'axios'
 import requrl from 'requrl'
 import bodyParser from 'body-parser'
@@ -223,6 +224,7 @@ import { defineEventHandler } from 'h3'
 
 // Form data parser
 const formMiddleware = bodyParser.json()
+const options = ${JSON.stringify(opt)}
 
 export default defineEventHandler(async (event) => {
     await new Promise<void>((resolve, reject) => {
@@ -234,7 +236,7 @@ export default defineEventHandler(async (event) => {
             }
         }
 
-        if (!event.req.url.includes(${opt.endpoint})) {
+        if (!event.req.url.includes(options.endpoint)) {
             return next()
         }
     
@@ -247,12 +249,12 @@ export default defineEventHandler(async (event) => {
     
             // If \`grant_type\` is not defined, set default value
             if (!data.grant_type) {
-                data.grant_type = ${opt.strategy.grantType}
+                data.grant_type = options.strategy.grantType
             }
     
             // If \`client_id\` is not defined, set default value
             if (!data.client_id) {
-                data.grant_type = ${opt.clientId}
+                data.grant_type = options.clientId
             }
     
             // Grant type is password, but username or password is not available
@@ -267,15 +269,15 @@ export default defineEventHandler(async (event) => {
             if (data.grant_type === 'refresh_token' && !data.refresh_token) {
                 return next(new Error('Refresh token not provided'))
             }
-    
+
             axios
                 .request({
                     method: 'post',
-                    url: ${opt.tokenEndpoint},
+                    url: options.tokenEndpoint,
                     baseURL: requrl(event.req),
                     data: {
-                        client_id: ${opt.clientId},
-                        client_secret: ${opt.clientSecret},
+                        client_id: options.clientId,
+                        client_secret: options.clientSecret,
                         ...data
                     },
                     headers: {
