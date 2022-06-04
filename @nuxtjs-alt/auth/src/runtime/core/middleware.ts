@@ -31,8 +31,7 @@ const middleware = defineNuxtRouteMiddleware((
 
     if (ctx.$auth.$state.loggedIn) {
         // Perform scheme checks.
-        const { tokenExpired, refreshTokenExpired, isRefreshable } =
-            ctx.$auth.check(true);
+        const { tokenExpired, refreshTokenExpired, isRefreshable } = ctx.$auth.check(true);
 
         // -- Authorized --
         if (!login || insidePage(login) || pageIsInGuestMode) {

@@ -14,7 +14,12 @@ export default defineNuxtModule({
             nuxt: '^3.0.0'
         }
     },
-    setup(options, nuxt) {
+    setup(moduleOptions, nuxt) {
+        const options = {
+            ...moduleOptions,
+            ...nuxt.options[CONFIG_KEY]
+        }
+
         // addServerMiddleware wont accept a function in build mode for some reason so to circumvent this we create a file for each entry
         // the folder will regenerate the files on every build
         const resolver = createResolver(nuxt.options.srcDir)

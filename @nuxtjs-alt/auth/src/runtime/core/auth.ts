@@ -400,13 +400,7 @@ export class Auth {
             return;
         }
 
-        const from = opt.route
-            ? this.options.fullPathRedirect
-                ? opt.route.fullPath
-                : opt.route.path
-            : this.options.fullPathRedirect
-            ? route.fullPath
-            : route.path;
+        const from = opt.route ? ( this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path ) : this.options.fullPathRedirect ? route.fullPath : route.path;
 
         let to = this.options.redirect[name];
 
@@ -416,18 +410,13 @@ export class Auth {
 
         // Apply rewrites
         if (this.options.rewriteRedirects) {
-            if (
-                name === "login" &&
-                isRelativeURL(from) &&
-                !isSameURL(this.ctx, to, from)
-            ) {
+            if ( name === "login" && isRelativeURL(from) && !isSameURL(this.ctx, to, from) ) {
                 this.$storage.setUniversal("redirect", from);
             }
 
             if (name === "home") {
-                const redirect = this.$storage.getUniversal(
-                    "redirect"
-                ) as string;
+                const redirect = this.$storage.getUniversal("redirect") as string;
+
                 this.$storage.setUniversal("redirect", null);
 
                 if (isRelativeURL(redirect)) {
@@ -444,18 +433,10 @@ export class Auth {
             return;
         }
 
-        const queryString = Object.keys(
-            opt.route ? opt.route.query : route.query
-        )
-            .map((key) =>
-                key + "=" + opt.route ? opt.route.query[key] : route.query[key]
-            )
-            .join("&");
+        const queryString = Object.keys(opt.route ? opt.route.query : route.query).map((key) => key + "=" + opt.route ? opt.route.query[key] : route.query[key]).join("&");
 
         if (opt.noRouter) {
-            window.location.replace(
-                to + (queryString ? "?" + queryString : "")
-            );
+            window.location.replace(to + (queryString ? "?" + queryString : ""));
         } else {
             router.push(to + (queryString ? "?" + queryString : ""));
         }

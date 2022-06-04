@@ -206,15 +206,12 @@ export class CookieScheme<
     async logout(endpoint: HTTPRequest = {}): Promise<void> {
         // Only connect to logout endpoint if it's configured
         if (this.options.endpoints.logout) {
-            await this.$auth
-                .requestWith(endpoint, this.options.endpoints.logout)
-                .catch((err) => {
-                    console.error(err);
-                });
+            await this.$auth.requestWith(endpoint, this.options.endpoints.logout).catch((err) => console.error(err));
         }
 
         // But reset regardless
-        return this.$auth.reset();
+        this.$auth.reset();
+        this.$auth.redirect("logout");
     }
 
     reset({ resetInterceptor = true } = {}): void {

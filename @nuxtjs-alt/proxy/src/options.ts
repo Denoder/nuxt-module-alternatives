@@ -1,7 +1,7 @@
 import { createResolver } from '@nuxt/kit'
 import fs from 'fs-extra'
 
-export function createMiddlewareFile(proxyEntries: object, nuxt: any): void {
+export function createMiddlewareFile(proxyEntries: any, nuxt: any): void {
     try {
         const resolver = createResolver(nuxt.options.srcDir)
         const proxyDirectory = resolver.resolve('server/middleware/@proxy')
@@ -14,8 +14,15 @@ export function createMiddlewareFile(proxyEntries: object, nuxt: any): void {
     }
 }
 
-export function proxyMiddlewareContent(options: object): string {
-return `
+function converter(key, val) {
+    if (typeof val === 'function' || val && val.constructor === RegExp) {
+        return String(val)
+    }
+    return val
+}
+
+export function proxyMiddlewareContent(options: any): string {
+    return `
 import type * as http from 'http'
 import httpProxy from 'http-proxy'
 import type { HttpProxy } from 'http-proxy'
@@ -25,11 +32,13 @@ interface ProxyOptions extends HttpProxy.ServerOptions {
     /**
      * rewrite path
      */
-    rewrite?: (path: string) => string
+    rewrite?: (path: string) => string | null | undefined | false
+
     /**
      * configure the proxy server (e.g. listen to events)
      */
-    configure?: (proxy: HttpProxy.Server, options: ProxyOptions) => void
+    configure?: (proxy: HttpProxy.Server, options: ProxyOptions) => void | null | undefined | false
+
     /**
      * webpack-dev-server style bypass function
      */
@@ -42,7 +51,7 @@ interface ProxyOptions extends HttpProxy.ServerOptions {
 
 // lazy require only when proxy is used
 const proxies: Record<string, [HttpProxy.Server, ProxyOptions]> = {}
-let options = ${JSON.stringify(options)};
+let options = ${JSON.stringify(options, converter)};
 
 Object.keys(options).forEach((context) => {
     let opts = options[context]
@@ -53,6 +62,9 @@ Object.keys(options).forEach((context) => {
 
     if (isObject(opts)) {
         opts = { changeOrigin: true, ...opts } as ProxyOptions
+        opts.rewrite = opts.rewrite ? new Function("return (" + opts.rewrite + ")")() : false
+        opts.configure = opts.configure ? new Function("return (" + opts.configure + ")")() : false
+        opts.bypass = opts.bypass ? new Function("return (" + opts.bypass + ")")() : false
     }
 
     const proxy = httpProxy.createProxyServer(opts) as HttpProxy.Server
@@ -105,7 +117,6 @@ export default defineEventHandler(async (event) => {
                     }
                 }
 
-                // @ts-ignore
                 console.debug(event.req.url + ' -> ' + opts.target || opts.forward)
 
                 if (opts.rewrite) {
