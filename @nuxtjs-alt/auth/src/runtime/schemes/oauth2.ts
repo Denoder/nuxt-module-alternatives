@@ -106,11 +106,7 @@ const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
     codeChallengeMethod: "implicit",
 };
 
-export class Oauth2Scheme<
-        OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOptions
-    >
-    extends BaseScheme<OptionsT>
-    implements RefreshableScheme
+export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOptions> extends BaseScheme<OptionsT> implements RefreshableScheme
 {
     req;
     token: Token;
@@ -118,17 +114,8 @@ export class Oauth2Scheme<
     refreshController: RefreshController;
     requestHandler: RequestHandler;
 
-    constructor(
-        $auth: Auth,
-        options: SchemePartialOptions<Oauth2SchemeOptions>,
-        ...defaults: SchemePartialOptions<Oauth2SchemeOptions>[]
-    ) {
-        super(
-            $auth,
-            options as OptionsT,
-            ...(defaults as OptionsT[]),
-            DEFAULTS as OptionsT
-        );
+    constructor($auth: Auth, options: SchemePartialOptions<Oauth2SchemeOptions>, ...defaults: SchemePartialOptions<Oauth2SchemeOptions>[]) {
+        super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT);
 
         // @ts-ignore
         this.req = process.server ? $auth.ctx.ssrContext.req : "";
@@ -351,14 +338,7 @@ export class Oauth2Scheme<
     async #handleCallback(): Promise<boolean | void> {
         const route = useActiveRoute();
         // Handle callback only for specified route
-        if (
-            this.$auth.options.redirect &&
-            normalizePath(route.path, this.$auth.ctx) !==
-                normalizePath(
-                    this.$auth.options.redirect.callback,
-                    this.$auth.ctx
-                )
-        ) {
+        if (this.$auth.options.redirect && normalizePath(route.path, this.$auth.ctx) !== normalizePath(this.$auth.options.redirect.callback, this.$auth.ctx)) {
             return;
         }
         // Callback flow is not supported in server side
@@ -391,10 +371,7 @@ export class Oauth2Scheme<
             let codeVerifier;
 
             // Retrieve code verifier and remove it from storage
-            if (
-                this.options.codeChallengeMethod &&
-                this.options.codeChallengeMethod !== "implicit"
-            ) {
+            if (this.options.codeChallengeMethod && this.options.codeChallengeMethod !== "implicit") {
                 codeVerifier = this.$auth.$storage.getUniversal(
                     this.name + ".pkce_code_verifier"
                 );
@@ -419,16 +396,8 @@ export class Oauth2Scheme<
                 }),
             });
 
-            token =
-                (getProp(
-                    response.data,
-                    this.options.token.property
-                ) as string) || token;
-            refreshToken =
-                (getProp(
-                    response.data,
-                    this.options.refreshToken.property
-                ) as string) || refreshToken;
+            token = (getProp(response.data,  this.options.token.property) as string) || token;
+            refreshToken = (getProp(response.data, this.options.refreshToken.property) as string) || refreshToken;
         }
 
         if (!token || !token.length) {

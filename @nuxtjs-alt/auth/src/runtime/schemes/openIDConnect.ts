@@ -38,23 +38,12 @@ const DEFAULTS: SchemePartialOptions<OpenIDConnectSchemeOptions> = {
     codeChallengeMethod: "S256",
 };
 
-export class OpenIDConnectScheme<
-    OptionsT extends OpenIDConnectSchemeOptions = OpenIDConnectSchemeOptions
-> extends Oauth2Scheme<OptionsT> {
+export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = OpenIDConnectSchemeOptions> extends Oauth2Scheme<OptionsT> {
     idToken: IdToken;
     configurationDocument: ConfigurationDocument;
 
-    constructor(
-        $auth: Auth,
-        options: SchemePartialOptions<OpenIDConnectSchemeOptions>,
-        ...defaults: SchemePartialOptions<OpenIDConnectSchemeOptions>[]
-    ) {
-        super(
-            $auth,
-            options as OptionsT,
-            ...(defaults as OptionsT[]),
-            DEFAULTS as OptionsT
-        );
+    constructor($auth: Auth, options: SchemePartialOptions<OpenIDConnectSchemeOptions>, ...defaults: SchemePartialOptions<OpenIDConnectSchemeOptions>[]) {
+        super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT);
 
         // Initialize ID Token instance
         this.idToken = new IdToken(this, this.$auth.$storage);
@@ -244,10 +233,7 @@ export class OpenIDConnectScheme<
             let codeVerifier;
 
             // Retrieve code verifier and remove it from storage
-            if (
-                this.options.codeChallengeMethod &&
-                this.options.codeChallengeMethod !== "implicit"
-            ) {
+            if (this.options.codeChallengeMethod && this.options.codeChallengeMethod !== "implicit") {
                 codeVerifier = this.$auth.$storage.getUniversal(
                     this.name + ".pkce_code_verifier"
                 );
@@ -272,22 +258,10 @@ export class OpenIDConnectScheme<
                 }),
             });
 
-            token =
-                (getProp(
-                    response.data,
-                    this.options.token.property
-                ) as string) || token;
-            refreshToken =
-                (getProp(
-                    response.data,
-                    this.options.refreshToken.property
-                ) as string) || refreshToken;
-            idToken =
-                // @ts-ignore
-                (getProp(
-                    response.data,
-                    this.options.idToken.property
-                ) as string) || idToken;
+            token = (getProp( response.data, this.options.token.property) as string) || token;
+            refreshToken = (getProp(response.data, this.options.refreshToken.property) as string) || refreshToken;
+            // @ts-ignore
+            idToken = (getProp(response.data, this.options.idToken.property) as string) || idToken;
         }
 
         if (!token || !token.length) {

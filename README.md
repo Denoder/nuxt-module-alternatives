@@ -8,12 +8,12 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Google Fonts Module: [Nuxt Community Repository](https://github.com/nuxt-community/google-fonts-module)
 - Nuxt SVG Sprite Module: [Nuxt Community Repository](https://github.com/nuxt-community/svg-sprite-module)
 - Nuxt Vuetify Module: [Nuxt Community Repository](https://github.com/nuxt-community/vuetify-module)
-- VueJS/Nuxt Pinia: [VueJS/Nuxt Pinia Repository](https://github.com/vuejs/pinia)
 - Nuxt Vuex: ?
 
-**Other Information**
+**Other Information (Pinia)**
 
-The `@nuxtjs` folder has been removed, use `@nuxtjs-alt` instead (this is due to me adding it to npmjs)
+The pinia module has been removed. The module itself was as a means for me to maintain consistensy in naming conventions for the modules, but with all the rapid changes happening with nuxt till, It would be a good point to just use the official one. So start using `@pinia/nuxt` instead.
+documentation has been changed accordingly.
 
 **Module Order**
 
@@ -22,7 +22,7 @@ If you're using a combination of axios, pinia and auth you need to load them in 
 modules: [
     '@nuxtjs-alt/auth',
     '@nuxtjs-alt/axios',
-    '@nuxtjs-alt/pinia',
+    '@pinia/nuxt',
 ]
 ```
 
@@ -58,9 +58,8 @@ Example `package.json`:
         "@nuxtjs-alt/axios": "file:modules/@nuxtjs-alt/axios",
         "@nuxtjs-alt/auth": "file:modules/@nuxtjs-alt/auth",
         "@nuxtjs-alt/google-fonts": "file:modules/@nuxtjs-alt/google-fonts",
-        "@nuxtjs-alt/pinia": "file:modules/@nuxtjs-alt/pinia",
         "@nuxtjs-alt/proxy": "file:modules/@nuxtjs-alt/proxy",
-        "@nuxtjs-alt/svg-sprite": "file:modules/@nuxtjs-alt/vuetify",
+        "@nuxtjs-alt/svg-sprite": "file:modules/@nuxtjs-alt/svg-sprite",
         "@nuxtjs-alt/vuetify": "file:modules/@nuxtjs-alt/vuetify",
         "@nuxtjs-alt/vuex": "file:modules/@nuxtjs-alt/vuex" // Deprecated
     }
@@ -83,7 +82,6 @@ or (yarn add/install)
         "@nuxtjs-alt/axios": "latest",
         "@nuxtjs-alt/auth": "latest",
         "@nuxtjs-alt/google-fonts": "latest",
-        "@nuxtjs-alt/pinia": "latest",
         "@nuxtjs-alt/proxy": "latest",
         "@nuxtjs-alt/svg-sprite": "latest",
         "@nuxtjs-alt/vuetify": "latest",

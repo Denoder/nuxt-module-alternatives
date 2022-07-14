@@ -78,7 +78,7 @@ For the time being, global middleware does not work, plugins cannot be accessed 
 
 **Depenencies Needed:**
 - @nuxtjs-alt/axios
-- @nuxtjs-alt/pinia
+- @pinia/nuxt
 - body-parser
 - cookie
 - defu

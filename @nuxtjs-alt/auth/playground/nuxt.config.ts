@@ -4,7 +4,7 @@ export default defineNuxtConfig({
     buildModules: [
         "@nuxtjs-alt/auth",
         "@nuxtjs-alt/axios",
-        "@nuxtjs-alt/pinia",
+        "@pinia/nuxt",
     ],
     auth: {
         enableMiddleware: false,

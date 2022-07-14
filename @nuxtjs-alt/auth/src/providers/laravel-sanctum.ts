@@ -7,9 +7,7 @@ import type { CookieSchemeOptions } from "../runtime";
 
 import { assignDefaults } from "../utils/provider";
 
-export interface LaravelSanctumProviderOptions
-    extends ProviderOptions,
-        CookieSchemeOptions {
+export interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOptions {
     url: string;
 }
 

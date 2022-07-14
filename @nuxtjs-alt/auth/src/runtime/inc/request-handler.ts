@@ -11,10 +11,7 @@ export class RequestHandler {
     axios: NuxtAxiosInstance;
     interceptor: number;
 
-    constructor(
-        scheme: TokenableScheme | RefreshableScheme,
-        axios: NuxtAxiosInstance
-    ) {
+    constructor(scheme: TokenableScheme | RefreshableScheme, axios: NuxtAxiosInstance) {
         this.scheme = scheme;
         this.axios = axios;
         this.interceptor = null;
@@ -39,10 +36,7 @@ export class RequestHandler {
         this.interceptor = this.axios.interceptors.request.use(
             async (config) => {
                 // Don't intercept refresh token requests
-                if (
-                    (this.scheme.options.token && !this.#needToken(config)) ||
-                    config.url === refreshEndpoint
-                ) {
+                if ((this.scheme.options.token && !this.#needToken(config)) || config.url === refreshEndpoint) {
                     return config;
                 }
 
@@ -70,8 +64,8 @@ export class RequestHandler {
                     }
 
                     // Refresh token is available. Attempt refresh.
-                    isValid = await (this.scheme as RefreshableScheme)
-                        .refreshTokens()
+                    isValid = await (this.scheme as RefreshableScheme).refreshController
+                        .handleRefresh()
                         .then(() => true)
                         .catch(() => {
                             // Tokens couldn't be refreshed. Force reset.
@@ -87,11 +81,7 @@ export class RequestHandler {
                 if (!isValid) {
                     // The authorization header in the current request is expired.
                     // Token was deleted right before this request
-                    if (
-                        token &&
-                        !token.get() &&
-                        this.#requestHasAuthorizationHeader(config)
-                    ) {
+                    if (token && !token.get() && this.#requestHasAuthorizationHeader(config)) {
                         throw new ExpiredAuthSessionError();
                     }
 
@@ -119,10 +109,7 @@ export class RequestHandler {
         return (
             options.token.global ||
             Object.values(options.endpoints).some(
-                (endpoint: HTTPRequest | string) =>
-                    typeof endpoint === "object"
-                        ? endpoint.url === config.url
-                        : endpoint === config.url
+                (endpoint: HTTPRequest | string) => typeof endpoint === "object" ? endpoint.url === config.url : endpoint === config.url
             )
         );
     }

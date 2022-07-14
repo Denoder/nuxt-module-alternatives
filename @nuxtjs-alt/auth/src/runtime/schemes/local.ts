@@ -62,26 +62,13 @@ const DEFAULTS: SchemePartialOptions<LocalSchemeOptions> = {
     scope: false,
 };
 
-export class LocalScheme<
-        OptionsT extends LocalSchemeOptions = LocalSchemeOptions
-    >
-    extends BaseScheme<OptionsT>
-    implements TokenableScheme<OptionsT>
+export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOptions> extends BaseScheme<OptionsT> implements TokenableScheme<OptionsT>
 {
     token: Token;
     requestHandler: RequestHandler;
 
-    constructor(
-        $auth: Auth,
-        options: SchemePartialOptions<LocalSchemeOptions>,
-        ...defaults: SchemePartialOptions<LocalSchemeOptions>[]
-    ) {
-        super(
-            $auth,
-            options as OptionsT,
-            ...(defaults as OptionsT[]),
-            DEFAULTS as OptionsT
-        );
+    constructor($auth: Auth, options: SchemePartialOptions<LocalSchemeOptions>, ...defaults: SchemePartialOptions<LocalSchemeOptions>[]) {
+        super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT);
 
         // Initialize Token instance
         this.token = new Token(this, this.$auth.$storage);
@@ -123,10 +110,7 @@ export class LocalScheme<
         return response;
     }
 
-    mounted({
-        tokenCallback = () => this.$auth.reset(),
-        refreshTokenCallback = undefined,
-    } = {}): Promise<HTTPResponse | void> {
+    mounted({ tokenCallback = () => this.$auth.reset(), refreshTokenCallback = undefined } = {}): Promise<HTTPResponse | void> {
         const { tokenExpired, refreshTokenExpired } = this.check(true);
 
         if (refreshTokenExpired && typeof refreshTokenCallback === "function") {
@@ -142,10 +126,7 @@ export class LocalScheme<
         return this.$auth.fetchUserOnce();
     }
 
-    async login(
-        endpoint: HTTPRequest,
-        { reset = true } = {}
-    ): Promise<HTTPResponse> {
+    async login(endpoint: HTTPRequest, { reset = true } = {}): Promise<HTTPResponse> {
         if (!this.options.endpoints.login) {
             return;
         }

@@ -53,8 +53,8 @@ export default defineNuxtModule({
         });
 
         if (options.enableMiddleware) {
-            nuxt.hook("pages:middleware:extend", (middleware) => {
-                middleware.push({
+            nuxt.hook("app:resolve", (app) => {
+                app.middleware.push({
                     name: "auth",
                     path: resolver.resolve("runtime/core/middleware"),
                     global: options.globalMiddleware,

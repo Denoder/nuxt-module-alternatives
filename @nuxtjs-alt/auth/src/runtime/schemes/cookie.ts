@@ -60,22 +60,11 @@ const DEFAULTS: SchemePartialOptions<CookieSchemeOptions> = {
     },
 };
 
-export class CookieScheme<
-    OptionsT extends CookieSchemeOptions
-> extends BaseScheme<OptionsT> {
+export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseScheme<OptionsT> {
     requestHandler: RequestHandler;
 
-    constructor(
-        $auth: Auth,
-        options: SchemePartialOptions<CookieSchemeOptions>,
-        ...defaults: SchemePartialOptions<CookieSchemeOptions>[]
-    ) {
-        super(
-            $auth,
-            options as OptionsT,
-            ...(defaults as OptionsT[]),
-            DEFAULTS as OptionsT
-        );
+    constructor($auth: Auth, options: SchemePartialOptions<CookieSchemeOptions>, ...defaults: SchemePartialOptions<CookieSchemeOptions>[]) {
+        super($auth, options as OptionsT, ...(defaults as OptionsT[]),DEFAULTS as OptionsT);
 
         // Initialize Request Interceptor
         this.requestHandler = new RequestHandler(this, this.$auth.ctx.$axios);

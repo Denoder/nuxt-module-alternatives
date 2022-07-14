@@ -111,7 +111,7 @@ export class Storage {
         this.#state = {};
 
         // Use pinia for local state's if possible
-        this.#piniaEnabled = this.options.pinia && !!this.ctx.pinia;
+        this.#piniaEnabled = this.options.pinia && !!this.ctx.$pinia;
 
         if (this.#piniaEnabled) {
             this.#store = defineStore(this.options.pinia.namespace, {
@@ -123,7 +123,7 @@ export class Storage {
                 },
             });
 
-            this.#initStore = this.#store(this.ctx.pinia);
+            this.#initStore = this.#store(this.ctx.$pinia);
             this.state = this.#initStore.$state;
         } else {
             this.state = {};
@@ -131,7 +131,7 @@ export class Storage {
             // eslint-disable-next-line no-console
             console.warn(
                 "[AUTH] The pinia store is not activated. This might cause issues in auth module behavior, like redirects not working properly." +
-                    "To activate it, please install it and add it to your config after this module"
+                "To activate it, please install it and add it to your config after this module"
             );
         }
     }

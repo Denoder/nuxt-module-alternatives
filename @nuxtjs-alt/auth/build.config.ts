@@ -29,7 +29,6 @@ export default defineBuildConfig({
         "pinia",
         // Workspace Modules
         "@nuxtjs-alt/axios",
-        "@nuxtjs-alt/pinia",
         // Defaults
         "@nuxt/schema",
         "@nuxt/kit",
