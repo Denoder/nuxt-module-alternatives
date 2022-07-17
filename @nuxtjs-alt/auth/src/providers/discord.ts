@@ -4,10 +4,7 @@ import { assignDefaults, addAuthorize } from "../utils/provider";
 
 export interface DiscordProviderOptions extends ProviderOptions, Oauth2SchemeOptions {}
 
-export function discord(
-    nuxt: any,
-    strategy: ProviderPartialOptions<DiscordProviderOptions>
-): void {
+export function discord(nuxt: any, strategy: ProviderPartialOptions<DiscordProviderOptions>): void {
     const DEFAULTS: typeof strategy = {
         scheme: "oauth2",
         endpoints: {

@@ -1,6 +1,6 @@
-import fs from "fs-extra";
 import { defu } from "defu";
-import { createResolver } from "@nuxt/kit";
+import { join } from 'path';
+import { addServerHandler, addTemplate } from "@nuxt/kit";
 import type { StrategyOptions, HTTPRequest } from "../types";
 import type {
     Oauth2SchemeOptions,
@@ -9,16 +9,11 @@ import type {
     CookieSchemeOptions,
 } from "../runtime";
 
-export function assignDefaults<SOptions extends StrategyOptions>(
-    strategy: SOptions,
-    defaults: SOptions
-): void {
+export function assignDefaults<SOptions extends StrategyOptions>(strategy: SOptions, defaults: SOptions): void {
     Object.assign(strategy, defu(strategy, defaults));
 }
 
-export function addAuthorize<
-    SOptions extends StrategyOptions<Oauth2SchemeOptions>
->(nuxt: any, strategy: SOptions, useForms: boolean = false): void {
+export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOptions>>(nuxt: any, strategy: SOptions, useForms: boolean = false): void {
     // Get clientSecret, clientId, endpoints.token and audience
     const clientSecret = strategy.clientSecret;
     const clientID = strategy.clientId;
@@ -35,14 +30,10 @@ export function addAuthorize<
     // Set response_type to code
     strategy.responseType = "code";
 
-    // Handle Middleware File
-    const resolver = createResolver(nuxt.options.srcDir);
-    const proxyDirectory = resolver.resolve("server/middleware/@auth");
-    const filePath = proxyDirectory + `/addAuthorize.ts`;
-
-    fs.outputFileSync(
-        filePath,
-        authorizeMiddlewareFile({
+    addTemplate({
+        filename: 'auth-addAuthorize.ts',
+        write: true,
+        getContents: () => authorizeMiddlewareFile({
             endpoint,
             strategy,
             useForms,
@@ -50,13 +41,16 @@ export function addAuthorize<
             clientID,
             tokenEndpoint,
             audience,
-        })
-    );
+        }),
+    })
+
+    addServerHandler({
+        handler: join(nuxt.options.buildDir, 'auth-addAuthorize.ts'),
+        middleware: true,
+    })
 }
 
-export function initializePasswordGrantFlow<
-    SOptions extends StrategyOptions<RefreshSchemeOptions>
->(nuxt: any, strategy: SOptions): void {
+export function initializePasswordGrantFlow<SOptions extends StrategyOptions<RefreshSchemeOptions>>(nuxt: any, strategy: SOptions): void {
     // Get clientSecret, clientId, endpoints.login.url
     const clientSecret = strategy.clientSecret;
     const clientId = strategy.clientId;
@@ -70,30 +64,25 @@ export function initializePasswordGrantFlow<
     strategy.endpoints.login.url = endpoint;
     strategy.endpoints.refresh.url = endpoint;
 
-    // Handle Middleware File
-    const resolver = createResolver(nuxt.options.srcDir);
-    const proxyDirectory = resolver.resolve("server/middleware/@auth");
-    const filePath = proxyDirectory + `/passwordGrant.ts`;
-
-    fs.outputFileSync(
-        filePath,
-        passwordGrantMiddlewareFile({
+    addTemplate({
+        filename: 'auth-passwordGrant.ts',
+        write: true,
+        getContents: () => passwordGrantMiddlewareFile({
             endpoint,
             strategy,
             clientSecret,
             clientId,
             tokenEndpoint,
         })
-    );
+    })
+
+    addServerHandler({
+        handler: join(nuxt.options.buildDir, 'auth-passwordGrant.ts'),
+        middleware: true,
+    })
 }
 
-export function assignAbsoluteEndpoints<
-    SOptions extends StrategyOptions<
-        (LocalSchemeOptions | Oauth2SchemeOptions | CookieSchemeOptions) & {
-            url: string;
-        }
-    >
->(strategy: SOptions): void {
+export function assignAbsoluteEndpoints<SOptions extends StrategyOptions<(LocalSchemeOptions | Oauth2SchemeOptions | CookieSchemeOptions) & { url: string; }>>(strategy: SOptions): void {
     const { url, endpoints } = strategy;
 
     if (endpoints) {

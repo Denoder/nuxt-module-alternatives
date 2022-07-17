@@ -1,17 +1,17 @@
-import { createResolver } from '@nuxt/kit'
-import fs from 'fs-extra'
+import { addServerHandler, addTemplate } from '@nuxt/kit'
+import { join } from 'path'
 
 export function createMiddlewareFile(proxyEntries: any, nuxt: any): void {
-    try {
-        const resolver = createResolver(nuxt.options.srcDir)
-        const proxyDirectory = resolver.resolve('server/middleware/@proxy')
-        const filePath = proxyDirectory + '/proxy.ts'
+    addTemplate({
+        filename: 'serverProxy.ts',
+        write: true,
+        getContents: () => proxyMiddlewareContent(proxyEntries),
+    })
 
-        fs.outputFileSync(filePath, proxyMiddlewareContent(proxyEntries))
-    }
-    catch (err) {
-        console.error(err)
-    }
+    addServerHandler({
+        handler: join(nuxt.options.buildDir, 'serverProxy.ts'),
+        middleware: true,
+    })
 }
 
 function converter(key, val) {

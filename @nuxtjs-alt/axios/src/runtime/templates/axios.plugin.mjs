@@ -1,4 +1,4 @@
-import { defineNuxtPlugin } from '#app'
+import { defineNuxtPlugin } from '#imports'
 import Axios from 'axios'
 '<% if (options.retry) { %>'
 import axiosRetry from 'axios-retry'
@@ -200,9 +200,7 @@ export default defineNuxtPlugin(ctx => {
     const runtimeConfig = ctx.$config && ctx.$config.public.axios || {}
 
     // baseURL
-    const baseURL = process.client
-        ? (runtimeConfig.browserBaseURL || runtimeConfig.browserBaseUrl || runtimeConfig.baseURL || runtimeConfig.baseUrl || '<%= options.browserBaseURL %>' || '')
-        : (runtimeConfig.baseURL || runtimeConfig.baseUrl || process.env._AXIOS_BASE_URL_ || '<%= options.baseURL %>' || '')
+    const baseURL = process.client ? (runtimeConfig.browserBaseURL || runtimeConfig.browserBaseUrl || runtimeConfig.baseURL || runtimeConfig.baseUrl || '<%= options.browserBaseURL %>' || '') : (runtimeConfig.baseURL || runtimeConfig.baseUrl || process.env._AXIOS_BASE_URL_ || '<%= options.baseURL %>' || '')
 
     // Create fresh objects for all default header scopes
     // Axios creates only one which is shared across SSR requests!

@@ -144,12 +144,6 @@ export default defineNuxtModule({
             options
         })
 
-        // Proxy integration
-        /* @ts-ignore */
-        if (options.proxy || nuxt.options.proxy) {
-            installModule('@nuxtjs-alt/proxy')
-        }
-
         // Set _AXIOS_BASE_URL_ for dynamic SSR baseURL
         process.env._AXIOS_BASE_URL_ = options.baseURL
 
