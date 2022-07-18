@@ -3,6 +3,7 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 
 **Current Modules**
 - Nuxt Axios Module: [Nuxt Community Repository](https://github.com/nuxt-community/axios-module)
+- Nuxt Http Module: [Nuxt Community Module](https://github.com/nuxt/http)
 - Nuxt Proxy Module: [Nuxt Community Repository](https://github.com/nuxt-community/proxy-module)
 - Nuxt Auth Module: [Nuxt Community Repository](https://github.com/nuxt-community/auth-module)
 - Nuxt Google Fonts Module: [Nuxt Community Repository](https://github.com/nuxt-community/google-fonts-module)
@@ -57,6 +58,7 @@ Example `package.json`:
     "dependencies": {
         "@nuxtjs-alt/axios": "file:modules/@nuxtjs-alt/axios",
         "@nuxtjs-alt/auth": "file:modules/@nuxtjs-alt/auth",
+        "@nuxtjs-alt/auth": "file:modules/@nuxtjs-alt/http",
         "@nuxtjs-alt/google-fonts": "file:modules/@nuxtjs-alt/google-fonts",
         "@nuxtjs-alt/proxy": "file:modules/@nuxtjs-alt/proxy",
         "@nuxtjs-alt/svg-sprite": "file:modules/@nuxtjs-alt/svg-sprite",
@@ -81,6 +83,7 @@ or (yarn add/install)
     "dependencies": {
         "@nuxtjs-alt/axios": "latest",
         "@nuxtjs-alt/auth": "latest",
+        "@nuxtjs-alt/http": "latest",
         "@nuxtjs-alt/google-fonts": "latest",
         "@nuxtjs-alt/proxy": "latest",
         "@nuxtjs-alt/svg-sprite": "latest",

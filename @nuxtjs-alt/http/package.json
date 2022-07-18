@@ -1,0 +1,52 @@
+{
+    "name": "@nuxtjs-alt/http",
+    "version": "1.0.0",
+    "description": "An extended module to ohmyfetch",
+    "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
+    "author": "Teranode",
+    "keywords": [
+        "nuxt",
+        "nuxtjs",
+        "nuxt-module",
+        "nuxt-plugin",
+        "nuxt-module-alternatives",
+        "ohmyfetch",
+        "@nuxtjs/http"
+    ],
+    "license": "MIT",
+    "type": "module",
+    "main": "./dist/module.mjs",
+    "module": "./dist/module.mjs",
+    "commonjs": "./dist/module.cjs",
+    "types": "./dist/types.d.ts",
+    "typings": "./dist/types.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "dev": "nuxi dev playground",
+        "dev:build": "nuxi build playground",
+        "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
+        "prepack": "npx unbuild"
+    },
+    "dependencies": {
+        "@nuxt/kit": "^3.0.0-rc.5",
+        "defu": "^6.0.0",
+        "destr": "latest",
+        "ohmyfetch": "latest"
+    },
+    "devDependencies": {
+        "@nuxt/module-builder": "latest",
+        "@types/node": "latest",
+        "eslint": "latest",
+        "nuxt": "^3.0.0-rc.5"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Teranode/nuxt-module-alternatives.git",
+        "directory": "@nuxtjs-alt/http"
+    },
+    "bugs": {
+        "url": "https://github.com/Teranode/nuxt-module-alternatives/issues"
+    }
+}
