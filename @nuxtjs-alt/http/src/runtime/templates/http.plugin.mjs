@@ -10,7 +10,6 @@ import destr from 'destr'
 class HttpInstance {
     constructor(defaults, $fetch = http) {
         this.httpDefaults = {
-            hooks: {},
             ...defaults
         }
 
@@ -38,44 +37,32 @@ class HttpInstance {
         this.setHeader('Authorization', value)
     }
 
-    #hook(name, fn) {
-        if (!this.httpDefaults.hooks[name]) {
-            this.httpDefaults.hooks[name] = []
-        }
-        this.httpDefaults.hooks[name].push(fn)
-    }
-
-    onRequest(fn) {
-        this.#hook('onRequest', fn)
-    }
-
-    onResponse(fn) {
-        this.#hook('onResponse', fn)
-    }
-
-    onRequestError(fn) {
-        this.#hook('onRequestError', fn)
-    }
-
-    onResponseError(fn) {
-        this.#hook('onResponseError', fn)
-    }
-
-    onError(fn) {
-        this.onRequestError(fn)
-        this.onResponseError(fn)
-    }
-
     create(options) {
-        const { retry, timeout, baseURL, headers } = this.httpDefaults
+        const { retry, timeout, baseURL, headers, credentials } = this.httpDefaults
 
-        return createHttpInstance(defu(options, { retry, timeout, baseURL, headers }))
+        return createHttpInstance(defu(options, { retry, timeout, baseURL, headers, credentials }))
     }
+}
+
+const cleanParams = (obj) => {
+    const cleanValues = [null, undefined, '']
+    const cleanedObj = { ...obj };
+    Object.keys(cleanedObj).forEach(key => {
+        if (cleanValues.includes(cleanedObj[key]) || (Array.isArray(cleanedObj[key]) && !cleanedObj[key].length) ) {
+            delete cleanedObj[key];
+        }
+    });
+
+    return cleanedObj;
 }
 
 for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch']) {
     HttpInstance.prototype[method] = async function (url, options) {
-        const fetchOptions = { ...this.httpDefaults, ...options }
+        const fetchOptions = defu(options, this.httpDefaults)
+
+        if (fetchOptions && fetchOptions.params) {
+            fetchOptions.params = cleanParams(options.params)
+        }
 
         if (/^https?/.test(url)) {
             delete fetchOptions.baseURL
@@ -87,42 +74,31 @@ for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch']) {
         try {
             const controller = new AbortController();
             const timeoutSignal = setTimeout(() => controller.abort(), fetchOptions.timeout);
+            let instance
 
-            let instance = await this.$fetch.create({
-                method: method,
-                signal: controller.signal,
-                ...fetchOptions
-            })
+            if (fetchOptions && fetchOptions.raw) {
+                instance = await this.$fetch.raw(url, {
+                    method: method,
+                    signal: controller.signal,
+                    ...fetchOptions
+                })
 
-            clearTimeout(timeoutSignal);
+                clearTimeout(timeoutSignal);
+                return instance
+            }
+            else {
+                instance = await this.$fetch.create({
+                    method: method,
+                    signal: controller.signal,
+                    ...fetchOptions
+                })
 
-            return instance(url)
-        } 
+                clearTimeout(timeoutSignal);
+                return instance(url)
+            }
+        }
         catch (error) {
-            // Try to fill error with useful data
-            if (error.response) {
-                error.statusCode = error.response.status
-                try {
-                    const text = await error.response.text()
-                    error.response.text = () => Promise.resolve(text)
-                    const json = destr(text)
-                    error.response.json = () => Promise.resolve(json)
-                    error.response.data = json
-                } catch (_) { }
-            }
-
-            // Call onError hook
-            if (fetchOptions.hooks.onError) {
-                for (const fn of fetchOptions.hooks.onError) {
-                    const res = fn(error)
-                    if (res !== undefined) {
-                        return res
-                    }
-                }
-            }
-
-            // Throw error
-            throw error
+            console.error(error)
         }
     }
 
@@ -131,7 +107,7 @@ for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch']) {
     }
 }
 
-const createHttpInstance = options => {
+const createHttpInstance = (options) => {
     // Create new Fetch instance
     return new HttpInstance(options)
 }
@@ -150,6 +126,7 @@ export default defineNuxtPlugin(ctx => {
     const defaults = {
         retry: '<%= options.retry %>',
         timeout: process.server ? '<%= options.serverTimeout %>' : '<%= options.clientTimeout %>',
+        credentials: '<%= options.credentials %>',
         baseURL,
         headers
     }
@@ -172,7 +149,7 @@ export default defineNuxtPlugin(ctx => {
     }
 
     const http = createHttpInstance(defaults)
-    const useConflict = '<% options.useConflict %>'
+    const useConflict = '<%= options.useConflict %>'
     const providerName = useConflict ? 'http' : 'fetch'
 
     globalThis['$' + providerName] = http

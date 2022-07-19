@@ -87,6 +87,7 @@ export default defineNuxtModule({
             useConflict: false,
             https,
             headers: {},
+            credentials: 'omit',
             ...moduleOptions
         }
 

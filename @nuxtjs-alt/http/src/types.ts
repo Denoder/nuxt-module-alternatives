@@ -197,6 +197,7 @@ export interface ModuleOptions {
     useConflict?: boolean;
     https?: boolean;
     headers?: any;
+    credentials?: string;
 }
 
 declare module '@nuxt/schema' {
