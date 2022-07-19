@@ -5,30 +5,40 @@ import { $fetch as http } from 'ohmyfetch/undici'
 import { $fetch as http } from 'ohmyfetch'
 '<% } %>'
 import { defu } from 'defu'
-import destr from 'destr'
 
 class HttpInstance {
-    constructor(defaults, $fetch = http) {
-        this.httpDefaults = {
+    #$fetch;
+    #httpDefaults;
+
+    constructor(defaults, $instance = http) {
+        this.#httpDefaults = {
             ...defaults
         }
 
-        this.$fetch = $fetch
+        this.#$fetch = $instance
+    }
+
+    getFetch() {
+        return this.#$fetch
+    }
+
+    getDefaults() {
+        return this.#httpDefaults
     }
 
     getBaseURL() {
-        return this.httpDefaults.baseURL
+        return this.#httpDefaults.baseURL
     }
 
     setBaseURL(baseURL) {
-        this.httpDefaults.baseURL = baseURL
+        this.#httpDefaults.baseURL = baseURL
     }
 
     setHeader(name, value) {
         if (!value) {
-            delete this.httpDefaults.headers[name];
+            delete this.#httpDefaults.headers[name];
         } else {
-            this.httpDefaults.headers[name] = value
+            this.#httpDefaults.headers[name] = value
         }
     }
 
@@ -38,7 +48,7 @@ class HttpInstance {
     }
 
     create(options) {
-        const { retry, timeout, baseURL, headers, credentials } = this.httpDefaults
+        const { retry, timeout, baseURL, headers, credentials } = this.getDefaults()
 
         return createHttpInstance(defu(options, { retry, timeout, baseURL, headers, credentials }))
     }
@@ -56,9 +66,18 @@ const cleanParams = (obj) => {
     return cleanedObj;
 }
 
-for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch']) {
+for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch', 'options']) {
+
+    /**
+     * Raw fetch instance
+     *
+     * @param {*} url
+     * @param {*} options
+     * @returns
+     */
     HttpInstance.prototype[method] = async function (url, options) {
-        const fetchOptions = defu(options, this.httpDefaults)
+        const fetchOptions = defu(options, this.getDefaults())
+        delete fetchOptions.method
 
         if (fetchOptions && fetchOptions.params) {
             fetchOptions.params = cleanParams(options.params)
@@ -74,36 +93,59 @@ for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch']) {
         try {
             const controller = new AbortController();
             const timeoutSignal = setTimeout(() => controller.abort(), fetchOptions.timeout);
-            let instance
 
-            if (fetchOptions && fetchOptions.raw) {
-                instance = await this.$fetch.raw(url, {
-                    method: method,
-                    signal: controller.signal,
-                    ...fetchOptions
-                })
+            let instance = await this.getFetch().raw(url, {
+                method: method,
+                signal: controller.signal,
+                ...fetchOptions
+            })
 
-                clearTimeout(timeoutSignal);
-                return instance
-            }
-            else {
-                instance = await this.$fetch.create({
-                    method: method,
-                    signal: controller.signal,
-                    ...fetchOptions
-                })
-
-                clearTimeout(timeoutSignal);
-                return instance(url)
-            }
+            clearTimeout(timeoutSignal);
+            return instance
         }
         catch (error) {
             console.error(error)
         }
     }
 
-    HttpInstance.prototype['$' + method] = function (url, options) {
-        return this[method](url, options).then(response => (response && response.text) ? response.text() : response).then(body => destr(body))
+    /**
+     * Destr/Parsed fetch instance
+     *
+     * @param {*} url
+     * @param {*} options
+     * @returns
+     */
+    HttpInstance.prototype['$' + method] = async function (url, options) {
+        const fetchOptions = defu(options, this.getDefaults())
+        delete fetchOptions.method
+
+        if (fetchOptions && fetchOptions.params) {
+            fetchOptions.params = cleanParams(options.params)
+        }
+
+        if (/^https?/.test(url)) {
+            delete fetchOptions.baseURL
+        } else if (fetchOptions.baseURL && typeof url === 'string' && url.startsWith('/')) {
+            // Prevents `$fetch` from throwing "`input` must not begin with a slash when using `baseURL`"
+            url = url.slice(1)
+        }
+
+        try {
+            const controller = new AbortController();
+            const timeoutSignal = setTimeout(() => controller.abort(), fetchOptions.timeout);
+
+            let instance = await this.getFetch().create({
+                method: method,
+                signal: controller.signal,
+                ...fetchOptions
+            })
+
+            clearTimeout(timeoutSignal);
+            return instance(url)
+        }
+        catch (error) {
+            console.error(error)
+        }
     }
 }
 
