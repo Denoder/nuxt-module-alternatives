@@ -81,7 +81,7 @@ export default defineNuxtModule({
             const resolver = createResolver(outputDir)
 
             try {
-                await download(url, {
+                const downloader = download(url, {
                     base64: options.base64,
                     overwriting: options.overwriting,
                     outputDir,
@@ -89,6 +89,8 @@ export default defineNuxtModule({
                     fontsDir: options.fontsDir,
                     fontsPath: options.fontsPath
                 })
+
+                await downloader.execute()
 
                 if (options.inject) {
                     nuxt.options.css.push(resolver.resolve(options.stylePath))
@@ -105,7 +107,6 @@ export default defineNuxtModule({
         if (options.prefetch) {
             // @ts-ignore
             nuxt.options.app.head.link.push({
-                hid: 'gf-prefetch',
                 rel: 'dns-prefetch',
                 href: 'https://fonts.gstatic.com/'
             })
@@ -116,7 +117,6 @@ export default defineNuxtModule({
         if (options.preconnect) {
             // @ts-ignore
             nuxt.options.app.head.link.push({
-                hid: 'gf-preconnect',
                 rel: 'preconnect',
                 href: 'https://fonts.gstatic.com/',
                 crossorigin: ''
@@ -128,7 +128,6 @@ export default defineNuxtModule({
         if (options.preload) {
             // @ts-ignore
             nuxt.options.app.head.link.push({
-                hid: 'gf-preload',
                 rel: 'preload',
                 as: 'style',
                 href: url
@@ -139,7 +138,6 @@ export default defineNuxtModule({
         if (options.useStylesheet) {
             // @ts-ignore
             nuxt.options.app.head.link.push({
-                hid: 'gf-style',
                 rel: 'stylesheet',
                 href: url
             })
@@ -152,8 +150,7 @@ export default defineNuxtModule({
         nuxt.options.app.head.script = nuxt.options.app.head.script || []
         // @ts-ignore
         nuxt.options.app.head.script.push({
-            hid: 'gf-script',
-            innerHTML: `(function(){var l=document.createElement('link');l.rel="stylesheet";l.href="${url}";document.querySelector("head").appendChild(l);})();`
+            children: `(function(){var l=document.createElement('link');l.rel="stylesheet";l.href="${url}";document.querySelector("head").appendChild(l);})();`
         })
 
         // no-JS fallback
@@ -161,17 +158,16 @@ export default defineNuxtModule({
         nuxt.options.app.head.noscript = nuxt.options.app.head.noscript || []
         // @ts-ignore
         nuxt.options.app.head.noscript.push({
-            hid: 'gf-noscript',
-            innerHTML: `<link rel="stylesheet" href="${url}">`
+            children: `<link rel="stylesheet" href="${url}">`
         })
 
         // Disable sanitazions
         // @ts-ignore
         nuxt.options.app.head.__dangerouslyDisableSanitizersByTagID = nuxt.options.app.head.__dangerouslyDisableSanitizersByTagID || {}
         // @ts-ignore
-        nuxt.options.app.head.__dangerouslyDisableSanitizersByTagID['gf-script'] = ['innerHTML']
+        nuxt.options.app.head.__dangerouslyDisableSanitizersByTagID['gf-script'] = ['children']
         // @ts-ignore
-        nuxt.options.app.head.__dangerouslyDisableSanitizersByTagID['gf-noscript'] = ['innerHTML']
+        nuxt.options.app.head.__dangerouslyDisableSanitizersByTagID['gf-noscript'] = ['children']
     }
 })
 

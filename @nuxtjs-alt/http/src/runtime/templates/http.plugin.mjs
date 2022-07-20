@@ -5,15 +5,21 @@ import { $fetch as http } from 'ohmyfetch/undici'
 import { $fetch as http } from 'ohmyfetch'
 '<% } %>'
 import { defu } from 'defu'
+import { InterceptorManager } from '#http/runtime'
 
 class HttpInstance {
     #$fetch;
     #httpDefaults;
+    interceptors;
 
     constructor(defaults, $instance = http) {
         this.#httpDefaults = {
-            interceptors: [],
             ...defaults
+        }
+
+        this.interceptors = {
+            request: new InterceptorManager(),
+            response: new InterceptorManager()
         }
 
         this.#$fetch = $instance
@@ -22,17 +28,11 @@ class HttpInstance {
 
     #createMethods() {
         for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch', 'options']) {
-            /**
-             * Method Creations
-             *
-             * @param {*} url
-             * @param {*} options
-             * @returns
-             */
             Object.assign(this.__proto__, {
-                [method]: function (url, options) {
+                [method]: (url, options) =>  {
                     const fetchOptions = defu(options, this.getDefaults())
-                    const interceptors = this.#httpDefaults.interceptors;
+                    fetchOptions.url = url
+                    fetchOptions.method = method
 
                     if (fetchOptions && fetchOptions.params) {
                         fetchOptions.params = cleanParams(options.params)
@@ -42,48 +42,79 @@ class HttpInstance {
                         delete fetchOptions.baseURL
                     }
 
-                    const controller = new AbortController();
-                    const timeoutSignal = setTimeout(() => controller.abort(), fetchOptions.timeout);
-                    delete fetchOptions.method
+                    const requestInterceptorChain = [];
+                    let synchronousRequestInterceptors = true;
 
-                    let promise = Promise.resolve({ request: url, options: fetchOptions });
-
-                    interceptors.forEach(({ onRequest, onRequestError }) => {
-                        if (onRequest || onRequestError) {
-                            promise = promise.then(onRequest, onRequestError);
+                    this.interceptors.request.forEach((interceptor) => {
+                        if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
+                            return;
                         }
+
+                        synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+
+                        requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
                     });
 
-                    promise = promise.then(context => {
-                        const request = context && context.request ? context.request : url
-                        const opt = context && options ? context.options : null
-
-                        return this.getFetch().raw(request, {
-                            method: method,
-                            signal: controller.signal,
-                            ...fetchOptions,
-                            ...opt
-                        })
-                        .then(response => {
-                            return response;
-                        })
-                        .catch(error => {
-                            return Promise.reject(error);
-                        });
+                    const responseInterceptorChain = [];
+                    this.interceptors.response.forEach((interceptor) => {
+                        responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
                     });
 
-                    interceptors.forEach(({ onResponse, onResponseError }) => {
-                        if (onResponse || onResponseError) {
-                            promise = promise.then(onResponse, onResponseError);
+                    let promise;
+                    let i = 0;
+                    let len;
+
+                    if (!synchronousRequestInterceptors) {
+                        const chain = [this.#dispatchRawRequest(fetchOptions), undefined];
+                        chain.unshift.apply(chain, requestInterceptorChain);
+                        chain.push.apply(chain, responseInterceptorChain);
+                        len = chain.length;
+
+                        promise = Promise.resolve(fetchOptions);
+
+                        while (i < len) {
+                            promise = promise.then(chain[i++], chain[i++]);
                         }
-                    });
 
-                    clearTimeout(timeoutSignal);
-                    return promise
+                        return promise;
+                    }
+
+                    len = requestInterceptorChain.length;
+
+                    let newConfig = fetchOptions;
+
+                    i = 0;
+
+                    while (i < len) {
+                        const onFulfilled = requestInterceptorChain[i++];
+                        const onRejected = requestInterceptorChain[i++];
+                        try {
+                            newConfig = onFulfilled(newConfig);
+                        } catch (error) {
+                            onRejected.call(this, error);
+                            break;
+                        }
+                    }
+
+                    try {
+                        promise = this.#dispatchRawRequest(newConfig);
+                    } catch (error) {
+                        return Promise.reject(error);
+                    }
+
+                    i = 0;
+                    len = responseInterceptorChain.length;
+
+                    while (i < len) {
+                        promise = promise.then(responseInterceptorChain[i++], responseInterceptorChain[i++]);
+                    }
+
+                    return promise;
                 },
-                ['$' + method]: function (url, options) {
+                ['$' + method]: (url, options) => {
                     const fetchOptions = defu(options, this.getDefaults())
-                    const interceptors = this.#httpDefaults.interceptors;
+                    fetchOptions.url = url
+                    fetchOptions.method = method
 
                     if (fetchOptions && fetchOptions.params) {
                         fetchOptions.params = cleanParams(options.params)
@@ -93,48 +124,105 @@ class HttpInstance {
                         delete fetchOptions.baseURL
                     }
 
-                    const controller = new AbortController();
-                    const timeoutSignal = setTimeout(() => controller.abort(), fetchOptions.timeout);
-                    delete fetchOptions.method
+                    const requestInterceptorChain = [];
+                    let synchronousRequestInterceptors = true;
 
-                    let promise = Promise.resolve({ request: url, options: fetchOptions });
-
-                    interceptors.forEach(({ onRequest, onRequestError }) => {
-                        if (onRequest || onRequestError) {
-                            promise = promise.then(onRequest, onRequestError);
+                    this.interceptors.request.forEach((interceptor) => {
+                        if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
+                            return;
                         }
+
+                        synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+
+                        requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
                     });
 
-                    promise = promise.then(context => {
-                        const request = context && context.request ? context.request : url
-                        const opt = context && options ? context.options : null
-
-                        let instance = this.getFetch().create({
-                            method: method,
-                            signal: controller.signal,
-                            ...fetchOptions,
-                            ...opt
-                        })
-
-                        return instance(request).then(response => {
-                            return response;
-                        })
-                        .catch(error => {
-                            return Promise.reject(error);
-                        });
+                    const responseInterceptorChain = [];
+                    this.interceptors.response.forEach((interceptor) => {
+                        responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
                     });
 
-                    interceptors.forEach(({ onResponse, onResponseError }) => {
-                        if (onResponse || onResponseError) {
-                            promise = promise.then(onResponse, onResponseError);
+                    let promise;
+                    let i = 0;
+                    let len;
+
+                    if (!synchronousRequestInterceptors) {
+                        const chain = [this.#dispatchRequest(fetchOptions), undefined];
+                        chain.unshift.apply(chain, requestInterceptorChain);
+                        chain.push.apply(chain, responseInterceptorChain);
+                        len = chain.length;
+
+                        promise = Promise.resolve(fetchOptions);
+
+                        while (i < len) {
+                            promise = promise.then(chain[i++], chain[i++]);
                         }
-                    });
 
-                    clearTimeout(timeoutSignal);
-                    return promise
+                        return promise;
+                    }
+
+                    len = requestInterceptorChain.length;
+
+                    let newConfig = fetchOptions;
+
+                    i = 0;
+
+                    while (i < len) {
+                        const onFulfilled = requestInterceptorChain[i++];
+                        const onRejected = requestInterceptorChain[i++];
+                        try {
+                            newConfig = onFulfilled(newConfig);
+                        } catch (error) {
+                            onRejected.call(this, error);
+                            break;
+                        }
+                    }
+
+                    try {
+                        promise = this.#dispatchRequest(newConfig);
+                    } catch (error) {
+                        return Promise.reject(error);
+                    }
+
+                    i = 0;
+                    len = responseInterceptorChain.length;
+
+                    while (i < len) {
+                        promise = promise.then(responseInterceptorChain[i++], responseInterceptorChain[i++]);
+                    }
+
+                    return promise;
                 }
             })
         }
+    }
+
+    #dispatchRawRequest = (config) => {
+        const controller = new AbortController();
+        const timeoutSignal = setTimeout(() => controller.abort(), config.timeout);
+
+        let instance = this.getFetch().raw(config.url, {
+            method: config.method,
+            signal: controller.signal,
+            ...config
+        })
+
+        clearTimeout(timeoutSignal);
+        return instance
+    }
+
+    #dispatchRequest = (config) => {
+        const controller = new AbortController();
+        const timeoutSignal = setTimeout(() => controller.abort(), config.timeout);
+
+        let instance = this.getFetch().create({
+            method: config.method,
+            signal: controller.signal,
+            ...config
+        })
+
+        clearTimeout(timeoutSignal);
+        return instance(config.url)
     }
 
     getFetch() {
@@ -166,27 +254,25 @@ class HttpInstance {
         this.setHeader('Authorization', value)
     }
 
+    onRequest(fn) {
+        this.interceptors.request.use(config => fn(config) || config)
+    }
+
+    onResponse(fn) {
+        this.interceptors.response.use(response => fn(response) || response)
+    }
+
+    onRequestError(fn) {
+        this.interceptors.request.use(undefined, error => fn(error) || Promise.reject(error))
+    }
+
+    onResponseError(fn) {
+        this.interceptors.response.use(undefined, error => fn(error) || Promise.reject(error))
+    }
+
     create(options) {
         const { retry, timeout, baseURL, headers, credentials } = this.getDefaults()
         return createHttpInstance(defu(options, { retry, timeout, baseURL, headers, credentials }))
-    }
-
-    interceptors(interceptor) {
-        this.#httpDefaults.interceptors.push(interceptor);
-
-        () => { 
-            const index = this.#httpDefaults.interceptors.indexOf(interceptor);
-            if (index >= 0) {
-                this.#httpDefaults.interceptors.splice(index, 1);
-            }
-        }
-
-        return this
-    }
-
-    clearInterceptors () {
-        this.#httpDefaults.interceptors = [];
-        return this
     }
 }
 

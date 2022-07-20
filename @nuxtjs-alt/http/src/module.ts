@@ -129,6 +129,9 @@ export default defineNuxtModule({
         console.debug(`baseURL: ${options.baseURL}`)
         console.debug(`browserBaseURL: ${options.browserBaseURL}`)
 
+        const runtime = resolver.resolve("runtime");
+        nuxt.options.alias["#http/runtime"] = runtime;
+
         // Add auto imports
         const composables = resolver.resolve('./runtime/composables')
 
