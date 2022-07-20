@@ -30,16 +30,16 @@ class HttpInstance {
         for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch', 'options']) {
             Object.assign(this.__proto__, {
                 [method]: (url, options) =>  {
-                    const fetchOptions = defu(options, this.getDefaults())
-                    fetchOptions.url = url
-                    fetchOptions.method = method
+                    const config = defu(options, this.getDefaults())
+                    config.url = url
+                    config.method = method
 
-                    if (fetchOptions && fetchOptions.params) {
-                        fetchOptions.params = cleanParams(options.params)
+                    if (config && config.params) {
+                        config.params = cleanParams(options.params)
                     }
 
                     if (/^https?/.test(url)) {
-                        delete fetchOptions.baseURL
+                        delete config.baseURL
                     }
 
                     const requestInterceptorChain = [];
@@ -65,12 +65,12 @@ class HttpInstance {
                     let len;
 
                     if (!synchronousRequestInterceptors) {
-                        const chain = [this.#dispatchRawRequest(fetchOptions), undefined];
+                        const chain = [this.#dispatchRawRequest(config), undefined];
                         chain.unshift.apply(chain, requestInterceptorChain);
                         chain.push.apply(chain, responseInterceptorChain);
                         len = chain.length;
 
-                        promise = Promise.resolve(fetchOptions);
+                        promise = Promise.resolve(config);
 
                         while (i < len) {
                             promise = promise.then(chain[i++], chain[i++]);
@@ -81,7 +81,7 @@ class HttpInstance {
 
                     len = requestInterceptorChain.length;
 
-                    let newConfig = fetchOptions;
+                    let newConfig = config;
 
                     i = 0;
 
@@ -112,16 +112,16 @@ class HttpInstance {
                     return promise;
                 },
                 ['$' + method]: (url, options) => {
-                    const fetchOptions = defu(options, this.getDefaults())
-                    fetchOptions.url = url
-                    fetchOptions.method = method
+                    const config = defu(options, this.getDefaults())
+                    config.url = url
+                    config.method = method
 
-                    if (fetchOptions && fetchOptions.params) {
-                        fetchOptions.params = cleanParams(options.params)
+                    if (config && config.params) {
+                        config.params = cleanParams(options.params)
                     }
 
                     if (/^https?/.test(url)) {
-                        delete fetchOptions.baseURL
+                        delete config.baseURL
                     }
 
                     const requestInterceptorChain = [];
@@ -147,12 +147,12 @@ class HttpInstance {
                     let len;
 
                     if (!synchronousRequestInterceptors) {
-                        const chain = [this.#dispatchRequest(fetchOptions), undefined];
+                        const chain = [this.#dispatchRequest(config), undefined];
                         chain.unshift.apply(chain, requestInterceptorChain);
                         chain.push.apply(chain, responseInterceptorChain);
                         len = chain.length;
 
-                        promise = Promise.resolve(fetchOptions);
+                        promise = Promise.resolve(config);
 
                         while (i < len) {
                             promise = promise.then(chain[i++], chain[i++]);
@@ -163,7 +163,7 @@ class HttpInstance {
 
                     len = requestInterceptorChain.length;
 
-                    let newConfig = fetchOptions;
+                    let newConfig = config;
 
                     i = 0;
 
