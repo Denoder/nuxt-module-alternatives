@@ -1,5 +1,5 @@
- class InterceptorManager {
-    handlers
+class InterceptorManager {
+    handlers: any
 
     constructor() {
         this.handlers = []
@@ -13,7 +13,7 @@
      *
      * @return {Number} An ID used to remove interceptor later
      */
-    use(fulfilled: Function, rejected: Function, options): number {
+    use(fulfilled: Function, rejected: Function, options: any): number {
         this.handlers.push({
             fulfilled,
             rejected,
@@ -29,7 +29,7 @@
      *
      * @param {Number} id The ID that was returned by `use`
      *
-     * @returns {Boolean} `true` if the interceptor was removed, `false` otherwise
+     * @returns {void}
      */
     eject(id: number): void {
         if (this.handlers[id]) {

@@ -30,7 +30,7 @@ class HttpInstance {
         for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch', 'options']) {
             Object.assign(this.__proto__, {
                 [method]: (url, options) =>  {
-                    const config = defu(options, this.getDefaults())
+                    const config = defu(options, this.getDefaultConfig())
                     config.url = url
                     config.method = method
 
@@ -52,7 +52,7 @@ class HttpInstance {
 
                         synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
 
-                        requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+                        requestInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
                     });
 
                     const responseInterceptorChain = [];
@@ -66,7 +66,7 @@ class HttpInstance {
 
                     if (!synchronousRequestInterceptors) {
                         const chain = [this.#dispatchRawRequest(config), undefined];
-                        chain.unshift.apply(chain, requestInterceptorChain);
+                        chain.push.apply(chain, requestInterceptorChain);
                         chain.push.apply(chain, responseInterceptorChain);
                         len = chain.length;
 
@@ -112,7 +112,7 @@ class HttpInstance {
                     return promise;
                 },
                 ['$' + method]: (url, options) => {
-                    const config = defu(options, this.getDefaults())
+                    const config = defu(options, this.getDefaultConfig())
                     config.url = url
                     config.method = method
 
@@ -134,7 +134,7 @@ class HttpInstance {
 
                         synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
 
-                        requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+                        requestInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
                     });
 
                     const responseInterceptorChain = [];
@@ -148,7 +148,7 @@ class HttpInstance {
 
                     if (!synchronousRequestInterceptors) {
                         const chain = [this.#dispatchRequest(config), undefined];
-                        chain.unshift.apply(chain, requestInterceptorChain);
+                        chain.push.apply(chain, requestInterceptorChain);
                         chain.push.apply(chain, responseInterceptorChain);
                         len = chain.length;
 
@@ -229,7 +229,7 @@ class HttpInstance {
         return this.#$fetch
     }
 
-    getDefaults() {
+    getDefaultConfig() {
         return this.#httpDefaults
     }
 
@@ -271,7 +271,7 @@ class HttpInstance {
     }
 
     create(options) {
-        const { retry, timeout, baseURL, headers, credentials } = this.getDefaults()
+        const { retry, timeout, baseURL, headers, credentials } = this.getDefaultConfig()
         return createHttpInstance(defu(options, { retry, timeout, baseURL, headers, credentials }))
     }
 }
