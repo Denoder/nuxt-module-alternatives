@@ -135,17 +135,10 @@ export default defineNuxtModule({
         // Add auto imports
         const composables = resolver.resolve('./runtime/composables')
 
-        if (!options.useConflict) {
-            addAutoImport([
-                { from: composables, name: 'useHttp' },
-                { from: composables, name: 'useLazyHttp' }
-            ])
-        } else {
-            addAutoImport([
-                { from: composables, name: 'useFetch' },
-                { from: composables, name: 'useLazyFetch' }
-            ])
-        }
+        addAutoImport([
+            { from: composables, name: options.useConflict ? 'useFetch' : 'useHttp' },
+            { from: composables, name: options.useConflict ? 'useLazyFetch' : 'useLazyHttp' }
+        ])
     }
 })
 

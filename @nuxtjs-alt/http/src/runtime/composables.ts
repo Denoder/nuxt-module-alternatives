@@ -1,74 +1,227 @@
-import type { FetchRequest } from 'ohmyfetch'
+import type { FetchOptions, FetchRequest } from 'ohmyfetch'
+import type { TypedInternalResponse, NitroFetchRequest } from 'nitropack'
+import { computed, isRef, Ref } from 'vue'
+import type { AsyncDataOptions, _Transform, KeyOfRes, AsyncData, PickFrom } from '#app'
 import { useAsyncData } from '#imports'
-import { hash } from 'ohash'
-import { computed, isRef } from 'vue'
 
-export function useFetch(request: any, opts = {}) {
-    const key = '$h_' + (opts.key || hash([request, opts]))
-    const _request = computed<FetchRequest>(() => {
-        let r = request
+export type FetchResult<ReqT extends NitroFetchRequest> = TypedInternalResponse<ReqT, unknown>
+
+export interface UseFetchOptions<
+    DataT,
+    Transform extends _Transform<DataT, any> = _Transform<DataT, DataT>,
+    PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
+    > extends AsyncDataOptions<DataT, Transform, PickKeys>, FetchOptions {
+    key?: string
+}
+
+export function useFetch<
+    ResT = void,
+    ErrorT = Error,
+    ReqT extends NitroFetchRequest = NitroFetchRequest,
+    _ResT = ResT extends void ? FetchResult<ReqT> : ResT,
+    Transform extends (res: _ResT) => any = (res: _ResT) => _ResT,
+    PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
+>(
+    request: Ref<ReqT> | ReqT | (() => ReqT),
+    opts?: UseFetchOptions<_ResT, Transform, PickKeys>
+): AsyncData<PickFrom<ReturnType<Transform>, PickKeys>, ErrorT | null | true>
+export function useFetch<
+    ResT = void,
+    ErrorT = Error,
+    ReqT extends NitroFetchRequest = NitroFetchRequest,
+    _ResT = ResT extends void ? FetchResult<ReqT> : ResT,
+    Transform extends (res: _ResT) => any = (res: _ResT) => _ResT,
+    PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
+>(
+    request: Ref<ReqT> | ReqT | (() => ReqT),
+    arg1?: string | UseFetchOptions<_ResT, Transform, PickKeys>,
+    arg2?: string
+) {
+    const [opts, autoKey] = typeof arg1 === 'string' ? [{}, arg1] : [arg1, arg2]
+    // @ts-ignore
+    const _key = opts.key || autoKey
+    if (!_key || typeof _key !== 'string') {
+        throw new TypeError('[nuxt] [useFetch] key must be a string: ' + _key)
+    }
+    if (!request) {
+        throw new Error('[nuxt] [useFetch] request is missing.')
+    }
+    const key = '$f' + _key
+
+    const _request = computed(() => {
+        let r = request as Ref<FetchRequest> | FetchRequest | (() => FetchRequest)
         if (typeof r === 'function') {
             r = r()
         }
-        return isRef(r) ? r.value : r
+        return (isRef(r) ? r.value : r) as NitroFetchRequest
     })
 
+    // @ts-ignore
+    const { server, lazy, default: defaultFn, transform, pick, watch, initialCache, ...fetchOptions } = opts
+
     const _fetchOptions = {
-        ...opts,
+        ...fetchOptions,
+        // @ts-ignore
         cache: typeof opts.cache === 'boolean' ? undefined : opts.cache
     }
 
-    const _asyncDataOptions = {
-        ...opts,
+    const _asyncDataOptions: AsyncDataOptions<_ResT, Transform, PickKeys> = {
+        server,
+        lazy,
+        default: defaultFn,
+        transform,
+        pick,
+        initialCache,
         watch: [
             _request,
-            ...(opts.watch || [])
+            ...(watch || [])
         ]
     }
 
-    const asyncData = useAsyncData(key, () => {
-        const method = ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method) ? opts.method : 'get'
+    const asyncData = useAsyncData<_ResT, ErrorT, Transform, PickKeys>(key, () => {
+        // @ts-ignore
+        const method = opts && opts.method && ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method) ? opts.method : 'get'
+        // @ts-ignore
         return $fetch[method](_request.value, _fetchOptions)
     }, _asyncDataOptions)
 
     return asyncData
 }
 
-export function useLazyFetch(request: any, opts = {}) {
-    return useFetch(request, { ...opts, lazy: true })
+export function useLazyFetch<
+    ResT = void,
+    ErrorT = Error,
+    ReqT extends NitroFetchRequest = NitroFetchRequest,
+    _ResT = ResT extends void ? FetchResult<ReqT> : ResT,
+    Transform extends (res: _ResT) => any = (res: _ResT) => _ResT,
+    PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
+>(
+    request: Ref<ReqT> | ReqT | (() => ReqT),
+    opts?: Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'>
+): AsyncData<PickFrom<ReturnType<Transform>, PickKeys>, ErrorT | null | true>
+export function useLazyFetch<
+    ResT = void,
+    ErrorT = Error,
+    ReqT extends NitroFetchRequest = NitroFetchRequest,
+    _ResT = ResT extends void ? FetchResult<ReqT> : ResT,
+    Transform extends (res: _ResT) => any = (res: _ResT) => _ResT,
+    PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
+>(
+    request: Ref<ReqT> | ReqT | (() => ReqT),
+    arg1?: string | Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'>,
+    arg2?: string
+) {
+    const [opts, autoKey] = typeof arg1 === 'string' ? [{}, arg1] : [arg1, arg2]
+
+    return useFetch<ResT, ErrorT, ReqT, _ResT, Transform, PickKeys>(request, {
+        ...opts,
+        lazy: true
+    // @ts-ignore 
+    }, autoKey)
 }
 
-export function useHttp(request: any, opts = {}) {
-    const key = '$h_' + (opts.key || hash([request, opts]))
-    const _request = computed<FetchRequest>(() => {
-        let r = request
+export function useHttp<
+    ResT = void,
+    ErrorT = Error,
+    ReqT extends NitroFetchRequest = NitroFetchRequest,
+    _ResT = ResT extends void ? FetchResult<ReqT> : ResT,
+    Transform extends (res: _ResT) => any = (res: _ResT) => _ResT,
+    PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
+>(
+    request: Ref<ReqT> | ReqT | (() => ReqT),
+    opts?: UseFetchOptions<_ResT, Transform, PickKeys>
+): AsyncData<PickFrom<ReturnType<Transform>, PickKeys>, ErrorT | null | true>
+export function useHttp<
+    ResT = void,
+    ErrorT = Error,
+    ReqT extends NitroFetchRequest = NitroFetchRequest,
+    _ResT = ResT extends void ? FetchResult<ReqT> : ResT,
+    Transform extends (res: _ResT) => any = (res: _ResT) => _ResT,
+    PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
+>(
+    request: Ref<ReqT> | ReqT | (() => ReqT),
+    arg1?: string | UseFetchOptions<_ResT, Transform, PickKeys>,
+    arg2?: string
+) {
+    const [opts, autoKey] = typeof arg1 === 'string' ? [{}, arg1] : [arg1, arg2]
+    // @ts-ignore
+    const _key = opts.key || autoKey
+    if (!_key || typeof _key !== 'string') {
+        throw new TypeError('[nuxt] [useHttp] key must be a string: ' + _key)
+    }
+    if (!request) {
+        throw new Error('[nuxt] [useHttp] request is missing.')
+    }
+    const key = '$h' + _key
+
+    const _request = computed(() => {
+        let r = request as Ref<FetchRequest> | FetchRequest | (() => FetchRequest)
         if (typeof r === 'function') {
             r = r()
         }
-        return isRef(r) ? r.value : r
+        return (isRef(r) ? r.value : r) as NitroFetchRequest
     })
 
+    // @ts-ignore
+    const { server, lazy, default: defaultFn, transform, pick, watch, initialCache, ...fetchOptions } = opts
+
     const _fetchOptions = {
-        ...opts,
+        ...fetchOptions,
+        // @ts-ignore
         cache: typeof opts.cache === 'boolean' ? undefined : opts.cache
     }
 
-    const _asyncDataOptions = {
-        ...opts,
+    const _asyncDataOptions: AsyncDataOptions<_ResT, Transform, PickKeys> = {
+        server,
+        lazy,
+        default: defaultFn,
+        transform,
+        pick,
+        initialCache,
         watch: [
             _request,
-            ...(opts.watch || [])
+            ...(watch || [])
         ]
     }
 
-    const asyncData = useAsyncData(key, () => {
-        const method = ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method) ? opts.method : 'get'
-        return $http[method](_request.value, _fetchOptions)
+    const asyncData = useAsyncData<_ResT, ErrorT, Transform, PickKeys>(key, () => {
+        // @ts-ignore
+        const method = opts && opts.method && ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method) ? opts.method : 'get'
+        // @ts-ignore
+        return $fetch[method](_request.value, _fetchOptions)
     }, _asyncDataOptions)
 
     return asyncData
 }
 
-export function useLazyHttp(request: any, opts = {}) {
-    return useHttp(request, { ...opts, lazy: true })
+export function useLazyHttp<
+    ResT = void,
+    ErrorT = Error,
+    ReqT extends NitroFetchRequest = NitroFetchRequest,
+    _ResT = ResT extends void ? FetchResult<ReqT> : ResT,
+    Transform extends (res: _ResT) => any = (res: _ResT) => _ResT,
+    PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
+>(
+    request: Ref<ReqT> | ReqT | (() => ReqT),
+    opts?: Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'>
+): AsyncData<PickFrom<ReturnType<Transform>, PickKeys>, ErrorT | null | true>
+export function useLazyHttp<
+    ResT = void,
+    ErrorT = Error,
+    ReqT extends NitroFetchRequest = NitroFetchRequest,
+    _ResT = ResT extends void ? FetchResult<ReqT> : ResT,
+    Transform extends (res: _ResT) => any = (res: _ResT) => _ResT,
+    PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
+>(
+    request: Ref<ReqT> | ReqT | (() => ReqT),
+    arg1?: string | Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'>,
+    arg2?: string
+) {
+    const [opts, autoKey] = typeof arg1 === 'string' ? [{}, arg1] : [arg1, arg2]
+
+    return useHttp<ResT, ErrorT, ReqT, _ResT, Transform, PickKeys>(request, {
+        ...opts,
+        lazy: true
+    // @ts-ignore 
+    }, autoKey)
 }

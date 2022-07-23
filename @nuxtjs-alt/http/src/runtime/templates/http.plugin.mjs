@@ -297,32 +297,32 @@ export default defineNuxtPlugin(ctx => {
     // runtimeConfig
     const runtimeConfig = ctx.$config && ctx.$config.public.http || {}
 
-    // baseURL
-    const baseURL = process.client ? (runtimeConfig.browserBaseURL || runtimeConfig.browserBaseUrl || runtimeConfig.baseURL || runtimeConfig.baseUrl || '<%= options.browserBaseURL %>' || '') : (runtimeConfig.baseURL || runtimeConfig.baseUrl || process.env._HTTP_BASE_URL_ || '<%= options.baseURL %>' || '')
+    // Nuxt Options
+    const nuxtOptions = JSON.parse('<%= JSON.stringify(options) %>')
 
-    // Create fresh objects for all default header scopes
-    const headers = JSON.parse('<%= JSON.stringify(options.headers) %>')
+    // baseURL
+    const baseURL = process.client ? (runtimeConfig.browserBaseURL || runtimeConfig.browserBaseUrl || runtimeConfig.baseURL || runtimeConfig.baseUrl || nuxtOptions.browserBaseURL || '') : (runtimeConfig.baseURL || runtimeConfig.baseUrl || process.env._HTTP_BASE_URL_ || nuxtOptions.baseURL || '')
 
     // Defaults
     const defaults = {
-        retry: '<%= options.retry %>',
-        timeout: process.server ? '<%= options.serverTimeout %>' : '<%= options.clientTimeout %>',
-        credentials: '<%= options.credentials %>',
+        retry: nuxtOptions.retry,
+        timeout: process.server ? nuxtOptions.serverTimeout : nuxtOptions.clientTimeout,
+        credentials: nuxtOptions.credentials,
+        headers: nuxtOptions.headers,
         baseURL,
-        headers
     }
 
-    '<% if (options.proxyHeaders) { %>'
-    // Proxy SSR request headers
-    if (process.server && ctx.ssrContext.req && ctx.ssrContext.req.headers) {
-        const reqHeaders = { ...ctx.ssrContext.req.headers }
-        for (const h of '<%= options.proxyHeadersIgnore %>'.split(',')) {
-            delete reqHeaders[h]
+    if (nuxtOptions.proxyHeaders) {
+        // Proxy SSR request headers
+        if (process.server && ctx.ssrContext.req && ctx.ssrContext.req.headers) {
+            const reqHeaders = { ...ctx.ssrContext.req.headers }
+            for (const h of nuxtOptions.proxyHeadersIgnore) {
+                delete reqHeaders[h]
+            }
+
+            defaults.headers = { ...reqHeaders, ...defaults.headers }
         }
-
-        defaults.headers = { ...reqHeaders, ...defaults.headers }
     }
-    '<% } %>'
 
     if (process.server) {
         // Don't accept brotli encoding because Node can't parse it
@@ -330,8 +330,8 @@ export default defineNuxtPlugin(ctx => {
     }
 
     const http = createHttpInstance(defaults)
-    const useConflict = '<%= options.useConflict %>'
-    const providerName = useConflict ? 'http' : 'fetch'
+    const useConflict = nuxtOptions.useConflict
+    const providerName = useConflict ? 'fetch' : 'http'
 
     globalThis['$' + providerName] = http
     ctx.provide(providerName, http);
