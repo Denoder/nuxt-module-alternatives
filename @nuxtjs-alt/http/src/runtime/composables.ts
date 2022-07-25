@@ -1,4 +1,4 @@
-import type { FetchOptions, FetchRequest } from 'ohmyfetch'
+import type { FetchOptions } from 'ohmyfetch'
 import type { TypedInternalResponse, NitroFetchRequest } from 'nitropack'
 import { computed, isRef, Ref } from 'vue'
 import type { AsyncDataOptions, _Transform, KeyOfRes, AsyncData, PickFrom } from '#app'
@@ -49,11 +49,11 @@ export function useFetch<
     const key = '$f' + _key
 
     const _request = computed(() => {
-        let r = request as Ref<FetchRequest> | FetchRequest | (() => FetchRequest)
+        let r = request
         if (typeof r === 'function') {
             r = r()
         }
-        return (isRef(r) ? r.value : r) as NitroFetchRequest
+        return (isRef(r) ? r.value : r)
     })
 
     // @ts-ignore
@@ -82,7 +82,7 @@ export function useFetch<
         // @ts-ignore
         const method = opts && opts.method && ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method) ? opts.method : 'get'
         // @ts-ignore
-        return $fetch[method](_request.value, _fetchOptions)
+        return $fetch[method](_request.value, _fetchOptions) as Promise<_ResT>
     }, _asyncDataOptions)
 
     return asyncData
@@ -155,11 +155,11 @@ export function useHttp<
     const key = '$h' + _key
 
     const _request = computed(() => {
-        let r = request as Ref<FetchRequest> | FetchRequest | (() => FetchRequest)
+        let r = request
         if (typeof r === 'function') {
             r = r()
         }
-        return (isRef(r) ? r.value : r) as NitroFetchRequest
+        return (isRef(r) ? r.value : r)
     })
 
     // @ts-ignore
@@ -188,7 +188,7 @@ export function useHttp<
         // @ts-ignore
         const method = opts && opts.method && ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method) ? opts.method : 'get'
         // @ts-ignore
-        return $fetch[method](_request.value, _fetchOptions)
+        return $fetch[method](_request.value, _fetchOptions) as Promise<_ResT>
     }, _asyncDataOptions)
 
     return asyncData
