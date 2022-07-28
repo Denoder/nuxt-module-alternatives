@@ -17,7 +17,7 @@ export default defineNuxtModule({
         },
     },
     defaults: moduleDefaults,
-    setup(moduleOptions, nuxt) {
+    async setup(moduleOptions, nuxt) {
         // Merge all option sources
         const options: ModuleOptions = {
             ...moduleDefaults,
@@ -32,12 +32,12 @@ export default defineNuxtModule({
         nuxt.options.alias["#auth/runtime"] = runtime;
 
         // Resolve strategies
-        const { strategies, strategyScheme } = resolveStrategies(nuxt, options);
+        const { strategies, strategyScheme } = await resolveStrategies(nuxt, options);
         delete options.strategies;
 
         // Resolve required imports
         const _uniqueImports = new Set();
-        const schemeImports = Object.values(strategyScheme).filter((i) => {
+        const schemeImports = Object.values(strategyScheme).filter((i: any) => {
             if (_uniqueImports.has(i.as)) return false;
             _uniqueImports.add(i.as);
             return true;

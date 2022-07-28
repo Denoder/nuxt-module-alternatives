@@ -1,5 +1,5 @@
-import { existsSync } from "fs";
-import hash from "hasha";
+import { existsSync } from "node:fs";
+import { hash } from 'ohash'
 import * as AUTH_PROVIDERS from "./providers";
 import { ProviderAliases } from "./providers";
 import type { Strategy, ModuleOptions } from "./types";
@@ -21,18 +21,12 @@ export interface ImportOptions {
     from: string;
 }
 
-export function resolveStrategies(
-    nuxt: any,
-    options: ModuleOptions
-): { strategies: Strategy[]; strategyScheme: Record<string, ImportOptions> } {
+export async function resolveStrategies(nuxt: any, options: ModuleOptions): Promise<{ strategies: Strategy[]; strategyScheme: Record<string, ImportOptions>; }> {
     const strategies: Strategy[] = [];
     const strategyScheme = {} as Record<string, ImportOptions>;
 
     for (const name of Object.keys(options.strategies)) {
-        if (
-            !options.strategies[name] ||
-            options.strategies[name].enabled === false
-        ) {
+        if (!options.strategies[name] || options.strategies[name].enabled === false) {
             continue;
         }
 
@@ -50,12 +44,12 @@ export function resolveStrategies(
         }
 
         // Try to resolve provider
-        const provider: (...args: unknown[]) => unknown = resolveProvider(
-            strategy.provider
-        );
+        const provider: (...args: unknown[]) => unknown = resolveProvider(strategy.provider);
+
         delete strategy.provider;
 
-        if (typeof provider === "function") {
+        // @ts-ignore
+        if (typeof provider === "function" && !provider.getOptions) {
             provider(nuxt, strategy);
         }
 
@@ -64,13 +58,17 @@ export function resolveStrategies(
             strategy.scheme = strategy.name;
         }
 
-        // Resolve and keep scheme needed for strategy
-        const schemeImport = resolveScheme(strategy.scheme);
-        delete strategy.scheme;
-        strategyScheme[strategy.name] = schemeImport;
+        try {
+            // Resolve and keep scheme needed for strategy
+            const schemeImport = await resolveScheme(strategy.scheme);
+            delete strategy.scheme;
+            strategyScheme[strategy.name] = schemeImport;
 
-        // Add strategy to array
-        strategies.push(strategy);
+            // Add strategy to array
+            strategies.push(strategy);
+        } catch (e) {
+            console.error(`[auth] Error resolving strategy ${strategy.name}: ${e}`);
+        }
     }
 
     return {
@@ -79,7 +77,7 @@ export function resolveStrategies(
     };
 }
 
-export function resolveScheme(scheme: string): ImportOptions {
+export async function resolveScheme(scheme: string): Promise<ImportOptions | any> {
     if (typeof scheme !== "string") {
         return;
     }
@@ -92,21 +90,19 @@ export function resolveScheme(scheme: string): ImportOptions {
         };
     }
 
-    const path = resolvePath(scheme) as any;
+    const path = await resolvePath(scheme);
+
     if (existsSync(path)) {
         const _path = path.replace(/\\/g, "/");
         return {
             name: "default",
-            as: "Scheme$" + hash(_path).substr(0, 4),
+            as: "Scheme$" + hash({ path: _path }),
             from: _path,
         };
     }
 }
 
-export function resolveProvider(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-    provider: string | ((...args: unknown[]) => unknown)
-): (...args: unknown[]) => unknown {
+export function resolveProvider(provider: string | ((...args: unknown[]) => unknown)) {
     if (typeof provider === "function") {
         return provider;
     }
@@ -117,9 +113,7 @@ export function resolveProvider(
 
     provider = (ProviderAliases[provider] || provider) as string;
 
-    // eslint-disable-next-line import/namespace
     if (AUTH_PROVIDERS[provider]) {
-        // eslint-disable-next-line import/namespace
         return AUTH_PROVIDERS[provider];
     }
 
@@ -127,7 +121,6 @@ export function resolveProvider(
         const m = requireModule(provider);
         return m.default || m;
     } catch (e) {
-        // TODO: Check if e.code is not file not found, throw an error (can be parse error)
-        // Ignore
+        return;
     }
 }

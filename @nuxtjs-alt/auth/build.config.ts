@@ -23,6 +23,7 @@ export default defineBuildConfig({
         "#app",
         "axios",
         "vue-router",
+        "node:fs",
         "fs-extra",
         "follow-redirects",
         "@pinia/nuxt",

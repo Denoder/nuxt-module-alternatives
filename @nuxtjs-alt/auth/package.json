@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/auth",
-    "version": "1.2.4",
+    "version": "1.2.8",
     "description": "An alternative module to @nuxtjs/auth",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -35,8 +35,8 @@
         "cookie-es": "latest",
         "defu": "^6.0.0",
         "fs-extra": "latest",
-        "hasha": "latest",
         "jwt-decode": "latest",
+        "ohash": "latest",
         "requrl": "latest"
     },
     "devDependencies": {
