@@ -433,7 +433,8 @@ export class Auth {
             return;
         }
 
-        const queryString = Object.keys(opt.route ? opt.route.query : route.query).map((key) => key + "=" + opt.route ? opt.route.query[key] : route.query[key]).join("&");
+        const query = opt.route ? opt.route.query : route.query;
+        const queryString = Object.keys(query).map((key) => key + "=" + query[key]).join("&");
 
         if (opt.noRouter) {
             window.location.replace(to + (queryString ? "?" + queryString : ""));
