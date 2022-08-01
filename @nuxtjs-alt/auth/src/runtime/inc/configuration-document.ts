@@ -61,13 +61,21 @@ export class ConfigurationDocument {
             // Push Configuration document to state hydration
             if (process.server) {
                 // @ts-ignore
-                this.scheme.$auth.ctx.beforeNuxtRender(({ nuxtState }) => {
-                    nuxtState.$auth = {
-                        oidc: {
-                            configurationDocument,
-                        },
-                    };
-                });
+                // this.scheme.$auth.ctx.beforeNuxtRender(({ nuxtState }) => {
+                //     nuxtState.$auth = {
+                //         oidc: {
+                //             configurationDocument,
+                //         },
+                //     };
+                // });
+
+                /* beforeNuxtRender does not exists in nuxt3? */
+                this.scheme.$auth.ctx.payload.data.$auth = {
+                    /* use `openIDConnect` instead of `oidc` because it could not be picked up by `serverDoc` */
+                    openIDConnect: {
+                        configurationDocument
+                    }
+                }
             }
 
             this.set(configurationDocument);
