@@ -12,7 +12,6 @@ import {
     Oauth2SchemeEndpoints,
     Oauth2SchemeOptions,
 } from "./oauth2";
-import { useRoute } from "#app";
 
 export interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
     configuration: string;
@@ -190,7 +189,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
     }
 
     async #handleCallback() {
-        const route = useRoute();
+        const route = this.$auth.ctx._route;
         // Handle callback only for specified route
         if (
             this.$auth.options.redirect &&

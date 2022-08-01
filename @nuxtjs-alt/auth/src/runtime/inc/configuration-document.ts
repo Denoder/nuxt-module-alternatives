@@ -44,30 +44,23 @@ export class ConfigurationDocument {
 
     async request() {
         // Get Configuration document from state hydration
-        const serverDoc: OpenIDConnectConfigurationDocument =
-            // @ts-ignore
-            this.scheme.$auth.ctx?.payload?.data?.$auth?.openIDConnect
-                ?.configurationDocument;
+        const serverDoc: OpenIDConnectConfigurationDocument = this.scheme.$auth.ctx?.payload?.data?.$auth?.openIDConnect?.configurationDocument;
 
         if (process.client && serverDoc) {
             this.set(serverDoc);
         }
 
         if (!this.get()) {
-            const configurationDocument = await this.scheme.requestHandler.axios
-                .$get(this.scheme.options.endpoints.configuration)
-                .catch((e) => Promise.reject(e));
+            const configurationDocument = await this.scheme.requestHandler.axios.$get(this.scheme.options.endpoints.configuration).catch((e) => Promise.reject(e));
 
             // Push Configuration document to state hydration
             if (process.server) {
-                // @ts-ignore
-                this.scheme.$auth.ctx.beforeNuxtRender(({ nuxtState }) => {
-                    nuxtState.$auth = {
-                        oidc: {
-                            configurationDocument,
-                        },
-                    };
-                });
+                this.scheme.$auth.ctx.payload.data.$auth = {
+                    /* use `openIDConnect` instead of `oidc` because it could not be picked up by `serverDoc` */
+                    openIDConnect: {
+                        configurationDocument
+                    }
+                }
             }
 
             this.set(configurationDocument);
