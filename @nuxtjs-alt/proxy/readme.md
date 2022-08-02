@@ -49,7 +49,3 @@ export default defineNuxtConfig({
 })
 
 ```
-
-**Depenencies Needed:**
-- http-proxy
-- @nuxt/kit

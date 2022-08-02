@@ -1,4 +1,4 @@
-import { join, sep } from 'path'
+import { join, sep } from 'pathe'
 import fs from 'fs-extra';
 import Svg from './svg'
 import Watcher from './watcher'

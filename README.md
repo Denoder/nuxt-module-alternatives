@@ -9,7 +9,6 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Google Fonts Module: [Nuxt Community Repository](https://github.com/nuxt-community/google-fonts-module)
 - Nuxt SVG Sprite Module: [Nuxt Community Repository](https://github.com/nuxt-community/svg-sprite-module)
 - Nuxt Vuetify Module: [Nuxt Community Repository](https://github.com/nuxt-community/vuetify-module)
-- Nuxt Vuex: ?
 
 **Other Information (Pinia)**
 
@@ -62,8 +61,7 @@ Example `package.json`:
         "@nuxtjs-alt/google-fonts": "file:modules/@nuxtjs-alt/google-fonts",
         "@nuxtjs-alt/proxy": "file:modules/@nuxtjs-alt/proxy",
         "@nuxtjs-alt/svg-sprite": "file:modules/@nuxtjs-alt/svg-sprite",
-        "@nuxtjs-alt/vuetify": "file:modules/@nuxtjs-alt/vuetify",
-        "@nuxtjs-alt/vuex": "file:modules/@nuxtjs-alt/vuex" // Deprecated
+        "@nuxtjs-alt/vuetify": "file:modules/@nuxtjs-alt/vuetify"
     }
 }
 ```
@@ -87,8 +85,7 @@ or (yarn add/install)
         "@nuxtjs-alt/google-fonts": "latest",
         "@nuxtjs-alt/proxy": "latest",
         "@nuxtjs-alt/svg-sprite": "latest",
-        "@nuxtjs-alt/vuetify": "latest",
-        "@nuxtjs-alt/vuex": "latest" // Deprecated
+        "@nuxtjs-alt/vuetify": "latest"
     }
 }
 ```

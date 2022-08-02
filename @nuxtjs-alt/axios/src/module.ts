@@ -1,5 +1,5 @@
 import { name, version } from '../package.json'
-import { defineNuxtModule, installModule, addPluginTemplate, createResolver } from '@nuxt/kit'
+import { defineNuxtModule, addPluginTemplate, createResolver } from '@nuxt/kit'
 import { ModuleOptions, NuxtAxiosInstance } from './options'
 
 const CONFIG_KEY = 'axios'

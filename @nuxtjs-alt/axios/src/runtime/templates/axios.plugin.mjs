@@ -199,30 +199,28 @@ export default defineNuxtPlugin(ctx => {
     // runtimeConfig
     const runtimeConfig = ctx.$config && ctx.$config.public.axios || {}
 
-    // baseURL
-    const baseURL = process.client ? (runtimeConfig.browserBaseURL || runtimeConfig.browserBaseUrl || runtimeConfig.baseURL || runtimeConfig.baseUrl || '<%= options.browserBaseURL %>' || '') : (runtimeConfig.baseURL || runtimeConfig.baseUrl || process.env._AXIOS_BASE_URL_ || '<%= options.baseURL %>' || '')
+    // Nuxt Options
+    const nuxtOptions = JSON.parse('<%= JSON.stringify(options) %>')
 
-    // Create fresh objects for all default header scopes
-    // Axios creates only one which is shared across SSR requests!
-    // https://github.com/mzabriskie/axios/blob/master/lib/defaults.js
-    const headers = JSON.parse('<%= JSON.stringify(options.headers) %>')
+    // baseURL
+    const baseURL = process.client ? (runtimeConfig.browserBaseURL || runtimeConfig.browserBaseUrl || runtimeConfig.baseURL || runtimeConfig.baseUrl || nuxtOptions.browserBaseURL || '') : (runtimeConfig.baseURL || runtimeConfig.baseUrl || process.env._AXIOS_BASE_URL_ || nuxtOptions.baseURL || '')
 
     const axiosOptions = {
         baseURL,
-        headers
+        headers: nuxtOptions.headers,
     }
 
-    '<% if (options.proxyHeaders) { %>'
-    // Proxy SSR request headers
-    if (process.server && ctx.ssrContext.req && ctx.ssrContext.req.headers) {
-        const reqHeaders = { ...ctx.ssrContext.req.headers }
-        for (const h of '<%= options.proxyHeadersIgnore %>'.split(',')) {
-            delete reqHeaders[h]
+    if (nuxtOptions.proxyHeaders) {
+        // Proxy SSR request headers
+        if (process.server && ctx.ssrContext.req && ctx.ssrContext.req.headers) {
+            const reqHeaders = { ...ctx.ssrContext.req.headers }
+            for (const h of nuxtOptions.proxyHeadersIgnore) {
+                delete reqHeaders[h]
+            }
+
+            axiosOptions.headers.common = { ...reqHeaders, ...axiosOptions.headers.common }
         }
-
-        axiosOptions.headers.common = { ...reqHeaders, ...axiosOptions.headers.common }
     }
-    '<% } %>'
 
     if (process.server) {
         // Don't accept brotli encoding because Node can't parse it
@@ -231,5 +229,6 @@ export default defineNuxtPlugin(ctx => {
 
     const axios = createAxiosInstance(axiosOptions)
 
+    globalThis['$axios'] = axios
     ctx.provide('axios', axios);
 })

@@ -75,15 +75,3 @@ Laravel Sanctum wokrs a tiny bit differently, It inherits the same config as the
 **Middleware**
 
 For the time being, global middleware does not work, plugins cannot be accessed client side when global middleware is on, the only thing that can be accessed is the server state, so you may access the user state via nuxt's `useState()` method when using global middleware.
-
-**Depenencies Needed:**
-- @nuxtjs-alt/axios
-- @pinia/nuxt
-- body-parser
-- cookie
-- defu
-- hasha
-- jwt-decode
-- requrl
-- @nuxt/kit
-- fs-extra

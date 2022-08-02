@@ -1,5 +1,5 @@
 import { defu } from "defu";
-import { join } from 'path';
+import { join } from 'pathe';
 import { addServerHandler, addTemplate } from "@nuxt/kit";
 import type { StrategyOptions, HTTPRequest } from "../types";
 import type {

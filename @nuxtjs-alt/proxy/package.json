@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/proxy",
-    "version": "1.2.8",
+    "version": "1.2.9",
     "description": "An alternative module to @nuxtjs/proxy",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -26,9 +26,10 @@
         "dist"
     ],
     "dependencies": {
-        "@nuxt/kit": "^3.0.0-rc.5",
+        "@nuxt/kit": "^3.0.0-rc.6",
         "fs-extra": "latest",
-        "http-proxy": "^1.18.1"
+        "http-proxy": "^1.18.1",
+        "pathe": "latest"
     },
     "devDependencies": {
         "@nuxt/module-builder": "latest",

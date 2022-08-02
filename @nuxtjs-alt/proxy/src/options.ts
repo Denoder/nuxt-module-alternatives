@@ -1,5 +1,5 @@
 import { addServerHandler, addTemplate } from '@nuxt/kit'
-import { join } from 'path'
+import { join } from 'pathe'
 
 export function createMiddlewareFile(proxyEntries: any, nuxt: any): void {
     addTemplate({

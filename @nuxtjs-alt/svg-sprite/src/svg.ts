@@ -1,4 +1,4 @@
-import { join } from 'path'
+import { join } from 'pathe'
 import { optimize } from 'svgo'
 import fs from 'fs-extra'
 import cleanupIDs from 'svgo/plugins/cleanupIDs.js'

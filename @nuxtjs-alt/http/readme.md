@@ -32,8 +32,3 @@ $http.onError()
 ```
 
 Please do tell me if you encounter any bugs.
-
-**Depenencies Needed:**
-- ohmyfetch
-- defu
-- @nuxt/kit
