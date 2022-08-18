@@ -27,7 +27,7 @@
     ],
     "dependencies": {
         "@nuxt/kit": "^3.0.0-rc.8",
-        "@refactorjs/http-proxy": "^0.0.9",
+        "@refactorjs/http-proxy": "^0.1.0",
         "defu": "^6.0.0",
         "fs-extra": "latest",
         "pathe": "latest"
