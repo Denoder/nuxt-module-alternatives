@@ -80,9 +80,9 @@ export function useFetch<
 
     const asyncData = useAsyncData<_ResT, ErrorT, Transform, PickKeys>(key, () => {
         // @ts-ignore
-        const method = opts && opts.method && ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method) ? opts.method : 'get'
+        const method = opts && opts.method && ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method.toLowerCase()) ? opts.method.toLowerCase() : 'get'
         // @ts-ignore
-        return $fetch[method](_request.value, _fetchOptions) as Promise<_ResT>
+        return $fetch['$' + method](_request.value, _fetchOptions) as Promise<_ResT>
     }, _asyncDataOptions)
 
     return asyncData
@@ -131,7 +131,7 @@ export function useHttp<
     request: Ref<ReqT> | ReqT | (() => ReqT),
     opts?: UseFetchOptions<_ResT, Transform, PickKeys>
 ): AsyncData<PickFrom<ReturnType<Transform>, PickKeys>, ErrorT | null | true>
-export function useHttp<
+export async function useHttp<
     ResT = void,
     ErrorT = Error,
     ReqT extends NitroFetchRequest = NitroFetchRequest,
@@ -186,9 +186,9 @@ export function useHttp<
 
     const asyncData = useAsyncData<_ResT, ErrorT, Transform, PickKeys>(key, () => {
         // @ts-ignore
-        const method = opts && opts.method && ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method) ? opts.method : 'get'
+        const method = opts && opts.method && ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method.toLowerCase()) ? opts.method.toLowerCase() : 'get'
         // @ts-ignore
-        return $fetch[method](_request.value, _fetchOptions) as Promise<_ResT>
+        return $http['$' + method](_request.value, _fetchOptions) as Promise<_ResT>
     }, _asyncDataOptions)
 
     return asyncData

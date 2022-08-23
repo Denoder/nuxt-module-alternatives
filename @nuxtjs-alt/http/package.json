@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/http",
-    "version": "1.1.9",
+    "version": "1.2.0",
     "description": "An extended module to ohmyfetch",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -30,15 +30,14 @@
         "prepack": "npx unbuild"
     },
     "dependencies": {
-        "@nuxt/kit": "^3.0.0-rc.6",
-        "defu": "^6.0.0",
+        "@nuxt/kit": "^3.0.0-rc.8",
         "ohmyfetch": "latest"
     },
     "devDependencies": {
         "@nuxt/module-builder": "latest",
         "@types/node": "latest",
         "eslint": "latest",
-        "nuxt": "^3.0.0-rc.6"
+        "nuxt": "^3.0.0-rc.8"
     },
     "repository": {
         "type": "git",

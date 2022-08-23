@@ -4,7 +4,6 @@ import { $fetch as http } from 'ohmyfetch/undici'
 '<% } else { %>'
 import { $fetch as http } from 'ohmyfetch'
 '<% } %>'
-import { defu } from 'defu'
 import { InterceptorManager } from '#http/runtime'
 
 class HttpInstance {
@@ -29,9 +28,16 @@ class HttpInstance {
     #createMethods() {
         for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch', 'options']) {
             Object.assign(this.__proto__, {
-                [method]: (url, options) =>  {
-                    const config = defu(options, this.getDefaultConfig())
-                    config.url = url
+                [method]: (url, options) => {
+                    let config = {...this.getDefaultConfig(), ...options}
+
+                    if (typeof url === 'string' || url instanceof URL) {
+                        config = config || {};
+                        config.url = url;
+                    } else {
+                        config = url || {};
+                    }
+
                     config.method = method
 
                     if (config && config.params) {
@@ -112,8 +118,15 @@ class HttpInstance {
                     return promise;
                 },
                 ['$' + method]: (url, options) => {
-                    const config = defu(options, this.getDefaultConfig())
-                    config.url = url
+                    let config = {...this.getDefaultConfig(), ...options}
+
+                    if (typeof url === 'string' || url instanceof URL) {
+                        config = config || {};
+                        config.url = url;
+                    } else {
+                        config = url || {};
+                    }
+
                     config.method = method
 
                     if (config && config.params) {
@@ -305,11 +318,11 @@ export default defineNuxtPlugin(ctx => {
 
     // Defaults
     const defaults = {
+        baseURL,
         retry: nuxtOptions.retry,
         timeout: process.server ? nuxtOptions.serverTimeout : nuxtOptions.clientTimeout,
         credentials: nuxtOptions.credentials,
         headers: nuxtOptions.headers,
-        baseURL,
     }
 
     if (nuxtOptions.proxyHeaders) {
