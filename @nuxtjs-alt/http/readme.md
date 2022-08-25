@@ -5,30 +5,66 @@ This works similar to nuxt/http and nuxtjs-alt/axios except it utilizes ohmyfetc
 
 **Other Information**
 
-If you want to experiment you may use the `useConflict: true` property to change `$http`, `useHttp`, `useLazyHttp`, `globalThis.$http`, to `$fetch`, `useFetch`, `useLazyFetch`, `globalThis.$fetch`.
+If you want to override the global `$fetch` function you can do so by setting `useConflict` to `true` in your config. This will change:
+- `$http`
+- `useHttp`
+- `useLazyHttp`
+- `globalThis.$http`
 
-Remember this is a mix of `ohmyfetch` and `nuxt/http` so to use methods you would use eg. `$fetch.$get(<url>, <options>) | $http.$get(<url>, <options>)` or `$fetch.get(<url>, <options>) | $http.get(<url>, <options>)` all options relative to `ohmyfetch` can be registered as a secondary parameter within the method.
+to
 
-Using the `$` (eg. `$http.$get()`) syntax will use `$fetch.create()` while the regular syntax will use `$fetch.raw()`.
+- `$fetch`
+- `useFetch`
+- `useLazyFetch`
+- `globalThis.$fetch`
+
+Remember this is a mix of `ohmyfetch` and `nuxt/http` so to use methods you would use as an example:
+
+```ts
+// Available methods: 'get', 'head', 'delete', 'post', 'put', 'patch', 'options'
+// $http.$get('/api') is the same as $fetch('/api', { method: 'get' })
+await $fetch.$get('/api', options)
+await $http.$get('/api', options)
+
+// Access Raw Response
+// $http.get('/api') is the same as $fetch.raw('/api', { method: 'get' })
+await $fetch.get('/api', options)
+await $http.get('/api', options)
+```
 
 **Interceptors**
 
 The interceptors should work exactly like how axios has it so to access them you would use:
 
 ```ts
-$http.interceptors.request.use()
-$http.interceptors.response.use()
+$http.interceptors.request.use(config)
+$http.interceptors.response.use(config)
 
 ```
 
 @nuxtjs-axios based functions have also been added:
 
 ```ts
-$http.onRequest()
-$http.onResponse()
-$http.onRequestError()
-$http.onResponseError()
-$http.onError()
+$http.onRequest(config)
+$http.onResponse(response)
+$http.onRequestError(err)
+$http.onResponseError(err)
+$http.onError(err)
+```
+
+**Config Options**
+
+```ts
+import { defineNuxtConfig } from 'nuxt'
+
+export default defineNuxtConfig({
+    modules: [
+        '@nuxtjs-alt/http',
+    ],
+    http: {
+      
+    }
+})
 ```
 
 Please do tell me if you encounter any bugs.

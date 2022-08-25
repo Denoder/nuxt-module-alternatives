@@ -26,10 +26,10 @@ class HttpInstance {
     }
 
     #createMethods() {
-        for (let method of ['get', 'head', 'delete', 'post', 'put', 'patch', 'options']) {
-            Object.assign(this.__proto__, {
-                [method]: (url, options) => {
-                    let config = {...this.getDefaultConfig(), ...options}
+        for (const method of ['get', 'head', 'delete', 'post', 'put', 'patch', 'options']) {
+            Object.assign(this, {
+                ['$' + method]: async (url, options) => {
+                    let config = {...this.getDefaults(), ...options}
 
                     if (typeof url === 'string' || url instanceof URL) {
                         config = config || {};
@@ -41,7 +41,7 @@ class HttpInstance {
                     config.method = method
 
                     if (config && config.params) {
-                        config.params = cleanParams(options.params)
+                        config.params = cleanParams(config.params)
                     }
 
                     if (/^https?/.test(url)) {
@@ -58,7 +58,7 @@ class HttpInstance {
 
                         synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
 
-                        requestInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
+                        requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
                     });
 
                     const responseInterceptorChain = [];
@@ -71,8 +71,8 @@ class HttpInstance {
                     let len;
 
                     if (!synchronousRequestInterceptors) {
-                        const chain = [this.#dispatchRawRequest(config), undefined];
-                        chain.push.apply(chain, requestInterceptorChain);
+                        const chain = [this.#dispatchRequest.bind(this), undefined]
+                        chain.unshift.apply(chain, requestInterceptorChain);
                         chain.push.apply(chain, responseInterceptorChain);
                         len = chain.length;
 
@@ -95,7 +95,7 @@ class HttpInstance {
                         const onFulfilled = requestInterceptorChain[i++];
                         const onRejected = requestInterceptorChain[i++];
                         try {
-                            newConfig = onFulfilled(newConfig);
+                            newConfig = await onFulfilled(newConfig);
                         } catch (error) {
                             onRejected.call(this, error);
                             break;
@@ -103,7 +103,7 @@ class HttpInstance {
                     }
 
                     try {
-                        promise = this.#dispatchRawRequest(newConfig);
+                        promise = this.#dispatchRequest.call(this, newConfig)
                     } catch (error) {
                         return Promise.reject(error);
                     }
@@ -117,132 +117,42 @@ class HttpInstance {
 
                     return promise;
                 },
-                ['$' + method]: (url, options) => {
-                    let config = {...this.getDefaultConfig(), ...options}
-
-                    if (typeof url === 'string' || url instanceof URL) {
-                        config = config || {};
-                        config.url = url;
-                    } else {
-                        config = url || {};
-                    }
-
-                    config.method = method
-
-                    if (config && config.params) {
-                        config.params = cleanParams(options.params)
-                    }
-
-                    if (/^https?/.test(url)) {
-                        delete config.baseURL
-                    }
-
-                    const requestInterceptorChain = [];
-                    let synchronousRequestInterceptors = true;
-
-                    this.interceptors.request.forEach((interceptor) => {
-                        if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
-                            return;
-                        }
-
-                        synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
-
-                        requestInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
-                    });
-
-                    const responseInterceptorChain = [];
-                    this.interceptors.response.forEach((interceptor) => {
-                        responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
-                    });
-
-                    let promise;
-                    let i = 0;
-                    let len;
-
-                    if (!synchronousRequestInterceptors) {
-                        const chain = [this.#dispatchRequest(config), undefined];
-                        chain.push.apply(chain, requestInterceptorChain);
-                        chain.push.apply(chain, responseInterceptorChain);
-                        len = chain.length;
-
-                        promise = Promise.resolve(config);
-
-                        while (i < len) {
-                            promise = promise.then(chain[i++], chain[i++]);
-                        }
-
-                        return promise;
-                    }
-
-                    len = requestInterceptorChain.length;
-
-                    let newConfig = config;
-
-                    i = 0;
-
-                    while (i < len) {
-                        const onFulfilled = requestInterceptorChain[i++];
-                        const onRejected = requestInterceptorChain[i++];
-                        try {
-                            newConfig = onFulfilled(newConfig);
-                        } catch (error) {
-                            onRejected.call(this, error);
-                            break;
-                        }
-                    }
-
-                    try {
-                        promise = this.#dispatchRequest(newConfig);
-                    } catch (error) {
-                        return Promise.reject(error);
-                    }
-
-                    i = 0;
-                    len = responseInterceptorChain.length;
-
-                    while (i < len) {
-                        promise = promise.then(responseInterceptorChain[i++], responseInterceptorChain[i++]);
-                    }
-
-                    return promise;
+                [method]: (url, options) => {
+                    options = { ...options, raw: true }
+                    return this['$' + method](url, options)
                 }
             })
         }
     }
 
-    #dispatchRawRequest = (config) => {
+    #dispatchRequest(config) {
         const controller = new AbortController();
         const timeoutSignal = setTimeout(() => controller.abort(), config.timeout);
+        const fetch = this.getFetch()
 
-        let instance = this.getFetch().raw(config.url, {
+        clearTimeout(timeoutSignal);
+
+        if (config.raw) {
+            return fetch.raw(config.url, {
+                method: config.method,
+                signal: controller.signal,
+                ...config
+            })
+        }
+
+        return fetch(config.url, {
             method: config.method,
             signal: controller.signal,
             ...config
         })
 
-        clearTimeout(timeoutSignal);
-        return instance
-    }
-
-    #dispatchRequest = (config) => {
-        const controller = new AbortController();
-        const timeoutSignal = setTimeout(() => controller.abort(), config.timeout);
-
-        let instance = this.getFetch().create({
-            method: config.method,
-            signal: controller.signal,
-            ...config
-        })
-
-        clearTimeout(timeoutSignal);
-        return instance(config.url)
     }
 
     getFetch() {
         return this.#$fetch
     }
 
-    getDefaultConfig() {
+    getDefaults() {
         return this.#httpDefaults
     }
 
@@ -284,8 +194,7 @@ class HttpInstance {
     }
 
     create(options) {
-        const { retry, timeout, baseURL, headers, credentials } = this.getDefaultConfig()
-        return createHttpInstance(defu(options, { retry, timeout, baseURL, headers, credentials }))
+        return createHttpInstance({ ...this.getDefaults(), ...options })
     }
 }
 
