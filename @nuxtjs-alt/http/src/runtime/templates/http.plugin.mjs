@@ -128,19 +128,19 @@ class HttpInstance {
     #dispatchRequest(config) {
         const controller = new AbortController();
         const timeoutSignal = setTimeout(() => controller.abort(), config.timeout);
-        const fetch = this.getFetch()
+        const $fetchInstance = this.getFetch()
 
         clearTimeout(timeoutSignal);
 
         if (config.raw) {
-            return fetch.raw(config.url, {
+            return $fetchInstance.raw(config.url, {
                 method: config.method,
                 signal: controller.signal,
                 ...config
             })
         }
 
-        return fetch(config.url, {
+        return $fetchInstance(config.url, {
             method: config.method,
             signal: controller.signal,
             ...config
