@@ -8,7 +8,6 @@ export default defineBuildConfig({
     declaration: true,
     entries: [
         'src/module',
-        'src/types',
         { input: 'src/runtime/', outDir: 'dist/runtime', ext: 'mjs' },
     ],
     rollup: {

@@ -1,8 +1,10 @@
-import { name, version } from '../package.json'
+import type { ModuleOptions, NuxtHttpInstance } from './types'
 import { defineNuxtModule, addPluginTemplate, createResolver, addAutoImport } from '@nuxt/kit'
-import { ModuleOptions, NuxtHttpInstance } from './types'
+import { name, version } from '../package.json'
 
 const CONFIG_KEY = 'http'
+
+export * from './types'
 
 export default defineNuxtModule({
     meta: {
@@ -128,9 +130,6 @@ export default defineNuxtModule({
 
         console.debug(`baseURL: ${options.baseURL}`)
         console.debug(`browserBaseURL: ${options.browserBaseURL}`)
-
-        const runtime = resolver.resolve("runtime");
-        nuxt.options.alias["#http/runtime"] = runtime;
 
         // Add auto imports
         const composables = resolver.resolve('./runtime/composables')

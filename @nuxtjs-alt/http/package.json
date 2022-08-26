@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/http",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "description": "An extended module to ohmyfetch",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -15,11 +15,15 @@
     ],
     "license": "MIT",
     "type": "module",
-    "main": "./dist/module.mjs",
+    "exports": {
+        ".": {
+            "import": "./dist/module.mjs",
+            "require": "./dist/module.cjs"
+        }
+    },
+    "main": "./dist/module.cjs",
     "module": "./dist/module.mjs",
-    "commonjs": "./dist/module.cjs",
-    "types": "./dist/types.d.ts",
-    "typings": "./dist/types.d.ts",
+    "types": "./dist/module.d.ts",
     "files": [
         "dist"
     ],
@@ -27,17 +31,18 @@
         "dev": "nuxi dev playground",
         "dev:build": "nuxi build playground",
         "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
-        "prepack": "npx unbuild"
+        "prepack": "unbuild"
     },
     "dependencies": {
         "@nuxt/kit": "^3.0.0-rc.8",
-        "ohmyfetch": "latest"
+        "@refactorjs/ofetch": "0.1.2"
     },
     "devDependencies": {
         "@nuxt/module-builder": "latest",
         "@types/node": "latest",
         "eslint": "latest",
-        "nuxt": "^3.0.0-rc.8"
+        "nuxt": "^3.0.0-rc.8",
+        "unbuild": "^0.8.9"
     },
     "repository": {
         "type": "git",
