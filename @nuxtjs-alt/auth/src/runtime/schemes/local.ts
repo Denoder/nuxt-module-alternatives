@@ -1,13 +1,4 @@
-import type {
-    EndpointsOption,
-    SchemePartialOptions,
-    TokenableSchemeOptions,
-    TokenableScheme,
-    UserOptions,
-    HTTPRequest,
-    HTTPResponse,
-    SchemeCheck,
-} from "../../types";
+import type { EndpointsOption, SchemePartialOptions, TokenableSchemeOptions, TokenableScheme, UserOptions, HTTPRequest, HTTPResponse, SchemeCheck,} from "../../types";
 import type { Auth } from "../core";
 import { getProp } from "../../utils";
 import { Token, RequestHandler } from "../inc";
@@ -74,7 +65,8 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
         this.token = new Token(this, this.$auth.$storage);
 
         // Initialize Request Interceptor
-        this.requestHandler = new RequestHandler(this, this.$auth.ctx.$axios);
+        const handler = this.$auth.ctx.$http ? this.$auth.ctx.$http : this.$auth.ctx.$fetch
+        this.requestHandler = new RequestHandler(this, handler);
     }
 
     check(checkStatus = false): SchemeCheck {
@@ -114,6 +106,7 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
         const { tokenExpired, refreshTokenExpired } = this.check(true);
 
         if (refreshTokenExpired && typeof refreshTokenCallback === "function") {
+            // @ts-ignore
             refreshTokenCallback();
         } else if (tokenExpired && typeof tokenCallback === "function") {
             tokenCallback();
@@ -138,24 +131,21 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
 
         // Add client id to payload if defined
         if (this.options.clientId) {
-            endpoint.data.client_id = this.options.clientId;
+            endpoint.body.client_id = this.options.clientId;
         }
 
         // Add grant type to payload if defined
         if (this.options.grantType) {
-            endpoint.data.grant_type = this.options.grantType;
+            endpoint.body.grant_type = this.options.grantType;
         }
 
         // Add scope to payload if defined
         if (this.options.scope) {
-            endpoint.data.scope = this.options.scope;
+            endpoint.body.scope = this.options.scope;
         }
 
         // Make login request
-        const response = await this.$auth.request(
-            endpoint,
-            this.options.endpoints.login
-        );
+        const response = await this.$auth.request(endpoint, this.options.endpoints.login);
 
         // Update tokens
         this.updateTokens(response);
@@ -196,15 +186,10 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
         return this.$auth
             .requestWith(endpoint, this.options.endpoints.user)
             .then((response) => {
-                const userData = getProp(
-                    response.data,
-                    this.options.user.property
-                );
+                const userData = getProp(response, this.options.user.property);
 
                 if (!userData) {
-                    const error = new Error(
-                        `User Data response does not contain field ${this.options.user.property}`
-                    );
+                    const error = new Error(`User Data response does not contain field ${this.options.user.property}`);
                     return Promise.reject(error);
                 }
 
@@ -222,8 +207,8 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
         if (this.options.endpoints.logout) {
             await this.$auth
                 .requestWith(endpoint, this.options.endpoints.logout)
-                .catch(() => {
-                    //
+                .catch((err) => {
+                    console.error(err)
                 });
         }
 
@@ -241,9 +226,7 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
     }
 
     protected updateTokens(response: HTTPResponse): void {
-        const token = this.options.token.required
-            ? (getProp(response.data, this.options.token.property) as string)
-            : true;
+        const token = this.options.token.required ? (getProp(response, this.options.token.property) as string) : true;
 
         this.token.set(token);
     }

@@ -1,8 +1,8 @@
-import { defu } from "defu";
+import { ConfigurationDocumentRequestError } from "./configuration-document-request-error";
 import { OpenIDConnectScheme, OpenIDConnectSchemeEndpoints } from "../schemes";
 import { OpenIDConnectConfigurationDocument } from "../../types";
 import { Storage } from "../core/storage";
-import { ConfigurationDocumentRequestError } from "./configuration-document-request-error";
+import { defu } from "defu";
 
 // eslint-disable-next-line no-console
 const ConfigurationDocumentWarning = (message: string) =>
@@ -51,7 +51,7 @@ export class ConfigurationDocument {
         }
 
         if (!this.get()) {
-            const configurationDocument = await this.scheme.requestHandler.axios.$get(this.scheme.options.endpoints.configuration).catch((e) => Promise.reject(e));
+            const configurationDocument = await this.scheme.requestHandler.http.$get(this.scheme.options.endpoints.configuration).catch((e) => Promise.reject(e));
 
             // Push Configuration document to state hydration
             if (process.server) {
@@ -82,10 +82,7 @@ export class ConfigurationDocument {
             const optionsValues = this.scheme.options[optionsKey];
 
             if (typeof configDocumentValues !== "undefined") {
-                if (
-                    Array.isArray(optionsValues) &&
-                    Array.isArray(configDocumentValues)
-                ) {
+                if (Array.isArray(optionsValues) && Array.isArray(configDocumentValues)) {
                     optionsValues.forEach((optionsValue) => {
                         if (!configDocumentValues.includes(optionsValue)) {
                             ConfigurationDocumentWarning(
@@ -95,21 +92,13 @@ export class ConfigurationDocument {
                     });
                 }
 
-                if (
-                    !Array.isArray(optionsValues) &&
-                    Array.isArray(configDocumentValues) &&
-                    !configDocumentValues.includes(optionsValues)
-                ) {
+                if (!Array.isArray(optionsValues) && Array.isArray(configDocumentValues) && !configDocumentValues.includes(optionsValues)) {
                     ConfigurationDocumentWarning(
                         `Value of scheme option ${optionsKey} is not supported by ${configDocumentKey} of by Authorization Server.`
                     );
                 }
 
-                if (
-                    !Array.isArray(optionsValues) &&
-                    !Array.isArray(configDocumentValues) &&
-                    configDocumentValues !== optionsValues
-                ) {
+                if (!Array.isArray(optionsValues) && !Array.isArray(configDocumentValues) && configDocumentValues !== optionsValues) {
                     ConfigurationDocumentWarning(
                         `Value of scheme option ${optionsKey} is not supported by ${configDocumentKey} of by Authorization Server.`
                     );

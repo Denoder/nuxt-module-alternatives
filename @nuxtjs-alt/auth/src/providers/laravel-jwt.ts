@@ -6,10 +6,7 @@ export interface LaravelJWTProviderOptions extends ProviderOptions, RefreshSchem
     url: string;
 }
 
-export function laravelJWT(
-    nuxt: any,
-    strategy: ProviderPartialOptions<LaravelJWTProviderOptions>
-): void {
+export function laravelJWT(nuxt: any, strategy: ProviderPartialOptions<LaravelJWTProviderOptions>): void {
     const { url } = strategy;
 
     if (!url) {

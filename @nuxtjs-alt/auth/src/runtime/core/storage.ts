@@ -1,8 +1,8 @@
-import { NuxtApp } from "#app";
-import { defineStore } from "pinia";
-import { parse, serialize } from "cookie-es";
-import { isUnset, isSet, decodeValue, encodeValue } from "../../utils";
 import type { ModuleOptions } from "../../types";
+import { isUnset, isSet, decodeValue, encodeValue } from "../../utils";
+import { parse, serialize } from "cookie-es";
+import { defineStore } from "pinia";
+import { NuxtApp } from "#app";
 
 export class Storage {
     ctx: NuxtApp;
@@ -129,10 +129,7 @@ export class Storage {
             this.state = {};
 
             // eslint-disable-next-line no-console
-            console.warn(
-                "[AUTH] The pinia store is not activated. This might cause issues in auth module behavior, like redirects not working properly." +
-                "To activate it, please install it and add it to your config after this module"
-            );
+            console.warn("[AUTH] The pinia store is not activated. This might cause issues in auth module behavior, like redirects not working properly. To activate it, please install it and add it to your config after this module");
         }
     }
 
@@ -162,7 +159,7 @@ export class Storage {
         }
     }
 
-    watchState(watchKey: string, fn: (value: unknown) => void): () => void {
+    watchState(watchKey: string, fn: (value: unknown) => void) {
         if (this.#piniaEnabled) {
             return this.#initStore.$onAction(({ name, args }) => {
                 if (name === "SET") {
@@ -259,9 +256,7 @@ export class Storage {
         } catch (e) {
             if (!this.options.ignoreExceptions) {
                 // eslint-disable-next-line no-console
-                console.warn(
-                    "[AUTH] Local storage is enabled in config, but the browser does not support it."
-                );
+                console.warn("[AUTH] Local storage is enabled in config, but the browser does not support it.");
             }
             return false;
         }
@@ -361,25 +356,15 @@ export class Storage {
             return;
         }
 
-        const cookieStr = process.client
-            ? document.cookie
-            // @ts-ignore
-            : this.ctx.ssrContext.req.headers.cookie;
+        // @ts-ignore
+        const cookieStr = process.client ? document.cookie: this.ctx.ssrContext?.req.headers.cookie;
 
         return parse(cookieStr || "") || {};
     }
 
-    setCookie<V extends unknown>(
-        key: string,
-        value: V,
-        options: { prefix?: string } = {}
-    ): V {
-
-        if (
-            !this.options.cookie ||
-            // @ts-ignore
-            (process.server && !this.ctx.ssrContext.res)
-        ) {
+    setCookie<V extends unknown>(key: string, value: V, options: { prefix?: string } = {}) {
+        // @ts-ignore
+        if (!this.options.cookie || (process.server && !this.ctx.ssrContext.res)) {
             return;
         }
 
@@ -387,16 +372,9 @@ export class Storage {
             return;
         }
 
-        const _prefix =
-            options.prefix !== undefined
-                ? options.prefix
-                : this.options.cookie.prefix;
+        const _prefix = options.prefix !== undefined ? options.prefix : this.options.cookie.prefix;
         const _key = _prefix + key;
-        const _options = Object.assign(
-            {},
-            this.options.cookie.options,
-            options
-        );
+        const _options = Object.assign({}, this.options.cookie.options, options);
         const _value = encodeValue(value);
 
         // Unset null, undefined
@@ -418,33 +396,24 @@ export class Storage {
             // @ts-ignore
         } else if (process.server && this.ctx.ssrContext.res) {
             // Send Set-Cookie header from server side
-            let cookies =
-                // @ts-ignore
-                (this.ctx.ssrContext.res.getHeader("Set-Cookie") as string[]) ||
-                [];
+            // @ts-ignore
+            let cookies = (this.ctx.ssrContext.res.getHeader("Set-Cookie") as string[]) || [];
             if (!Array.isArray(cookies)) cookies = [cookies];
             cookies.unshift(serializedCookie);
             // @ts-ignore
-            this.ctx.ssrContext.res.setHeader(
-                "Set-Cookie",
-                cookies.filter(
-                    (v, i, arr) =>
-                        arr.findIndex((val) =>
-                            val.startsWith(v.slice(0, v.indexOf("=")))
-                        ) === i
-                )
-            );
+            this.ctx.ssrContext.res.setHeader("Set-Cookie", cookies.filter(
+                (v, i, arr) => arr.findIndex( 
+                    (val) => val.startsWith(v.slice(0, v.indexOf("="))) 
+                ) === i
+            ));
         }
 
         return value;
     }
 
     getCookie(key: string): unknown {
-        if (
-            !this.options.cookie ||
-            // @ts-ignore
-            (process.server && !this.ctx.ssrContext.req)
-        ) {
+        // @ts-ignore
+        if ( !this.options.cookie || (process.server && !this.ctx.ssrContext.req)) {
             return;
         }
 
@@ -456,9 +425,7 @@ export class Storage {
 
         const cookies = this.getCookies();
 
-        const value = cookies[_key]
-            ? decodeURIComponent(cookies[_key] as string)
-            : undefined;
+        const value = cookies[_key] ? decodeURIComponent(cookies[_key] as string) : undefined;
 
         return decodeValue(value);
     }
@@ -483,9 +450,7 @@ export class Storage {
             return true;
         } else {
             // eslint-disable-next-line no-console
-            console.warn(
-                "[AUTH] Cookies are enabled in config, but the browser does not support it."
-            );
+            console.warn("[AUTH] Cookies are enabled in config, but the browser does not support it.");
             return false;
         }
     }

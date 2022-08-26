@@ -1,11 +1,8 @@
+import type { RouteLocationNormalized } from "vue-router";
 import { useNuxtApp, defineNuxtRouteMiddleware } from "#app";
 import { routeOption, getMatchedComponents, normalizePath } from "../../utils";
-import type { RouteLocationNormalized } from "vue-router";
 
-const middleware = defineNuxtRouteMiddleware((
-    to: RouteLocationNormalized,
-    from: RouteLocationNormalized
-) => {
+export default defineNuxtRouteMiddleware((to: RouteLocationNormalized, from: RouteLocationNormalized) => {
     // Disable middleware if options: { auth: false } is set on the route
     if (routeOption(to, "auth", false)) {
         return;
@@ -65,5 +62,3 @@ const middleware = defineNuxtRouteMiddleware((
         ctx.$auth.redirect("login", { route: to });
     }
 });
-
-export { middleware as AuthMiddleware, middleware as default };

@@ -6,10 +6,7 @@ export interface Auth0ProviderOptions extends ProviderOptions, Oauth2SchemeOptio
     domain: string;
 }
 
-export function auth0(
-    nuxt: any,
-    strategy: ProviderPartialOptions<Auth0ProviderOptions>
-): void {
+export function auth0(nuxt: any, strategy: ProviderPartialOptions<Auth0ProviderOptions>): void {
     const DEFAULTS: typeof strategy = {
         scheme: "auth0",
         endpoints: {

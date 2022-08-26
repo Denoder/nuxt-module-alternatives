@@ -1,11 +1,4 @@
-import type {
-    EndpointsOption,
-    SchemePartialOptions,
-    SchemeCheck,
-    UserCookieOptions,
-    HTTPRequest,
-    HTTPResponse,
-} from "../../types";
+import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCookieOptions, HTTPRequest, HTTPResponse } from "../../types";
 import { BaseScheme } from "./base";
 import { getProp } from "../../utils";
 import type { Auth } from "../core";
@@ -64,13 +57,14 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
     requestHandler: RequestHandler;
 
     constructor($auth: Auth, options: SchemePartialOptions<CookieSchemeOptions>, ...defaults: SchemePartialOptions<CookieSchemeOptions>[]) {
-        super($auth, options as OptionsT, ...(defaults as OptionsT[]),DEFAULTS as OptionsT);
+        super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT);
 
         // Initialize Request Interceptor
-        this.requestHandler = new RequestHandler(this, this.$auth.ctx.$axios);
+        const handler = this.$auth.ctx.$http ? this.$auth.ctx.$http : this.$auth.ctx.$fetch
+        this.requestHandler = new RequestHandler(this, handler);
     }
 
-    mounted(): Promise<HTTPResponse | void> {
+    async mounted(): Promise<HTTPResponse | void> {
         if (process.server) {
             this.$auth.ctx.$axios.setHeader(
                 "referer",
@@ -82,7 +76,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         // Initialize request interceptor
         this.initializeRequestInterceptor();
 
-        if (this.isCookieServer() || this.isCookieClient()) {
+        if (this.isServerCookie() || this.isClientCookie()) {
             // Fetch user once
             return this.$auth.fetchUserOnce();
         }
@@ -94,7 +88,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         if (this.options.cookie.name) {
             const cookies = this.$auth.$storage.getCookies();
 
-            if (this.isCookieServer() || this.isCookieClient()) {
+            if (this.isServerCookie() || this.isClientCookie()) {
                 response.valid = Boolean(cookies[this.options.cookie.name]);
             } else {
                 response.valid = true;
@@ -123,10 +117,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         }
 
         // Make login request
-        const response = await this.$auth.request(
-            endpoint,
-            this.options.endpoints.login
-        );
+        const response = await this.$auth.request(endpoint, this.options.endpoints.login);
 
         // Initialize request interceptor if not initialized
         if (!this.requestHandler.interceptor) {
@@ -141,10 +132,8 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         return response;
     }
 
-    fetchUser(endpoint?: HTTPRequest): Promise<HTTPResponse | void> {
-        // Cookie is required but not available
-
-        if (this.isCookieServer() || this.isCookieClient()) {
+    async fetchUser(endpoint?: HTTPRequest): Promise<HTTPResponse | void> {
+        if (this.isServerCookie() || this.isClientCookie()) {
             if (!this.check().valid) {
                 return Promise.resolve();
             }
@@ -163,15 +152,10 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
                 let userData: any;
 
                 if (process.client) {
-                    userData = getProp(
-                        response.data,
-                        this.options.user.property.client
-                    );
-                } else {
-                    userData = getProp(
-                        response.data,
-                        this.options.user.property.server
-                    );
+                    userData = getProp(response, this.options.user.property.client);
+                }
+                else {
+                    userData = getProp(response, this.options.user.property.server);
                 }
 
                 if (!userData) {
@@ -217,11 +201,11 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         }
     }
 
-    protected isCookieServer(): boolean {
+    protected isServerCookie(): boolean {
         return this.options.cookie.server && process.server;
     }
 
-    protected isCookieClient(): boolean {
+    protected isClientCookie(): boolean {
         return !this.options.cookie.server && process.client;
     }
 

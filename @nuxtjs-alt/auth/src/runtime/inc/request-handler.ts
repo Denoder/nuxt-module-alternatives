@@ -4,36 +4,36 @@ import type {
     HTTPRequest,
 } from "../../types";
 import { ExpiredAuthSessionError } from "./expired-auth-session-error";
-import { NuxtAxiosInstance } from "@nuxtjs-alt/axios";
+import { NuxtHttpInstance } from "@nuxtjs-alt/http"
 
 export class RequestHandler {
     scheme: TokenableScheme | RefreshableScheme;
-    axios: NuxtAxiosInstance;
-    interceptor: number;
+    http: NuxtHttpInstance;
+    interceptor: number | null;
 
-    constructor(scheme: TokenableScheme | RefreshableScheme, axios: NuxtAxiosInstance) {
+    constructor(scheme: TokenableScheme | RefreshableScheme, http: NuxtHttpInstance) {
         this.scheme = scheme;
-        this.axios = axios;
+        this.http = http;
         this.interceptor = null;
     }
 
     setHeader(token: string): void {
         if (this.scheme.options.token && this.scheme.options.token.global) {
             // Set Authorization token for all axios requests
-            this.axios.setHeader(this.scheme.options.token.name, token);
+            this.http.setHeader(this.scheme.options.token.name, token);
         }
     }
 
     clearHeader(): void {
         if (this.scheme.options.token && this.scheme.options.token.global) {
             // Clear Authorization token for all axios requests
-            this.axios.setHeader(this.scheme.options.token.name, false);
+            this.http.setHeader(this.scheme.options.token.name, false);
         }
     }
 
     // ---------------------------------------------------------------
     initializeRequestInterceptor(refreshEndpoint?: string): void {
-        this.interceptor = this.axios.interceptors.request.use(
+        this.interceptor = this.http.interceptors.request.use(
             async (config) => {
                 // Don't intercept refresh token requests
                 if ((this.scheme.options.token && !this.#needToken(config)) || config.url === refreshEndpoint) {
@@ -41,12 +41,7 @@ export class RequestHandler {
                 }
 
                 // Perform scheme checks.
-                const {
-                    valid,
-                    tokenExpired,
-                    refreshTokenExpired,
-                    isRefreshable,
-                } = this.scheme.check(true);
+                const { valid, tokenExpired, refreshTokenExpired, isRefreshable } = this.scheme.check(true);
                 let isValid = valid;
 
                 // Refresh token has expired. There is no way to refresh. Force reset.
@@ -90,17 +85,14 @@ export class RequestHandler {
 
                 // Token is valid, let the request pass
                 // Fetch updated token and add to current request
-                return this.#getUpdatedRequestConfig(
-                    config,
-                    token ? token.get() : false
-                );
+                return this.#getUpdatedRequestConfig(config, token ? token.get() : false);
             }
         );
     }
 
     reset(): void {
         // Eject request interceptor
-        this.axios.interceptors.request.eject(this.interceptor);
+        this.http.interceptors.request.eject(this.interceptor);
         this.interceptor = null;
     }
 
@@ -108,9 +100,7 @@ export class RequestHandler {
         const options = this.scheme.options;
         return (
             options.token.global ||
-            Object.values(options.endpoints).some(
-                (endpoint: HTTPRequest | string) => typeof endpoint === "object" ? endpoint.url === config.url : endpoint === config.url
-            )
+            Object.values(options.endpoints).some((endpoint: HTTPRequest | string) => typeof endpoint === "object" ? endpoint.url === config.url : endpoint === config.url)
         );
     }
 
@@ -127,6 +117,6 @@ export class RequestHandler {
     }
 
     #requestHasAuthorizationHeader(config): boolean {
-        return !!config.headers.common[this.scheme.options.token.name];
+        return !!config.headers[this.scheme.options.token.name];
     }
 }

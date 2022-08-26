@@ -6,6 +6,11 @@ This module is meant as an alternative to @nuxtjs/auth, except this is for nuxt3
 
 Please note, any issues regarding typescript is not a priorty for me. If you're having issues with it it'll be noted but not a priority, I normally have typescript disabled to focus on the functionality of the module.
 
+**Refactored (Version 2.0.0+)**
+
+The module now requires '@nuxtjs-alt/http' to function in version 2.0.0 and up, that module extends ohmyfetch. Please note that if you were using `data` to post data, you now need to use `body` since this is what `ohmyfetch` uses.
+Please tell me if you encounter any issues with these changes.
+
 **Cookie-based auth**
 
 If you have any specific changes that need to be made to accomodate cookie based-auth please tell me, at this moment the way I configured it is that it pretty much does the same thing as the official auth module cookie, but in cases where the server autmaitcally attaches the server cookie to all requests it will function conrrently (in this case setting a cookie on all requests via laravel).
@@ -71,7 +76,3 @@ Laravel Sanctum wokrs a tiny bit differently, It inherits the same config as the
         }
     }
 ```
-
-**Middleware**
-
-For the time being, global middleware does not work, plugins cannot be accessed client side when global middleware is on, the only thing that can be accessed is the server state, so you may access the user state via nuxt's `useState()` method when using global middleware.

@@ -1,27 +1,14 @@
-import type {
-    RefreshableScheme,
-    SchemePartialOptions,
-    SchemeCheck,
-    HTTPResponse,
-    HTTPRequest,
-    RefreshableSchemeOptions,
-} from "../../types";
+import type { HTTPRequest, HTTPResponse, RefreshableScheme, RefreshableSchemeOptions, SchemeCheck, SchemePartialOptions } from "../../types";
 import type { Auth } from "../core";
 import { cleanObj, getProp } from "../../utils";
-import {
-    RefreshController,
-    RefreshToken,
-    ExpiredAuthSessionError,
-} from "../inc";
+import { RefreshController, RefreshToken, ExpiredAuthSessionError } from "../inc";
 import { LocalScheme, LocalSchemeEndpoints, LocalSchemeOptions } from "./local";
 
 export interface RefreshSchemeEndpoints extends LocalSchemeEndpoints {
     refresh: HTTPRequest;
 }
 
-export interface RefreshSchemeOptions
-    extends LocalSchemeOptions,
-        RefreshableSchemeOptions {
+export interface RefreshSchemeOptions extends LocalSchemeOptions, RefreshableSchemeOptions {
     endpoints: RefreshSchemeEndpoints;
     autoLogout: boolean;
 }
@@ -46,19 +33,12 @@ const DEFAULTS: SchemePartialOptions<RefreshSchemeOptions> = {
     autoLogout: false,
 };
 
-export class RefreshScheme<
-        OptionsT extends RefreshSchemeOptions = RefreshSchemeOptions
-    >
-    extends LocalScheme<OptionsT>
-    implements RefreshableScheme<OptionsT>
+export class RefreshScheme<OptionsT extends RefreshSchemeOptions = RefreshSchemeOptions> extends LocalScheme<OptionsT> implements RefreshableScheme<OptionsT>
 {
     refreshToken: RefreshToken;
     refreshController: RefreshController;
 
-    constructor(
-        $auth: Auth,
-        options: SchemePartialOptions<RefreshSchemeOptions>
-    ) {
+    constructor($auth: Auth, options: SchemePartialOptions<RefreshSchemeOptions>) {
         super($auth, options, DEFAULTS);
 
         // Initialize Refresh Token instance
@@ -151,32 +131,28 @@ export class RefreshScheme<
         }
 
         const endpoint = {
-            data: {
+            body: {
                 client_id: undefined,
                 grant_type: undefined,
             },
         };
 
         // Add refresh token to payload if required
-        if (
-            this.options.refreshToken.required &&
-            this.options.refreshToken.data
-        ) {
-            endpoint.data[this.options.refreshToken.data] =
-                this.refreshToken.get();
+        if (this.options.refreshToken.required && this.options.refreshToken.data) {
+            endpoint.body[this.options.refreshToken.data] = this.refreshToken.get();
         }
 
         // Add client id to payload if defined
         if (this.options.clientId) {
-            endpoint.data.client_id = this.options.clientId;
+            endpoint.body.client_id = this.options.clientId;
         }
 
         // Add grant type to payload if defined
         if (this.options.grantType) {
-            endpoint.data.grant_type = "refresh_token";
+            endpoint.body.grant_type = "refresh_token";
         }
 
-        cleanObj(endpoint.data);
+        cleanObj(endpoint.body);
 
         // Make refresh request
         return this.$auth
@@ -192,10 +168,7 @@ export class RefreshScheme<
             });
     }
 
-    setUserToken(
-        token: string | boolean,
-        refreshToken?: string | boolean
-    ): Promise<HTTPResponse | void> {
+    setUserToken(token: string | boolean, refreshToken?: string | boolean): Promise<HTTPResponse | void> {
         this.token.set(token);
 
         if (refreshToken) {
@@ -216,28 +189,15 @@ export class RefreshScheme<
         }
     }
 
-    protected updateTokens(
-        response: HTTPResponse,
-        { isRefreshing = false, updateOnRefresh = true } = {}
-    ): void {
-        const token = this.options.token.required
-            ? (getProp(response.data, this.options.token.property) as string)
-            : true;
-        const refreshToken = this.options.refreshToken.required
-            ? (getProp(
-                  response.data,
-                  this.options.refreshToken.property
-              ) as string)
-            : true;
+    protected updateTokens(response: HTTPResponse, { isRefreshing = false, updateOnRefresh = true } = {}): void {
+        const token = this.options.token.required ? (getProp(response, this.options.token.property) as string) : true;
+        const refreshToken = this.options.refreshToken.required ? (getProp(response, this.options.refreshToken.property) as string) : true;
 
         this.token.set(token);
 
         // Update refresh token if defined and if `isRefreshing` is `false`
         // If `isRefreshing` is `true`, then only update if `updateOnRefresh` is also `true`
-        if (
-            refreshToken &&
-            (!isRefreshing || (isRefreshing && updateOnRefresh))
-        ) {
+        if (refreshToken && (!isRefreshing || (isRefreshing && updateOnRefresh))) {
             this.refreshToken.set(refreshToken);
         }
     }

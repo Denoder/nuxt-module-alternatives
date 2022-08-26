@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/auth",
-    "version": "1.2.12",
+    "version": "2.0.0",
     "description": "An alternative module to @nuxtjs/auth",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -14,11 +14,15 @@
     ],
     "license": "MIT",
     "type": "module",
-    "main": "./dist/module.mjs",
+    "exports": {
+        ".": {
+            "import": "./dist/module.mjs",
+            "require": "./dist/module.cjs"
+        }
+    },
+    "main": "./dist/module.cjs",
     "module": "./dist/module.mjs",
-    "commonjs": "./dist/module.cjs",
     "types": "./dist/types/index.d.ts",
-    "typings": "./dist/types/index.d.ts",
     "files": [
         "dist"
     ],
@@ -29,8 +33,8 @@
         "prepack": "npx unbuild"
     },
     "dependencies": {
-        "@nuxt/kit": "^3.0.0-rc.6",
-        "@pinia/nuxt": "^0.3.0",
+        "@nuxt/kit": "^3.0.0-rc.8",
+        "@pinia/nuxt": "^0.4.1",
         "body-parser": "latest",
         "cookie-es": "latest",
         "defu": "^6.0.0",
@@ -44,7 +48,7 @@
         "@nuxt/module-builder": "latest",
         "@types/fs-extra": "latest",
         "eslint": "latest",
-        "nuxt": "^3.0.0-rc.6"
+        "nuxt": "^3.0.0-rc.8"
     },
     "repository": {
         "type": "git",

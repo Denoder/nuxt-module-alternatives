@@ -1,4 +1,3 @@
-// @ts-ignore
 import jwtDecode, { JwtPayload } from "jwt-decode";
 import { addTokenPrefix } from "../../utils";
 import type { IdTokenableScheme } from "../../types";
@@ -70,7 +69,7 @@ export class IdToken {
     }
 
     #updateExpiration(idToken: string | boolean): number | false | void {
-        let idTokenExpiration;
+        let idTokenExpiration: number;
         const _tokenIssuedAtMillis = Date.now();
         const _tokenTTLMillis =
             Number(this.scheme.options.idToken.maxAge) * 1000;

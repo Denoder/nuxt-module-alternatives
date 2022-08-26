@@ -8,7 +8,6 @@ export default defineBuildConfig({
     declaration: true,
     entries: [
         'src/module',
-        'src/options',
         'src/plugin',
         { input: 'src/runtime/', outDir: 'dist/runtime', ext: 'mjs' },
         { input: 'src/types/', outDir: 'dist/types', ext: 'd.ts' },
@@ -21,15 +20,15 @@ export default defineBuildConfig({
     },
     externals: [
         "#app",
-        "axios",
+        "#imports",
+        "@refactorjs/ofetch",
+        "ohmyfetch",
         "vue-router",
         "node:fs",
         "fs-extra",
         "follow-redirects",
         "@pinia/nuxt",
         "pinia",
-        // Workspace Modules
-        "@nuxtjs-alt/axios",
         // Defaults
         "@nuxt/schema",
         "@nuxt/kit",

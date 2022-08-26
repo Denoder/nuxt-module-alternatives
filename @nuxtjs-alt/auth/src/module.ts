@@ -1,9 +1,9 @@
+import type { ModuleOptions } from "./types";
 import { name, version } from "../package.json";
 import { moduleDefaults } from "./options";
 import { resolveStrategies } from "./resolve";
 import { getAuthPlugin } from "./plugin";
 import { defineNuxtModule, addPluginTemplate, createResolver } from "@nuxt/kit";
-import type { ModuleOptions } from "./types";
 
 const CONFIG_KEY = "auth";
 

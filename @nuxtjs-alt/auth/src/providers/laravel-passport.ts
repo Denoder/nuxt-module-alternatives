@@ -1,47 +1,23 @@
-import type {
-    RefreshTokenOptions,
-    TokenOptions,
-    UserOptions,
-    RecursivePartial,
-    ProviderPartialOptions,
-    ProviderOptions,
-} from "../types";
+import type { RefreshTokenOptions, TokenOptions, UserOptions, RecursivePartial, ProviderPartialOptions, ProviderOptions } from "../types";
 import type { Oauth2SchemeOptions, RefreshSchemeOptions } from "../runtime";
+import { assignDefaults, addAuthorize, initializePasswordGrantFlow, assignAbsoluteEndpoints } from "../utils/provider";
 
-import {
-    assignDefaults,
-    addAuthorize,
-    initializePasswordGrantFlow,
-    assignAbsoluteEndpoints,
-} from "../utils/provider";
-
-export interface LaravelPassportProviderOptions
-    extends ProviderOptions,
-        Oauth2SchemeOptions {
+export interface LaravelPassportProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
     url: string;
 }
 
-export interface LaravelPassportPasswordProviderOptions
-    extends ProviderOptions,
-        RefreshSchemeOptions {
+export interface LaravelPassportPasswordProviderOptions extends ProviderOptions, RefreshSchemeOptions {
     url: string;
 }
 
-export type PartialPassportOptions =
-    ProviderPartialOptions<LaravelPassportProviderOptions>;
-export type PartialPassportPasswordOptions =
-    ProviderPartialOptions<LaravelPassportPasswordProviderOptions>;
+export type PartialPassportOptions = ProviderPartialOptions<LaravelPassportProviderOptions>;
+export type PartialPassportPasswordOptions = ProviderPartialOptions<LaravelPassportPasswordProviderOptions>;
 
-function isPasswordGrant(
-    strategy: PartialPassportOptions | PartialPassportPasswordOptions
-): strategy is PartialPassportPasswordOptions {
+function isPasswordGrant(strategy: PartialPassportOptions | PartialPassportPasswordOptions): strategy is PartialPassportPasswordOptions {
     return strategy.grantType === "password";
 }
 
-export function laravelPassport(
-    nuxt: any,
-    strategy: PartialPassportOptions | PartialPassportPasswordOptions
-): void {
+export function laravelPassport(nuxt: any, strategy: PartialPassportOptions | PartialPassportPasswordOptions): void {
     const { url } = strategy;
 
     if (!url) {
@@ -71,8 +47,10 @@ export function laravelPassport(
         },
     };
 
+    let _DEFAULTS: typeof strategy
+
     if (isPasswordGrant(strategy)) {
-        const _DEFAULTS: typeof strategy = {
+        _DEFAULTS = {
             ...defaults,
             scheme: "refresh",
             endpoints: {
@@ -96,7 +74,7 @@ export function laravelPassport(
         assignAbsoluteEndpoints(strategy);
         initializePasswordGrantFlow(nuxt, strategy);
     } else {
-        const _DEFAULTS: typeof strategy = {
+        _DEFAULTS = {
             ...defaults,
             scheme: "oauth2",
             endpoints: {

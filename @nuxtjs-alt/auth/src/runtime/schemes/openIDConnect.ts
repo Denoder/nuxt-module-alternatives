@@ -17,9 +17,7 @@ export interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
     configuration: string;
 }
 
-export interface OpenIDConnectSchemeOptions
-    extends Oauth2SchemeOptions,
-        IdTokenableSchemeOptions {
+export interface OpenIDConnectSchemeOptions extends Oauth2SchemeOptions, IdTokenableSchemeOptions {
     endpoints: OpenIDConnectSchemeEndpoints;
 }
 
@@ -56,10 +54,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
 
     protected updateTokens(response: HTTPResponse): void {
         super.updateTokens(response);
-        const idToken = getProp(
-            response.data,
-            this.options.idToken.property
-        ) as string;
+        const idToken = getProp(response, this.options.idToken.property) as string;
 
         if (idToken) {
             this.idToken.set(idToken);
@@ -181,7 +176,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
             return;
         }
 
-        const { data } = await this.$auth.requestWith({
+        const data = await this.$auth.requestWith({
             url: this.options.endpoints.userInfo,
         });
 
@@ -191,11 +186,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
     async #handleCallback() {
         const route = this.$auth.ctx._route;
         // Handle callback only for specified route
-        if (
-            this.$auth.options.redirect &&
-            normalizePath(route.path) !==
-                normalizePath(this.$auth.options.redirect.callback)
-        ) {
+        if (this.$auth.options.redirect && normalizePath(route.path) !== normalizePath(this.$auth.options.redirect.callback)) {
             return;
         }
         // Callback flow is not supported in server side
@@ -246,7 +237,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
                 method: "post",
                 url: this.options.endpoints.token,
                 baseURL: "",
-                data: encodeQuery({
+                body: encodeQuery({
                     code: parsedQuery.code as string,
                     client_id: this.options.clientId,
                     redirect_uri: this.redirectURI,
@@ -257,10 +248,10 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
                 }),
             });
 
-            token = (getProp( response.data, this.options.token.property) as string) || token;
-            refreshToken = (getProp(response.data, this.options.refreshToken.property) as string) || refreshToken;
+            token = (getProp(response, this.options.token.property) as string) || token;
+            refreshToken = (getProp(response, this.options.refreshToken.property) as string) || refreshToken;
             // @ts-ignore
-            idToken = (getProp(response.data, this.options.idToken.property) as string) || idToken;
+            idToken = (getProp(response, this.options.idToken.property) as string) || idToken;
         }
 
         if (!token || !token.length) {

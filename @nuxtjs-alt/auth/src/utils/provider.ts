@@ -1,13 +1,8 @@
-import { defu } from "defu";
-import { join } from 'pathe';
-import { addServerHandler, addTemplate } from "@nuxt/kit";
+import type { Oauth2SchemeOptions, RefreshSchemeOptions, LocalSchemeOptions, CookieSchemeOptions } from "../runtime";
 import type { StrategyOptions, HTTPRequest } from "../types";
-import type {
-    Oauth2SchemeOptions,
-    RefreshSchemeOptions,
-    LocalSchemeOptions,
-    CookieSchemeOptions,
-} from "../runtime";
+import { addServerHandler, addTemplate } from "@nuxt/kit";
+import { join } from 'pathe';
+import { defu } from "defu";
 
 export function assignDefaults<SOptions extends StrategyOptions>(strategy: SOptions, defaults: SOptions): void {
     Object.assign(strategy, defu(strategy, defaults));
@@ -108,10 +103,10 @@ export function assignAbsoluteEndpoints<SOptions extends StrategyOptions<(LocalS
 
 export function authorizeMiddlewareFile(opt: any): string {
 return `
-import axios from 'axios'
 import qs from 'querystring'
 import bodyParser from 'body-parser'
 import { defineEventHandler } from 'h3'
+import { $fetch } from '@refactorjs/ofetch';
 
 // Form data parser
 const formMiddleware = bodyParser.urlencoded({ extended: true })
@@ -144,17 +139,17 @@ export default defineEventHandler(async (event) => {
                 grant_type: grantType = options.strategy.grantType,
                 refresh_token: refreshToken
             } = event.req.body
-    
+
             // Grant type is authorization code, but code is not available
             if (grantType === 'authorization_code' && !code) {
                 return next()
             }
-    
+
             // Grant type is refresh token, but refresh token is not available
             if (grantType === 'refresh_token' && !refreshToken) {
                 return next()
             }
-    
+
             let data: qs.ParsedUrlQueryInput | string = {
                 client_id: options.clientID,
                 client_secret: options.clientSecret,
@@ -166,38 +161,35 @@ export default defineEventHandler(async (event) => {
                 code_verifier: codeVerifier,
                 code
             }
-    
+
             const headers = {
                 Accept: 'application/json',
                 'Content-Type': 'application/json'
             }
-    
+
             if (options.strategy.clientSecretTransport === 'authorization_header') {
                 // @ts-ignore
                 headers.Authorization = 'Basic ' + Buffer.from(options.clientID + ':' + options.clientSecret).toString('base64')
                 // client_secret is transported in auth header
                 delete data.client_secret
             }
-    
+
             if (options.useForms) {
                 data = qs.stringify(data)
                 headers['Content-Type'] = 'application/x-www-form-urlencoded'
             }
-    
-            axios
-                .request({
-                    method: 'post',
-                    url: options.tokenEndpoint,
-                    data,
-                    headers
-                })
-                .then((response) => {
-                    event.res.end(JSON.stringify(response.data))
-                })
-                .catch((error) => {
-                    event.res.statusCode = error.response.status
-                    event.res.end(JSON.stringify(error.response.data))
-                })
+
+            $fetch.$post(options.tokenEndpoint, {
+                body: data,
+                headers
+            })
+            .then((response) => {
+                event.res.end(JSON.stringify(response))
+            })
+            .catch((error) => {
+                event.res.statusCode = error.response.status
+                event.res.end(JSON.stringify(error.response.data))
+            })
         })
     })
 })
@@ -206,10 +198,10 @@ export default defineEventHandler(async (event) => {
 
 export function passwordGrantMiddlewareFile(opt: any): string {
 return `
-import axios from 'axios'
 import requrl from 'requrl'
 import bodyParser from 'body-parser'
 import { defineEventHandler } from 'h3'
+import { $fetch } from '@refactorjs/ofetch';
 
 // Form data parser
 const formMiddleware = bodyParser.json()
@@ -228,11 +220,11 @@ export default defineEventHandler(async (event) => {
         if (!event.req.url.includes(options.endpoint)) {
             return next()
         }
-    
+
         if (event.req.method !== 'POST') {
             return next()
         }
-    
+
         formMiddleware(event.req, event.res, () => {
             const data = event.req.body
     
@@ -240,46 +232,40 @@ export default defineEventHandler(async (event) => {
             if (!data.grant_type) {
                 data.grant_type = options.strategy.grantType
             }
-    
+
             // If \`client_id\` is not defined, set default value
             if (!data.client_id) {
                 data.grant_type = options.clientId
             }
-    
+
             // Grant type is password, but username or password is not available
-            if (
-                data.grant_type === 'password' &&
-                (!data.username || !data.password)
-            ) {
+            if (data.grant_type === 'password' && (!data.username || !data.password)) {
                 return next(new Error('Invalid username or password'))
             }
-    
+
             // Grant type is refresh token, but refresh token is not available
             if (data.grant_type === 'refresh_token' && !data.refresh_token) {
                 return next(new Error('Refresh token not provided'))
             }
 
-            axios
-                .request({
-                    method: 'post',
-                    url: options.tokenEndpoint,
-                    baseURL: requrl(event.req),
-                    data: {
-                        client_id: options.clientId,
-                        client_secret: options.clientSecret,
-                        ...data
-                    },
-                    headers: {
-                        Accept: 'application/json'
-                    }
-                })
-                .then((response) => {
-                    event.res.end(JSON.stringify(response.data))
-                })
-                .catch((error) => {
-                    event.res.statusCode = error.response.status
-                    event.res.end(JSON.stringify(error.response.data))
-                })
+            $fetch.$post(options.tokenEndpoint, {
+                baseURL: requrl(event.req),
+                body: {
+                    client_id: options.clientId,
+                    client_secret: options.clientSecret,
+                    ...data
+                },
+                headers: {
+                    Accept: 'application/json'
+                }
+            })
+            .then((response) => {
+                event.res.end(JSON.stringify(response))
+            })
+            .catch((error) => {
+                event.res.statusCode = error.response.status
+                event.res.end(JSON.stringify(error.response.data))
+            })
         })
     })
 })

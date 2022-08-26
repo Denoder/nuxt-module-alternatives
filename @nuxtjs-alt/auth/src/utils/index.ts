@@ -2,26 +2,15 @@ import type { NuxtApp } from "#app";
 import type { RecursivePartial } from "../types";
 import type { RouteLocationNormalized } from "vue-router";
 
-export const isUnset = (o: unknown): boolean =>
-    typeof o === "undefined" || o === null;
+export const isUnset = (o: unknown): boolean => typeof o === "undefined" || o === null;
 
 export const isSet = (o: unknown): boolean => !isUnset(o);
 
 export const isSameURL = (ctx: NuxtApp, a: string, b: string): boolean =>
     normalizePath(a, ctx) === normalizePath(b, ctx);
 
-export function isRelativeURL(u: string): boolean {
-    return (
-        u &&
-        u.length &&
-        new RegExp(
-            [
-                "^\\/([a-zA-Z0-9@\\-%_~.:]",
-                "[/a-zA-Z0-9@\\-%_~.:]*)?",
-                "([?][^#]*)?(#[^#]*)?$",
-            ].join("")
-        ).test(u)
-    );
+export function isRelativeURL(u: string) {
+    return (u && u.length && new RegExp(["^\\/([a-zA-Z0-9@\\-%_~.:]", "[/a-zA-Z0-9@\\-%_~.:]*)?", "([?][^#]*)?(#[^#]*)?$"].join("")).test(u));
 }
 
 export function parseQuery(queryString: string): Record<string, unknown> {
@@ -113,14 +102,11 @@ export function decodeValue(val: unknown): unknown {
  * Get property defined by dot notation in string.
  * Based on  https://github.com/dy/dotprop (MIT)
  *
- * @param  {Object} holder   Target object where to look property up
- * @param  {string} propName Dot notation, like 'this.a.b.c'
- * @return {*}          A property value
+ * @param  { Object } holder   Target object where to look property up
+ * @param  { string } propName Dot notation, like 'this.a.b.c'
+ * @return { * }          A property value
  */
-export function getProp(
-    holder: Record<string, any>,
-    propName: string | false
-): unknown {
+export function getProp(holder: Record<string, any>, propName: string | false): unknown {
     if (!propName || !holder || typeof holder !== "object") {
         return holder;
     }
@@ -129,11 +115,9 @@ export function getProp(
         return holder[propName];
     }
 
-    const propParts = Array.isArray(propName)
-        ? propName
-        : (propName + "").split(".");
+    const propParts = Array.isArray(propName) ? propName : (propName + "").split(".");
 
-    let result: unknown = holder;
+    let result = holder;
     while (propParts.length && result) {
         result = result[propParts.shift()];
     }
@@ -142,10 +126,7 @@ export function getProp(
 }
 
 // Ie "Bearer " + token
-export function addTokenPrefix(
-    token: string | boolean,
-    tokenType: string | false
-): string | boolean {
+export function addTokenPrefix(token: string | boolean, tokenType: string | false): string | boolean {
     if (
         !token ||
         !tokenType ||
@@ -158,10 +139,7 @@ export function addTokenPrefix(
     return tokenType + " " + token;
 }
 
-export function removeTokenPrefix(
-    token: string | boolean,
-    tokenType: string | false
-): string | boolean {
+export function removeTokenPrefix(token: string | boolean, tokenType: string | false): string | boolean {
     if (!token || !tokenType || typeof token !== "string") {
         return token;
     }
@@ -180,9 +158,7 @@ export function urlJoin(...args: string[]): string {
         .replace("&", "?");
 }
 
-export function cleanObj<T extends Record<string, unknown>>(
-    obj: T
-): RecursivePartial<T> {
+export function cleanObj<T extends Record<string, unknown>>(obj: T): RecursivePartial<T> {
     for (const key in obj) {
         if (obj[key] === undefined) {
             delete obj[key];
@@ -192,15 +168,12 @@ export function cleanObj<T extends Record<string, unknown>>(
     return obj as RecursivePartial<T>;
 }
 
-const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 export function randomString(length) {
     let result = "";
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
-        result += characters.charAt(
-            Math.floor(Math.random() * charactersLength)
-        );
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
 }
