@@ -1,4 +1,5 @@
-import type { ModuleOptions, NuxtHttpInstance } from './types'
+import type { ModuleOptions } from './types'
+import { $fetch } from '@refactorjs/ofetch'
 import { defineNuxtModule, addPluginTemplate, createResolver, addAutoImport } from '@nuxt/kit'
 import { name, version } from '../package.json'
 
@@ -143,9 +144,9 @@ export default defineNuxtModule({
 
 declare module "#app" {
     export interface NuxtApp {
-        $http: NuxtHttpInstance;
+        $http: typeof $fetch;
     }
     export interface NuxtOptions {
-        http: NuxtHttpInstance;
+        http: ModuleOptions;
     }
 }

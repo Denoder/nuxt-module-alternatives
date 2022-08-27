@@ -1,5 +1,5 @@
 import { defineNuxtPlugin } from '#imports'
-import { createHttpInstance } from '@refactorjs/ofetch'
+import { createInstance } from '@refactorjs/ofetch'
 '<% if (options.undici) { %>'
 import { $fetch as http } from 'ohmyfetch/undici'
 '<% } else { %>'
@@ -8,7 +8,7 @@ import { $fetch as http } from 'ohmyfetch'
 
 const httpInstance = (options) => {
     // Create new Fetch instance
-    return createHttpInstance(options, http)
+    return createInstance(options, http)
 }
 
 export default defineNuxtPlugin(ctx => {

@@ -1,9 +1,3 @@
-import type { OFetchInstance } from '@refactorjs/ofetch'
-
-export interface NuxtHttpInstance extends OFetchInstance {
-
-}
-
 export interface ModuleOptions {
     baseURL?: string;
     baseUrl?: string;
