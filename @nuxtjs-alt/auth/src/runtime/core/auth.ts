@@ -1,10 +1,11 @@
 import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions } from "../../types";
 import { isRelativeURL, isSet, isSameURL, getProp, routeOption } from "../../utils";
-import { NuxtApp, useRouter, useRoute } from "#app";
+import { useRouter, useRoute } from "#imports";
+import { NuxtApp } from '#app/nuxt'
 import { Storage } from "./storage";
 import requrl from "requrl";
 
-export type ErrorListener = (...args: unknown[]) => void;
+export type ErrorListener = (...args: any[]) => void;
 export type RedirectListener = (to: string, from: string) => string;
 
 export class Auth {
@@ -15,7 +16,7 @@ export class Auth {
     $storage: Storage;
     $state: {
         strategy: string;
-        user: Record<string, unknown> | null;
+        user: Record<string, any> | null;
         loggedIn: boolean;
     };
     #errorListeners: ErrorListener[] = [];
@@ -43,16 +44,14 @@ export class Auth {
                 throw new Error("No strategy is set!");
             }
             if (!this.strategies[this.$state.strategy]) {
-                throw new Error(
-                    "Strategy not supported: " + this.$state.strategy
-                );
+                throw new Error("Strategy not supported: " + this.$state.strategy);
             }
         }
 
         return this.strategies[this.$state.strategy];
     }
 
-    get user(): Record<string, unknown> | null {
+    get user(): Record<string, any> | null {
         return this.$state.user;
     }
 
@@ -83,10 +82,7 @@ export class Auth {
 
         // Set default strategy if current one is invalid
         if (!this.getStrategy(false)) {
-            this.$storage.setUniversal(
-                "strategy",
-                this.options.defaultStrategy
-            );
+            this.$storage.setUniversal("strategy", this.options.defaultStrategy);
 
             // Give up if still invalid
             if (!this.getStrategy(false)) {
@@ -97,11 +93,11 @@ export class Auth {
         try {
             // Call mounted for active strategy on initial load
             await this.mounted();
-        } catch (error) {
+        } catch (error: any) {
             this.callOnError(error);
         } finally {
             if (process.client && this.options.watchLoggedIn) {
-                this.$storage.watchState("loggedIn", (loggedIn) => {
+                this.$storage.watchState("loggedIn", (loggedIn: boolean) => {
                     if (loggedIn) {
                         const route = useRoute();
                         if (!routeOption(route, "auth", false)) {
@@ -116,6 +112,7 @@ export class Auth {
     }
 
     registerStrategy(name: string, strategy: Scheme): void {
+        // @ts-ignore
         this.strategies[name] = strategy;
     }
 
@@ -138,7 +135,7 @@ export class Auth {
         return this.mounted();
     }
 
-    async mounted(...args: unknown[]): Promise<HTTPResponse | void> {
+    async mounted(...args: any[]): Promise<HTTPResponse | void> {
         if (!this.getStrategy().mounted) {
             return this.fetchUserOnce();
         }
@@ -151,11 +148,11 @@ export class Auth {
         );
     }
 
-    async loginWith(name: string, ...args: unknown[]): Promise<HTTPResponse | void> {
+    async loginWith(name: string, ...args: any[]): Promise<HTTPResponse | void> {
         return this.setStrategy(name).then(() => this.login(...args));
     }
 
-    async login(...args: unknown[]): Promise<HTTPResponse | void> {
+    async login(...args: any[]): Promise<HTTPResponse | void> {
         if (!this.getStrategy().login) {
             return Promise.resolve();
         }
@@ -168,7 +165,7 @@ export class Auth {
         );
     }
 
-    async fetchUser(...args: unknown[]): Promise<HTTPResponse | void> {
+    async fetchUser(...args: any[]): Promise<HTTPResponse | void> {
         if (!this.getStrategy().fetchUser) {
             return Promise.resolve();
         }
@@ -181,7 +178,7 @@ export class Auth {
         );
     }
 
-    async logout(...args: unknown[]): Promise<void> {
+    async logout(...args: any[]): Promise<void> {
         if (!this.getStrategy().logout) {
             this.reset();
             return Promise.resolve();
@@ -211,11 +208,8 @@ export class Auth {
         });
     }
 
-    reset(...args: unknown[]): void {
-        if (
-            (<TokenableScheme>this.getStrategy()).token &&
-            !this.getStrategy().reset
-        ) {
+    reset(...args: any[]): void {
+        if ((<TokenableScheme>this.getStrategy()).token && !this.getStrategy().reset) {
             this.setUser(false);
             (<TokenableScheme>this.getStrategy()).token.reset();
             (<RefreshableScheme>this.getStrategy()).refreshToken.reset();
@@ -232,16 +226,14 @@ export class Auth {
         }
 
         return Promise.resolve(
-            (<RefreshableScheme>(
-                this.getStrategy()
-            )).refreshController.handleRefresh()
+            (<RefreshableScheme>(this.getStrategy())).refreshController.handleRefresh()
         ).catch((error) => {
             this.callOnError(error, { method: "refreshTokens" });
             return Promise.reject(error);
         });
     }
 
-    check(...args: unknown[]): SchemeCheck {
+    check(...args: any[]): SchemeCheck {
         if (!this.getStrategy().check) {
             return { valid: true };
         }
@@ -249,7 +241,7 @@ export class Auth {
         return this.getStrategy().check(...(args as [checkStatus: boolean]));
     }
 
-    async fetchUserOnce(...args: unknown[]): Promise<HTTPResponse | void> {
+    async fetchUserOnce(...args: any[]): Promise<HTTPResponse | void> {
         if (!this.$state.user) {
             return this.fetchUser(...args);
         }
@@ -260,7 +252,7 @@ export class Auth {
     // Utils
     // ---------------------------------------------------------------
 
-    setUser(user: unknown): void {
+    setUser(user: any): void {
         this.$storage.setState("user", user);
 
         let check = { valid: Boolean(user) };
@@ -344,7 +336,6 @@ export class Auth {
         }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     redirect(name: string, opt: { route?: any; noRouter?: boolean } = { route: false, noRouter: false }): void {
         const router = useRouter();
         const route = useRoute();

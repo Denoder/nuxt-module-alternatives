@@ -1,17 +1,13 @@
-import type {
-    TokenableScheme,
-    RefreshableScheme,
-    HTTPRequest,
-} from "../../types";
+import type { TokenableScheme, RefreshableScheme, HTTPRequest } from "../../types";
 import { ExpiredAuthSessionError } from "./expired-auth-session-error";
-import { NuxtHttpInstance } from "@nuxtjs-alt/http"
+import { FetchInstance } from "@refactorjs/ofetch"
 
 export class RequestHandler {
-    scheme: TokenableScheme | RefreshableScheme;
-    http: NuxtHttpInstance;
+    scheme!: TokenableScheme | RefreshableScheme;
+    http: FetchInstance;
     interceptor: number | null;
 
-    constructor(scheme: TokenableScheme | RefreshableScheme, http: NuxtHttpInstance) {
+    constructor(scheme: TokenableScheme | RefreshableScheme, http: FetchInstance) {
         this.scheme = scheme;
         this.http = http;
         this.interceptor = null;
@@ -27,14 +23,14 @@ export class RequestHandler {
     clearHeader(): void {
         if (this.scheme.options.token && this.scheme.options.token.global) {
             // Clear Authorization token for all axios requests
-            this.http.setHeader(this.scheme.options.token.name, false);
+            this.http.setHeader(this.scheme.options.token.name, null);
         }
     }
 
     // ---------------------------------------------------------------
     initializeRequestInterceptor(refreshEndpoint?: string): void {
         this.interceptor = this.http.interceptors.request.use(
-            async (config) => {
+            async (config: any) => {
                 // Don't intercept refresh token requests
                 if ((this.scheme.options.token && !this.#needToken(config)) || config.url === refreshEndpoint) {
                     return config;
@@ -96,19 +92,17 @@ export class RequestHandler {
         this.interceptor = null;
     }
 
-    #needToken(config): boolean {
+    #needToken(config: any): boolean {
         const options = this.scheme.options;
-        return (
-            options.token.global ||
-            Object.values(options.endpoints).some((endpoint: HTTPRequest | string) => typeof endpoint === "object" ? endpoint.url === config.url : endpoint === config.url)
-        );
+        // @ts-ignore
+        return ( options.token.global || Object.values(options.endpoints).some((endpoint: HTTPRequest | string) => typeof endpoint === "object" ? endpoint.url === config.url : endpoint === config.url));
     }
 
     // ---------------------------------------------------------------
     // Watch requests for token expiration
     // Refresh tokens if token has expired
 
-    #getUpdatedRequestConfig(config, token: string | boolean) {
+    #getUpdatedRequestConfig(config: any, token: string | boolean) {
         if (typeof token === "string") {
             config.headers[this.scheme.options.token.name] = token;
         }

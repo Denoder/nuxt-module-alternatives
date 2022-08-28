@@ -1,12 +1,6 @@
 import type { HTTPRequest, HTTPResponse } from "../types";
 import type { Auth } from "../runtime/core";
-import type {
-    Token,
-    IdToken,
-    RefreshToken,
-    RefreshController,
-    RequestHandler,
-} from "../runtime/inc";
+import type { Token, IdToken, RefreshToken, RefreshController, RequestHandler,} from "../runtime/inc";
 import type { PartialExcept } from "./utils";
 
 // TODO: Move us to our home
@@ -33,10 +27,7 @@ export interface SchemeOptions {
     name: string;
 }
 
-export type SchemePartialOptions<Options extends SchemeOptions> = PartialExcept<
-    Options,
-    keyof SchemeOptions
->;
+export type SchemePartialOptions<Options extends SchemeOptions> = PartialExcept<Options, keyof SchemeOptions>;
 
 export interface SchemeCheck {
     valid: boolean;
@@ -80,9 +71,7 @@ export interface TokenableSchemeOptions extends SchemeOptions {
     endpoints: EndpointsOption;
 }
 
-export interface TokenableScheme<
-    OptionsT extends TokenableSchemeOptions = TokenableSchemeOptions
-> extends Scheme<OptionsT> {
+export interface TokenableScheme<OptionsT extends TokenableSchemeOptions = TokenableSchemeOptions> extends Scheme<OptionsT> {
     token?: Token;
     requestHandler: RequestHandler;
 }
@@ -93,9 +82,7 @@ export interface IdTokenableSchemeOptions extends SchemeOptions {
     idToken: TokenOptions;
 }
 
-export interface IdTokenableScheme<
-    OptionsT extends IdTokenableSchemeOptions = IdTokenableSchemeOptions
-> extends Scheme<OptionsT> {
+export interface IdTokenableScheme<OptionsT extends IdTokenableSchemeOptions = IdTokenableSchemeOptions> extends Scheme<OptionsT> {
     idToken: IdToken;
     requestHandler: RequestHandler;
 }
@@ -117,9 +104,7 @@ export interface RefreshableSchemeOptions extends TokenableSchemeOptions {
     refreshToken: RefreshTokenOptions;
 }
 
-export interface RefreshableScheme<
-    OptionsT extends RefreshableSchemeOptions = RefreshableSchemeOptions
-> extends TokenableScheme<OptionsT> {
+export interface RefreshableScheme<OptionsT extends RefreshableSchemeOptions = RefreshableSchemeOptions> extends TokenableScheme<OptionsT> {
     refreshToken: RefreshToken;
     refreshController: RefreshController;
     refreshTokens(): Promise<HTTPResponse | void>;

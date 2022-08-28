@@ -8,7 +8,6 @@ export default defineBuildConfig({
     declaration: true,
     entries: [
         'src/module',
-        'src/plugin',
         { input: 'src/runtime/', outDir: 'dist/runtime', ext: 'mjs' },
         { input: 'src/types/', outDir: 'dist/types', ext: 'd.ts' },
         { input: 'src/utils/', outDir: 'dist/utils', ext: 'mjs' },

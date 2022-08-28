@@ -21,10 +21,7 @@ export class Token {
     }
 
     set(tokenValue: string | boolean, expiresIn: number | boolean = false): string | boolean {
-        const token = addTokenPrefix(
-            tokenValue,
-            this.scheme.options.token.type
-        );
+        const token = addTokenPrefix(tokenValue, this.scheme.options.token.type);
 
         this.#setToken(token);
         this.#updateExpiration(token, expiresIn);
@@ -58,40 +55,34 @@ export class Token {
     }
 
     #getExpiration(): number | false {
-        const _key =
-            this.scheme.options.token.expirationPrefix + this.scheme.name;
+        const _key = this.scheme.options.token.expirationPrefix + this.scheme.name;
 
         return this.$storage.getUniversal(_key) as number | false;
     }
 
     #setExpiration(expiration: number | false): number | false {
-        const _key =
-            this.scheme.options.token.expirationPrefix + this.scheme.name;
+        const _key = this.scheme.options.token.expirationPrefix + this.scheme.name;
 
         return this.$storage.setUniversal(_key, expiration) as number | false;
     }
 
     #syncExpiration(): number | false {
-        const _key =
-            this.scheme.options.token.expirationPrefix + this.scheme.name;
+        const _key = this.scheme.options.token.expirationPrefix + this.scheme.name;
 
         return this.$storage.syncUniversal(_key) as number | false;
     }
 
     #updateExpiration(token: string | boolean, expiresIn: number | boolean): number | false | void {
-        let tokenExpiration;
+        let tokenExpiration: number;
         const _tokenIssuedAtMillis = Date.now();
         const _maxAge = expiresIn ? expiresIn : this.scheme.options.token.maxAge
         const _tokenTTLMillis = Number(_maxAge) * 1000
-        const _tokenExpiresAtMillis = _tokenTTLMillis
-            ? _tokenIssuedAtMillis + _tokenTTLMillis
-            : 0;
+        const _tokenExpiresAtMillis = _tokenTTLMillis ? _tokenIssuedAtMillis + _tokenTTLMillis : 0;
 
         try {
-            tokenExpiration =
-                jwtDecode<JwtPayload>(token + "").exp * 1000 ||
-                _tokenExpiresAtMillis;
-        } catch (error) {
+            tokenExpiration = jwtDecode<JwtPayload>(token + "").exp * 1000 || _tokenExpiresAtMillis;
+        } 
+        catch (error) {
             // If the token is not jwt, we can't decode and refresh it, use _tokenExpiresAt value
             tokenExpiration = _tokenExpiresAtMillis;
 

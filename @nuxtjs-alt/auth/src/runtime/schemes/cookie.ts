@@ -66,7 +66,8 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
 
     async mounted(): Promise<HTTPResponse | void> {
         if (process.server) {
-            this.$auth.ctx.$axios.setHeader(
+            const handler = this.$auth.ctx.$http ? this.$auth.ctx.$http : this.$auth.ctx.$fetch
+            handler.setHeader(
                 "referer",
                 // @ts-ignore
                 this.$auth.ctx.ssrContext.req.headers.host

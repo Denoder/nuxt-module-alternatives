@@ -1,9 +1,10 @@
 import { defineNuxtConfig } from "nuxt";
+import Module from '..'
 
 export default defineNuxtConfig({
     buildModules: [
-        "@nuxtjs-alt/auth",
-        "@nuxtjs-alt/axios",
+        Module,
+        "@nuxtjs-alt/http",
         "@pinia/nuxt",
     ],
     auth: {

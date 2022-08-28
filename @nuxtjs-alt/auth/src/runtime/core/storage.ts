@@ -1,8 +1,8 @@
 import type { ModuleOptions } from "../../types";
+import type { NuxtApp } from '#app/nuxt'
 import { isUnset, isSet, decodeValue, encodeValue } from "../../utils";
 import { parse, serialize } from "cookie-es";
 import { defineStore } from "pinia";
-import { NuxtApp } from "#app";
 
 export class Storage {
     ctx: NuxtApp;
@@ -20,6 +20,7 @@ export class Storage {
     constructor(ctx: NuxtApp, options: ModuleOptions) {
         this.ctx = ctx;
         this.options = options;
+        this.#piniaEnabled = false;
 
         this.#initState();
     }
@@ -28,7 +29,7 @@ export class Storage {
     // Universal
     // ------------------------------------
 
-    setUniversal<V extends unknown>(key: string, value: V): V | void {
+    setUniversal<V extends any>(key: string, value: V): V | void {
         // Unset null, undefined
         if (isUnset(value)) {
             return this.removeUniversal(key);
@@ -49,7 +50,7 @@ export class Storage {
         return value;
     }
 
-    getUniversal(key: string): unknown {
+    getUniversal(key: string): any {
         let value;
 
         // Local state
@@ -80,7 +81,7 @@ export class Storage {
         return value;
     }
 
-    syncUniversal(key: string, defaultValue?: unknown): unknown {
+    syncUniversal(key: string, defaultValue?: any): any {
         let value = this.getUniversal(key);
 
         if (isUnset(value) && isSet(defaultValue)) {
@@ -117,7 +118,7 @@ export class Storage {
             this.#store = defineStore(this.options.pinia.namespace, {
                 state: () => this.options.initialState,
                 actions: {
-                    SET(payload) {
+                    SET(payload: any) {
                         this.$patch({ [payload.key]: payload.value });
                     },
                 },
@@ -137,7 +138,7 @@ export class Storage {
         return pinia ? this.#store(pinia) : this.#initStore;
     }
 
-    setState<V extends unknown>(key: string, value: V): V {
+    setState<V extends any>(key: string, value: V): V {
         if (key[0] === "_") {
             this.#state[key] = value;
         } else if (this.#piniaEnabled) {
@@ -151,7 +152,7 @@ export class Storage {
         return value;
     }
 
-    getState(key: string): unknown {
+    getState(key: string): any {
         if (key[0] !== "_") {
             return this.state[key];
         } else {
@@ -159,11 +160,11 @@ export class Storage {
         }
     }
 
-    watchState(watchKey: string, fn: (value: unknown) => void) {
+    watchState(watchKey: string, fn: (value: any) => void) {
         if (this.#piniaEnabled) {
             return this.#initStore.$onAction(({ name, args }) => {
-                if (name === "SET") {
-                    const { key, value } = args[0];
+                if ((name as string) === "SET") {
+                    const { key, value } = <any>args[0];
                     if (key === watchKey) {
                         fn(value);
                     }
@@ -180,7 +181,7 @@ export class Storage {
     // Local storage
     // ------------------------------------
 
-    setLocalStorage<V extends unknown>(key: string, value: V): V | void {
+    setLocalStorage<V extends any>(key: string, value: V): V | void {
         // Unset null, undefined
         if (isUnset(value)) {
             return this.removeLocalStorage(key);
@@ -203,7 +204,7 @@ export class Storage {
         return value;
     }
 
-    getLocalStorage(key: string): unknown {
+    getLocalStorage(key: string): any {
         if (!this.isLocalStorageEnabled()) {
             return;
         }
@@ -266,7 +267,7 @@ export class Storage {
     // Session storage
     // ------------------------------------
 
-    setSessionStorage<V extends unknown>(key: string, value: V): V | void {
+    setSessionStorage<V extends any>(key: string, value: V): V | void {
         // Unset null, undefined
         if (isUnset(value)) {
             return this.removeSessionStorage(key)
@@ -289,7 +290,7 @@ export class Storage {
         return value  
     }
 
-    getSessionStorage(key: string): unknown {
+    getSessionStorage(key: string): any {
         if (!this.isSessionStorageEnabled()) {
             return
         }
@@ -339,9 +340,7 @@ export class Storage {
         } catch (e) {
             if (!this.options.ignoreExceptions) {
                 // eslint-disable-next-line no-console
-                console.warn(
-                    "[AUTH] Session storage is enabled in config, but the browser does not support it."
-                )
+                console.warn("[AUTH] Session storage is enabled in config, but the browser does not support it.")
             }
             return false
         }
@@ -351,20 +350,20 @@ export class Storage {
     // Cookies
     // ------------------------------------
 
-    getCookies(): Record<string, unknown> {
+    getCookies(): Record<string, any> {
         if (!this.isCookiesEnabled()) {
             return;
         }
 
         // @ts-ignore
-        const cookieStr = process.client ? document.cookie: this.ctx.ssrContext?.req.headers.cookie;
+        const cookieStr = process.client ? document.cookie: this.ctx.ssrContext!.req.headers.cookie;
 
         return parse(cookieStr || "") || {};
     }
 
-    setCookie<V extends unknown>(key: string, value: V, options: { prefix?: string } = {}) {
+    setCookie<V extends any>(key: string, value: V, options: { prefix?: string } = {}) {
         // @ts-ignore
-        if (!this.options.cookie || (process.server && !this.ctx.ssrContext.res)) {
+        if (!this.options.cookie || (process.server && !this.ctx.ssrContext!.res)) {
             return;
         }
 
@@ -393,15 +392,14 @@ export class Storage {
         if (process.client) {
             // Set in browser
             document.cookie = serializedCookie;
-            // @ts-ignore
-        } else if (process.server && this.ctx.ssrContext.res) {
+        } else if (process.server && this.ctx.ssrContext!.res) {
             // Send Set-Cookie header from server side
             // @ts-ignore
-            let cookies = (this.ctx.ssrContext.res.getHeader("Set-Cookie") as string[]) || [];
+            let cookies = (this.ctx.ssrContext!.res.getHeader("Set-Cookie") as string[]) || [];
             if (!Array.isArray(cookies)) cookies = [cookies];
             cookies.unshift(serializedCookie);
-            // @ts-ignore
-            this.ctx.ssrContext.res.setHeader("Set-Cookie", cookies.filter(
+
+            this.ctx.ssrContext!.res.setHeader("Set-Cookie", cookies.filter(
                 (v, i, arr) => arr.findIndex( 
                     (val) => val.startsWith(v.slice(0, v.indexOf("="))) 
                 ) === i
@@ -411,9 +409,8 @@ export class Storage {
         return value;
     }
 
-    getCookie(key: string): unknown {
-        // @ts-ignore
-        if ( !this.options.cookie || (process.server && !this.ctx.ssrContext.req)) {
+    getCookie(key: string): any {
+        if ( !this.options.cookie || (process.server && !this.ctx.ssrContext!.req)) {
             return;
         }
 

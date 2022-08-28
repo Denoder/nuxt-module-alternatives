@@ -4,6 +4,9 @@ export interface ModuleOptions {
     globalMiddleware?: boolean;
     enableMiddleware?: boolean;
     plugins?: Array<string | { src: string; ssr: boolean }>;
+    strategies?: {
+        [strategy: string]: Strategy;
+    };
     ignoreExceptions: boolean;
     resetOnError: boolean | ((...args: unknown[]) => boolean);
     defaultStrategy: string | undefined;
@@ -32,19 +35,8 @@ export interface ModuleOptions {
                 };
             }
         |   false;
-    localStorage:
-        |   {
-                prefix: string;
-            }
-        |   false;
-    sessionStorage:
-        |   {
-                prefix: string;
-            }
-        |   false;
-    strategies: {
-        [strategy: string]: Strategy;
-    };
+    localStorage: { prefix: string; } | false;
+    sessionStorage: { prefix: string; } | false;
     initialState?: {
         user: null;
         loggedIn: boolean;

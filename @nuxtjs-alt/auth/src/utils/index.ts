@@ -1,13 +1,12 @@
-import type { NuxtApp } from "#app";
 import type { RecursivePartial } from "../types";
 import type { RouteLocationNormalized } from "vue-router";
+import { NuxtApp } from "#app/nuxt";
 
 export const isUnset = (o: unknown): boolean => typeof o === "undefined" || o === null;
 
 export const isSet = (o: unknown): boolean => !isUnset(o);
 
-export const isSameURL = (ctx: NuxtApp, a: string, b: string): boolean =>
-    normalizePath(a, ctx) === normalizePath(b, ctx);
+export const isSameURL = (ctx: NuxtApp, a: string, b: string): boolean => normalizePath(a, ctx) === normalizePath(b, ctx);
 
 export function isRelativeURL(u: string) {
     return (u && u.length && new RegExp(["^\\/([a-zA-Z0-9@\\-%_~.:]", "[/a-zA-Z0-9@\\-%_~.:]*)?", "([?][^#]*)?(#[^#]*)?$"].join("")).test(u));

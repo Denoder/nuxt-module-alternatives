@@ -18,7 +18,7 @@ const ConfigurationDocumentWarning = (message: string) =>
  * More info: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
  */
 export class ConfigurationDocument {
-    scheme: OpenIDConnectScheme;
+    scheme!: OpenIDConnectScheme;
     $storage: Storage;
     key: string;
 
@@ -44,21 +44,26 @@ export class ConfigurationDocument {
 
     async request() {
         // Get Configuration document from state hydration
-        const serverDoc: OpenIDConnectConfigurationDocument = this.scheme.$auth.ctx?.payload?.data?.$auth?.openIDConnect?.configurationDocument;
+        // @ts-ignore
+        const serverDoc: OpenIDConnectConfigurationDocument = this.scheme.$auth.ctx.payload!.data.$auth?.openIDConnect?.configurationDocument;
 
         if (process.client && serverDoc) {
             this.set(serverDoc);
         }
 
         if (!this.get()) {
-            const configurationDocument = await this.scheme.requestHandler.http.$get(this.scheme.options.endpoints.configuration).catch((e) => Promise.reject(e));
+            const configurationDocument = await this.scheme.requestHandler.http.$get(this.scheme.options.endpoints.configuration).catch((e: any) => Promise.reject(e));
 
             // Push Configuration document to state hydration
             if (process.server) {
-                this.scheme.$auth.ctx.payload.data.$auth = {
-                    /* use `openIDConnect` instead of `oidc` because it could not be picked up by `serverDoc` */
-                    openIDConnect: {
-                        configurationDocument
+                // @ts-ignore
+                this.scheme.$auth.ctx.payload!.data = {
+                    ...this.scheme.$auth.ctx.payload!.data,
+                    $auth: {
+                        /* use `openIDConnect` instead of `oidc` because it could not be picked up by `serverDoc` */
+                        openIDConnect: {
+                            configurationDocument
+                        }
                     }
                 }
             }
@@ -76,8 +81,8 @@ export class ConfigurationDocument {
         };
 
         Object.keys(mapping).forEach((optionsKey) => {
-            const configDocument = this.get();
-            const configDocumentKey = mapping[optionsKey];
+            const configDocument: OpenIDConnectConfigurationDocument = this.get();
+            const configDocumentKey = mapping[optionsKey as any];
             const configDocumentValues = configDocument[configDocumentKey];
             const optionsValues = this.scheme.options[optionsKey];
 
@@ -93,15 +98,11 @@ export class ConfigurationDocument {
                 }
 
                 if (!Array.isArray(optionsValues) && Array.isArray(configDocumentValues) && !configDocumentValues.includes(optionsValues)) {
-                    ConfigurationDocumentWarning(
-                        `Value of scheme option ${optionsKey} is not supported by ${configDocumentKey} of by Authorization Server.`
-                    );
+                    ConfigurationDocumentWarning(`Value of scheme option ${optionsKey} is not supported by ${configDocumentKey} of by Authorization Server.`);
                 }
 
                 if (!Array.isArray(optionsValues) && !Array.isArray(configDocumentValues) && configDocumentValues !== optionsValues) {
-                    ConfigurationDocumentWarning(
-                        `Value of scheme option ${optionsKey} is not supported by ${configDocumentKey} of by Authorization Server.`
-                    );
+                    ConfigurationDocumentWarning(`Value of scheme option ${optionsKey} is not supported by ${configDocumentKey} of by Authorization Server.`);
                 }
             }
         });

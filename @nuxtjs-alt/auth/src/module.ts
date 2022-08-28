@@ -17,7 +17,7 @@ export default defineNuxtModule({
         },
     },
     defaults: moduleDefaults,
-    async setup(moduleOptions, nuxt) {
+    async setup(moduleOptions: ModuleOptions, nuxt: any) {
         // Merge all option sources
         const options: ModuleOptions = {
             ...moduleDefaults,
@@ -36,10 +36,13 @@ export default defineNuxtModule({
         delete options.strategies;
 
         // Resolve required imports
-        const _uniqueImports = new Set();
+        const uniqueImports = new Set();
         const schemeImports = Object.values(strategyScheme).filter((i: any) => {
-            if (_uniqueImports.has(i.as)) return false;
-            _uniqueImports.add(i.as);
+            if (uniqueImports.has(i.as)) {
+                return false;
+            }
+
+            uniqueImports.add(i.as);
             return true;
         });
 
@@ -53,7 +56,7 @@ export default defineNuxtModule({
         });
 
         if (options.enableMiddleware) {
-            nuxt.hook("app:resolve", (app) => {
+            nuxt.hook("app:resolve", (app: any) => {
                 app.middleware.push({
                     name: "auth",
                     path: resolver.resolve("runtime/core/middleware"),
@@ -67,5 +70,5 @@ export default defineNuxtModule({
             options.plugins.forEach((p: any) => nuxt.options.plugins.push(p));
             delete options.plugins;
         }
-    },
+    }
 });

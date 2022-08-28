@@ -3,7 +3,7 @@ return `
 import { Auth, ExpiredAuthSessionError } from '#auth/runtime'
 import { defineNuxtPlugin } from '#imports'
 // Active schemes
-${options.schemeImports.map(i => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n')}
+${options.schemeImports.map((i: any) => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n')}
 
 export default defineNuxtPlugin(async nuxtApp => {
     // Options
@@ -13,7 +13,7 @@ export default defineNuxtPlugin(async nuxtApp => {
     const auth = new Auth(nuxtApp, options)
 
     // Register strategies
-    ${options.strategies.map((strategy) => {
+    ${options.strategies.map((strategy: any) => {
         const scheme = options.strategyScheme[strategy.name]
         const schemeOptions = JSON.stringify(strategy, null, 2)
         return `auth.registerStrategy('${strategy.name}', new ${scheme.as}(auth, ${schemeOptions}));`
