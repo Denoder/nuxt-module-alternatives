@@ -6,7 +6,7 @@ export class Auth0Scheme extends Oauth2Scheme {
         this.$auth.reset();
 
         const opts = {
-            client_id: this.options.clientId + "",
+            client_id: this.options.clientId as string,
             returnTo: this.logoutRedirectURI,
         };
         const url = this.options.endpoints.logout + "?" + encodeQuery(opts);

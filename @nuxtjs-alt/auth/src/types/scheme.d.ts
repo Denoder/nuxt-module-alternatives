@@ -3,13 +3,12 @@ import type { Auth } from "../runtime/core";
 import type { Token, IdToken, RefreshToken, RefreshController, RequestHandler,} from "../runtime/inc";
 import type { PartialExcept } from "./utils";
 
-// TODO: Move us to our home
 export interface UserOptions {
     property?: string | false;
     autoFetch: boolean;
 }
 
-export interface UserCookieOptions {
+export interface CookieUserOptions {
     property: {
         client: string | false;
         server: string | false;
@@ -41,9 +40,9 @@ export interface Scheme<OptionsT extends SchemeOptions = SchemeOptions> {
     options: OptionsT;
     name?: string;
     $auth: Auth;
-    mounted?(...args: unknown[]): Promise<HTTPResponse | void>;
+    mounted?(...args: any[]): Promise<HTTPResponse | void>;
     check?(checkStatus: boolean): SchemeCheck;
-    login(...args: unknown[]): Promise<HTTPResponse | void>;
+    login(...args: any[]): Promise<HTTPResponse | void>;
     fetchUser(endpoint?: HTTPRequest): Promise<HTTPResponse | void>;
     setUserToken?(
         token: string | boolean,

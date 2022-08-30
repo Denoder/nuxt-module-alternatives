@@ -1,9 +1,8 @@
 import type { RefreshableScheme } from "../../types";
-import type { JwtPayload } from "jwt-decode";
 import type { Storage } from "../core";
 import { addTokenPrefix } from "../../utils";
 import { TokenStatus } from "./token-status";
-import jwtDecode from "jwt-decode";
+import jwtDecode, { JwtPayload } from "jwt-decode";
 
 export class RefreshToken {
     scheme: RefreshableScheme;
@@ -15,9 +14,9 @@ export class RefreshToken {
     }
 
     get(): string | boolean {
-        const _key = this.scheme.options.refreshToken.prefix + this.scheme.name;
+        const key = this.scheme.options.refreshToken.prefix + this.scheme.name;
 
-        return this.$storage.getUniversal(_key) as string | boolean;
+        return this.$storage.getUniversal(key) as string | boolean;
     }
 
     set(tokenValue: string | boolean): string | boolean {
@@ -46,36 +45,34 @@ export class RefreshToken {
     }
 
     #getExpiration(): number | false {
-        const _key = this.scheme.options.refreshToken.expirationPrefix + this.scheme.name;
+        const key = this.scheme.options.refreshToken.expirationPrefix + this.scheme.name;
 
-        return this.$storage.getUniversal(_key) as number | false;
+        return this.$storage.getUniversal(key) as number | false;
     }
 
     #setExpiration(expiration: number | false): number | false {
-        const _key = this.scheme.options.refreshToken.expirationPrefix + this.scheme.name;
+        const key = this.scheme.options.refreshToken.expirationPrefix + this.scheme.name;
 
-        return this.$storage.setUniversal(_key, expiration) as number | false;
+        return this.$storage.setUniversal(key, expiration) as number | false;
     }
 
     #syncExpiration(): number | false {
-        const _key =
-            this.scheme.options.refreshToken.expirationPrefix +
-            this.scheme.name;
+        const key = this.scheme.options.refreshToken.expirationPrefix + this.scheme.name;
 
-        return this.$storage.syncUniversal(_key) as number | false;
+        return this.$storage.syncUniversal(key) as number | false;
     }
 
     #updateExpiration(refreshToken: string | boolean): number | false | void {
         let refreshTokenExpiration: number;
-        const _tokenIssuedAtMillis = Date.now();
-        const _tokenTTLMillis = Number(this.scheme.options.refreshToken.maxAge) * 1000;
-        const _tokenExpiresAtMillis = _tokenTTLMillis ? _tokenIssuedAtMillis + _tokenTTLMillis : 0;
+        const tokenIssuedAtMillis = Date.now();
+        const tokenTTLMillis = Number(this.scheme.options.refreshToken.maxAge) * 1000;
+        const tokenExpiresAtMillis = tokenTTLMillis ? tokenIssuedAtMillis + tokenTTLMillis : 0;
 
         try {
-            refreshTokenExpiration = jwtDecode<JwtPayload>(refreshToken + "").exp * 1000 || _tokenExpiresAtMillis;
-        } catch (error) {
-            // If the token is not jwt, we can't decode and refresh it, use _tokenExpiresAt value
-            refreshTokenExpiration = _tokenExpiresAtMillis;
+            refreshTokenExpiration = jwtDecode<JwtPayload>(refreshToken as string).exp! * 1000 || tokenExpiresAtMillis;
+        } catch (error: any) {
+            // If the token is not jwt, we can't decode and refresh it, use tokenExpiresAt value
+            refreshTokenExpiration = tokenExpiresAtMillis;
 
             if (!((error && error.name === "InvalidTokenError"))) {
                 throw error;
@@ -87,14 +84,14 @@ export class RefreshToken {
     }
 
     #setToken(refreshToken: string | boolean): string | boolean {
-        const _key = this.scheme.options.refreshToken.prefix + this.scheme.name;
+        const key = this.scheme.options.refreshToken.prefix + this.scheme.name;
 
-        return this.$storage.setUniversal(_key, refreshToken) as string | boolean;
+        return this.$storage.setUniversal(key, refreshToken) as string | boolean;
     }
 
     #syncToken(): string | boolean {
-        const _key = this.scheme.options.refreshToken.prefix + this.scheme.name;
+        const key = this.scheme.options.refreshToken.prefix + this.scheme.name;
 
-        return this.$storage.syncUniversal(_key) as string | boolean;
+        return this.$storage.syncUniversal(key) as string | boolean;
     }
 }

@@ -12,7 +12,7 @@ export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOption
     // Get clientSecret, clientId, endpoints.token and audience
     const clientSecret = strategy.clientSecret;
     const clientID = strategy.clientId;
-    const tokenEndpoint = strategy.endpoints.token;
+    const tokenEndpoint = strategy.endpoints!.token;
     const audience = strategy.audience;
 
     // IMPORTANT: remove clientSecret from generated bundle
@@ -20,7 +20,7 @@ export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOption
 
     // Endpoint
     const endpoint = `/_auth/oauth/${strategy.name}/authorize`;
-    strategy.endpoints.token = endpoint;
+    strategy.endpoints!.token = endpoint;
 
     // Set response_type to code
     strategy.responseType = "code";
@@ -49,15 +49,15 @@ export function initializePasswordGrantFlow<SOptions extends StrategyOptions<Ref
     // Get clientSecret, clientId, endpoints.login.url
     const clientSecret = strategy.clientSecret;
     const clientId = strategy.clientId;
-    const tokenEndpoint = strategy.endpoints.token as string;
+    const tokenEndpoint = strategy.endpoints!.token as string;
 
     // IMPORTANT: remove clientSecret from generated bundle
     delete strategy.clientSecret;
 
     // Endpoint
     const endpoint = `/_auth/${strategy.name}/token`;
-    strategy.endpoints.login.url = endpoint;
-    strategy.endpoints.refresh.url = endpoint;
+    strategy.endpoints!.login.url = endpoint;
+    strategy.endpoints!.refresh.url = endpoint;
 
     addTemplate({
         filename: 'auth-passwordGrant.ts',

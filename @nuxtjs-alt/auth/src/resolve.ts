@@ -25,13 +25,13 @@ export async function resolveStrategies(nuxt: any, options: ModuleOptions): Prom
     const strategies: Strategy[] = [];
     const strategyScheme = {} as Record<string, ImportOptions>;
 
-    for (const name of Object.keys(options.strategies)) {
-        if (!options.strategies[name] || options.strategies[name].enabled === false) {
+    for (const name of Object.keys(options.strategies!)) {
+        if (!options.strategies![name] || options.strategies![name].enabled === false) {
             continue;
         }
 
         // Clone strategy
-        const strategy: Strategy = Object.assign({}, options.strategies[name]);
+        const strategy: Strategy = Object.assign({}, options.strategies![name]);
 
         // Default name
         if (!strategy.name) {
@@ -44,7 +44,7 @@ export async function resolveStrategies(nuxt: any, options: ModuleOptions): Prom
         }
 
         // Try to resolve provider
-        const provider: (...args: unknown[]) => unknown = resolveProvider(strategy.provider);
+        const provider: (...args: any[]) => any = resolveProvider(strategy.provider);
 
         delete strategy.provider;
 
@@ -82,10 +82,10 @@ export async function resolveScheme(scheme: string): Promise<ImportOptions | any
         return;
     }
 
-    if (BuiltinSchemes[scheme]) {
+    if (BuiltinSchemes[scheme as keyof typeof BuiltinSchemes]) {
         return {
-            name: BuiltinSchemes[scheme],
-            as: BuiltinSchemes[scheme],
+            name: BuiltinSchemes[scheme as keyof typeof BuiltinSchemes],
+            as: BuiltinSchemes[scheme as keyof typeof BuiltinSchemes],
             from: "#auth/runtime",
         };
     }
@@ -102,7 +102,7 @@ export async function resolveScheme(scheme: string): Promise<ImportOptions | any
     }
 }
 
-export function resolveProvider(provider: string | ((...args: unknown[]) => unknown)) {
+export function resolveProvider(provider: string | ((...args: any[]) => any)) {
     if (typeof provider === "function") {
         return provider;
     }
@@ -111,10 +111,10 @@ export function resolveProvider(provider: string | ((...args: unknown[]) => unkn
         return;
     }
 
-    provider = (ProviderAliases[provider] || provider) as string;
+    provider = (ProviderAliases[provider as keyof typeof ProviderAliases] || provider) as string;
 
-    if (AUTH_PROVIDERS[provider]) {
-        return AUTH_PROVIDERS[provider];
+    if (AUTH_PROVIDERS[provider as keyof typeof AUTH_PROVIDERS]) {
+        return AUTH_PROVIDERS[provider as keyof typeof AUTH_PROVIDERS];
     }
 
     try {

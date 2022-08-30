@@ -1,8 +1,9 @@
 import { defineNuxtConfig } from "nuxt";
+import httpModule from '..'
 
 export default defineNuxtConfig({
     buildModules: [
-        "@nuxtjs-alt/http"
+        httpModule
     ],
     vite: {
         server: {

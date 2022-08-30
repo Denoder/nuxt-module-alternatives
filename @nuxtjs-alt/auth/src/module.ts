@@ -64,11 +64,5 @@ export default defineNuxtModule({
                 });
             });
         }
-
-        // Extend auth with plugins
-        if (options.plugins) {
-            options.plugins.forEach((p: any) => nuxt.options.plugins.push(p));
-            delete options.plugins;
-        }
     }
 });

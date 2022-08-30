@@ -2,17 +2,11 @@ import type { ProviderPartialOptions, HTTPRequest, ProviderOptions } from "../ty
 import type { CookieSchemeOptions } from "../runtime";
 import { assignDefaults } from "../utils/provider";
 
-export interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOptions {
-    url: string;
-}
+export interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOptions {}
 
 export function laravelSanctum(nuxt: any, strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>): void {
     const endpointDefaults: Partial<HTTPRequest> = {
-        withCredentials: true,
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        },
+        credentials: 'include',
     };
 
     const DEFAULTS: typeof strategy = {
@@ -25,19 +19,19 @@ export function laravelSanctum(nuxt: any, strategy: ProviderPartialOptions<Larav
         endpoints: {
             csrf: {
                 ...endpointDefaults,
-                url: `${strategy.url ? strategy.url : ""}/sanctum/csrf-cookie`,
+                url: '/sanctum/csrf-cookie',
             },
             login: {
                 ...endpointDefaults,
-                url: `${strategy.url ? strategy.url : ""}/login`,
+                url: '/login',
             },
             logout: {
                 ...endpointDefaults,
-                url: `${strategy.url ? strategy.url : ""}/logout`,
+                url: '/logout',
             },
             user: {
                 ...endpointDefaults,
-                url: `${strategy.url ? strategy.url : ""}/api/user`,
+                url: '/api/user',
             },
         },
         user: {
@@ -47,8 +41,7 @@ export function laravelSanctum(nuxt: any, strategy: ProviderPartialOptions<Larav
             },
             autoFetch: true,
         },
-        ...strategy,
     };
 
-    assignDefaults(strategy, DEFAULTS);
+    assignDefaults(strategy, DEFAULTS)
 }

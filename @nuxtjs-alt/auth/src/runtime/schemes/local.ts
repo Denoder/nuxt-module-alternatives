@@ -1,5 +1,5 @@
 import type { EndpointsOption, SchemePartialOptions, TokenableSchemeOptions, TokenableScheme, UserOptions, HTTPRequest, HTTPResponse, SchemeCheck,} from "../../types";
-import type { Auth } from "../core";
+import type { Auth } from "..";
 import { getProp } from "../../utils";
 import { Token, RequestHandler } from "../inc";
 import { BaseScheme } from "./base";
@@ -186,7 +186,7 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
         return this.$auth
             .requestWith(endpoint, this.options.endpoints.user)
             .then((response) => {
-                const userData = getProp(response, this.options.user.property);
+                const userData = getProp(response, this.options.user.property!);
 
                 if (!userData) {
                     const error = new Error(`User Data response does not contain field ${this.options.user.property}`);
@@ -205,14 +205,11 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
     async logout(endpoint: HTTPRequest = {}): Promise<void> {
         // Only connect to logout endpoint if it's configured
         if (this.options.endpoints.logout) {
-            await this.$auth
-                .requestWith(endpoint, this.options.endpoints.logout)
-                .catch((err) => {
-                    console.error(err)
-                });
+            await this.$auth.requestWith(endpoint, this.options.endpoints.logout).catch((err: any) => console.error(err));
         }
 
         // But reset regardless
+        this.$auth.redirect("logout");
         return this.$auth.reset();
     }
 
@@ -226,7 +223,7 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
     }
 
     protected updateTokens(response: HTTPResponse): void {
-        const token = this.options.token.required ? (getProp(response, this.options.token.property) as string) : true;
+        const token = this.options.token?.required ? (getProp(response, this.options.token.property) as string) : true;
 
         this.token.set(token);
     }

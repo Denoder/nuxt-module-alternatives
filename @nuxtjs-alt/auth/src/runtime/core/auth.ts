@@ -38,7 +38,7 @@ export class Auth {
         return this.getStrategy();
     }
 
-    getStrategy(throwException = true): Scheme | TokenableScheme | RefreshableScheme {
+    getStrategy(throwException = true): Scheme {
         if (throwException) {
             if (!this.$state.strategy) {
                 throw new Error("No strategy is set!");
@@ -93,9 +93,11 @@ export class Auth {
         try {
             // Call mounted for active strategy on initial load
             await this.mounted();
-        } catch (error: any) {
+        }
+        catch (error: any) {
             this.callOnError(error);
-        } finally {
+        }
+        finally {
             if (process.client && this.options.watchLoggedIn) {
                 this.$storage.watchState("loggedIn", (loggedIn: boolean) => {
                     if (loggedIn) {
@@ -140,7 +142,7 @@ export class Auth {
             return this.fetchUserOnce();
         }
 
-        return Promise.resolve(this.getStrategy().mounted(...args)).catch(
+        return Promise.resolve(this.getStrategy().mounted!(...args)).catch(
             (error) => {
                 this.callOnError(error, { method: "mounted" });
                 return Promise.reject(error);
@@ -184,7 +186,7 @@ export class Auth {
             return Promise.resolve();
         }
 
-        return Promise.resolve(this.getStrategy().logout(...args)).catch(
+        return Promise.resolve(this.getStrategy().logout!(...args)).catch(
             (error) => {
                 this.callOnError(error, { method: "logout" });
                 return Promise.reject(error);
@@ -198,11 +200,11 @@ export class Auth {
 
     async setUserToken(token: string | boolean, refreshToken?: string | boolean): Promise<HTTPResponse | void> {
         if (!this.getStrategy().setUserToken) {
-            (<TokenableScheme>this.getStrategy()).token.set(token);
+            (<TokenableScheme>this.getStrategy()).token!.set(token);
             return Promise.resolve();
         }
 
-        return Promise.resolve(this.getStrategy().setUserToken(token, refreshToken)).catch((error) => {
+        return Promise.resolve(this.getStrategy().setUserToken!(token, refreshToken)).catch((error) => {
             this.callOnError(error, { method: "setUserToken" });
             return Promise.reject(error);
         });
@@ -211,23 +213,21 @@ export class Auth {
     reset(...args: any[]): void {
         if ((<TokenableScheme>this.getStrategy()).token && !this.getStrategy().reset) {
             this.setUser(false);
-            (<TokenableScheme>this.getStrategy()).token.reset();
+            (<TokenableScheme>this.getStrategy()).token!.reset();
             (<RefreshableScheme>this.getStrategy()).refreshToken.reset();
         }
 
-        return this.getStrategy().reset(
+        return this.getStrategy().reset!(
             ...(args as [options?: { resetInterceptor: boolean }])
         );
     }
 
     async refreshTokens(): Promise<HTTPResponse | void> {
-        if (!(<RefreshableScheme>this.getStrategy()).refreshController) {
+        if (!(this.getStrategy() as RefreshableScheme).refreshController) {
             return Promise.resolve();
         }
 
-        return Promise.resolve(
-            (<RefreshableScheme>(this.getStrategy())).refreshController.handleRefresh()
-        ).catch((error) => {
+        return Promise.resolve((this.getStrategy() as RefreshableScheme).refreshController.handleRefresh()).catch((error) => {
             this.callOnError(error, { method: "refreshTokens" });
             return Promise.reject(error);
         });
@@ -238,13 +238,14 @@ export class Auth {
             return { valid: true };
         }
 
-        return this.getStrategy().check(...(args as [checkStatus: boolean]));
+        return this.getStrategy().check!(...(args as [checkStatus: boolean]));
     }
 
     async fetchUserOnce(...args: any[]): Promise<HTTPResponse | void> {
         if (!this.$state.user) {
             return this.fetchUser(...args);
         }
+
         return Promise.resolve();
     }
 
@@ -268,20 +269,19 @@ export class Auth {
 
     async request(endpoint: HTTPRequest, defaults: HTTPRequest = {}): Promise<HTTPResponse> {
         const handler = this.ctx.$http ? this.ctx.$http : this.ctx.$fetch
-        const _endpoint = typeof defaults === "object" ? Object.assign({}, defaults, endpoint) : endpoint;
-        const method = _endpoint.method ? _endpoint.method.toLowerCase() : 'get'
+        const request = typeof defaults === "object" ? Object.assign({}, defaults, endpoint) : endpoint;
+        const method = request.method ? request.method.toLowerCase() : 'get'
 
-        if (_endpoint.baseURL === "") {
+        if (request.baseURL === "") {
             /* @ts-ignore */
-            _endpoint.baseURL = requrl(process.server ? this.ctx.ssrContext?.req : "");
+            request.baseURL = requrl(process.server ? this.ctx.ssrContext?.event.req : "");
         }
 
         if (!handler) {
-            // eslint-disable-next-line no-console
             return Promise.reject(new Error("[AUTH] add the @nuxtjs-alt/http module to nuxt.config file"));
         }
 
-        return handler['$' + method](_endpoint.url, _endpoint).catch((error: Error) => {
+        return handler['$' + method](request.url, request).catch((error: Error) => {
             // Call all error handlers
             this.callOnError(error, { method: "request" });
 
@@ -291,37 +291,37 @@ export class Auth {
     }
 
     async requestWith(endpoint: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse> {
-        const _endpoint = Object.assign({}, defaults, endpoint);
+        const request = Object.assign({}, defaults, endpoint);
 
-        if ((<TokenableScheme>this.getStrategy()).token) {
-            const token = (<TokenableScheme>this.getStrategy()).token.get();
+        if ((this.getStrategy() as TokenableScheme).token) {
+            const token = (this.getStrategy() as TokenableScheme).token!.get();
 
-            const tokenName = (<TokenableScheme>this.getStrategy()).options.token.name || "Authorization";
+            const tokenName = (this.getStrategy() as TokenableScheme).options.token!.name || "Authorization";
 
-            if (!_endpoint.headers) {
-                _endpoint.headers = {};
+            if (!request.headers) {
+                request.headers = {};
             }
 
-            if (!_endpoint.headers[tokenName] && isSet(token) && token && typeof token === "string") {
-                _endpoint.headers[tokenName] = token;
+            if (!request.headers[tokenName as keyof typeof request.headers] && isSet(token) && token && typeof token === "string") {
+                request.headers[tokenName as keyof typeof request.headers] = token;
             }
         }
 
-        return this.request(_endpoint);
+        return this.request(request);
     }
 
     async wrapLogin(promise: Promise<HTTPResponse | void>): Promise<HTTPResponse | void> {
         this.$storage.setState("busy", true);
         this.error = undefined;
 
-        try {
-            const response = await Promise.resolve(promise);
-            this.$storage.setState("busy", false);
-            return response;
-        } catch (error) {
-            this.$storage.setState("busy", false);
-            return await Promise.reject(error);
-        }
+        return Promise.resolve(promise).then((response) => {
+            this.$storage.setState('busy', false)
+            return response
+        })
+        .catch((error) => {
+            this.$storage.setState('busy', false)
+            return Promise.reject(error)
+        })
     }
 
     onError(listener: ErrorListener): void {
@@ -346,7 +346,7 @@ export class Auth {
 
         const from = opt.route ? (this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path) : this.options.fullPathRedirect ? route.fullPath : route.path;
 
-        let to = this.options.redirect[name];
+        let to = this.options.redirect[name as keyof typeof this.options.redirect];
 
         if (!to) {
             return;
@@ -399,9 +399,7 @@ export class Auth {
     }
 
     hasScope(scope: string): boolean {
-        const userScopes =
-            this.$state.user &&
-            getProp(this.$state.user, this.options.scopeKey);
+        const userScopes = this.$state.user && getProp(this.$state.user, this.options.scopeKey);
 
         if (!userScopes) {
             return false;

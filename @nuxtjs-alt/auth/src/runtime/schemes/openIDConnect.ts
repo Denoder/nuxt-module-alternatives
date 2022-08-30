@@ -1,17 +1,9 @@
-import { IdTokenableSchemeOptions } from "../../types";
+import type { HTTPResponse, SchemeCheck, SchemePartialOptions } from "../../types";
+import type { Auth } from "..";
+import { Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions } from "./oauth2";
 import { encodeQuery, parseQuery, normalizePath, getProp } from "../../utils";
 import { IdToken, ConfigurationDocument } from "../inc";
-import { Auth } from "../index";
-import type {
-    HTTPResponse,
-    SchemeCheck,
-    SchemePartialOptions,
-} from "../../types";
-import {
-    Oauth2Scheme,
-    Oauth2SchemeEndpoints,
-    Oauth2SchemeOptions,
-} from "./oauth2";
+import { IdTokenableSchemeOptions } from "../../types";
 
 export interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
     configuration: string;
@@ -46,10 +38,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
         this.idToken = new IdToken(this, this.$auth.$storage);
 
         // Initialize ConfigurationDocument
-        this.configurationDocument = new ConfigurationDocument(
-            this,
-            this.$auth.$storage
-        );
+        this.configurationDocument = new ConfigurationDocument(this, this.$auth.$storage);
     }
 
     protected updateTokens(response: HTTPResponse): void {
@@ -127,9 +116,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
         }
 
         // Initialize request interceptor
-        this.requestHandler.initializeRequestInterceptor(
-            this.options.endpoints.token
-        );
+        this.requestHandler.initializeRequestInterceptor(this.options.endpoints.token);
 
         // Handle callbacks on page load
         const redirected = await this.#handleCallback();
@@ -189,6 +176,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
         if (this.$auth.options.redirect && normalizePath(route.path) !== normalizePath(this.$auth.options.redirect.callback)) {
             return;
         }
+
         // Callback flow is not supported in server side
         if (process.server) {
             return;
@@ -198,14 +186,12 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
         const parsedQuery = Object.assign({}, route.query, hash);
 
         // accessToken/idToken
-        let token: string = parsedQuery[this.options.token.property] as string;
+        let token: string = parsedQuery[this.options.token!.property] as string;
 
         // refresh token
         let refreshToken: string;
         if (this.options.refreshToken.property) {
-            refreshToken = parsedQuery[
-                this.options.refreshToken.property
-            ] as string;
+            refreshToken = parsedQuery[this.options.refreshToken.property] as string;
         }
 
         // id token
@@ -248,9 +234,8 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
                 }),
             });
 
-            token = (getProp(response, this.options.token.property) as string) || token;
-            refreshToken = (getProp(response, this.options.refreshToken.property) as string) || refreshToken;
-            // @ts-ignore
+            token = (getProp(response, this.options.token!.property) as string) || token;
+            refreshToken = (getProp(response, this.options.refreshToken.property!) as string) || refreshToken!;
             idToken = (getProp(response, this.options.idToken.property) as string) || idToken;
         }
 
@@ -262,7 +247,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
         this.token.set(token);
 
         // Store refresh token
-        if (refreshToken && refreshToken.length) {
+        if (refreshToken! && refreshToken.length) {
             this.refreshToken.set(refreshToken);
         }
 

@@ -6,7 +6,6 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 - Nuxt Http Module: [Nuxt Community Module](https://github.com/nuxt/http)
 - Nuxt Proxy Module: [Nuxt Community Repository](https://github.com/nuxt-community/proxy-module)
 - Nuxt Auth Module: [Nuxt Community Repository](https://github.com/nuxt-community/auth-module)
-- Nuxt Google Fonts Module: [Nuxt Community Repository](https://github.com/nuxt-community/google-fonts-module)
 - Nuxt SVG Sprite Module: [Nuxt Community Repository](https://github.com/nuxt-community/svg-sprite-module)
 - Nuxt Vuetify Module: [Nuxt Community Repository](https://github.com/nuxt-community/vuetify-module)
 
@@ -51,7 +50,6 @@ Example `package.json`:
         "@nuxtjs-alt/axios": "latest",
         "@nuxtjs-alt/auth": "latest",
         "@nuxtjs-alt/http": "latest",
-        "@nuxtjs-alt/google-fonts": "latest",
         "@nuxtjs-alt/proxy": "latest",
         "@nuxtjs-alt/svg-sprite": "latest",
         "@nuxtjs-alt/vuetify": "latest"

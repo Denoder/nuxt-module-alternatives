@@ -23,10 +23,7 @@ export class TokenStatus {
         return TokenStatusEnum.EXPIRED === this.#status;
     }
 
-    #calculate(
-        token: string | boolean,
-        tokenExpiresAt: number | false
-    ): TokenStatusEnum {
+    #calculate(token: string | boolean, tokenExpiresAt: number | false): TokenStatusEnum {
         const now = Date.now();
 
         try {

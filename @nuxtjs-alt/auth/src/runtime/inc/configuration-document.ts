@@ -18,7 +18,7 @@ const ConfigurationDocumentWarning = (message: string) =>
  * More info: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
  */
 export class ConfigurationDocument {
-    scheme!: OpenIDConnectScheme;
+    scheme: OpenIDConnectScheme;
     $storage: Storage;
     key: string;
 
@@ -56,7 +56,6 @@ export class ConfigurationDocument {
 
             // Push Configuration document to state hydration
             if (process.server) {
-                // @ts-ignore
                 this.scheme.$auth.ctx.payload!.data = {
                     ...this.scheme.$auth.ctx.payload!.data,
                     $auth: {
@@ -82,9 +81,9 @@ export class ConfigurationDocument {
 
         Object.keys(mapping).forEach((optionsKey) => {
             const configDocument: OpenIDConnectConfigurationDocument = this.get();
-            const configDocumentKey = mapping[optionsKey as any];
-            const configDocumentValues = configDocument[configDocumentKey];
-            const optionsValues = this.scheme.options[optionsKey];
+            const configDocumentKey = mapping[optionsKey as keyof typeof mapping];
+            const configDocumentValues = configDocument[configDocumentKey as keyof typeof configDocument];
+            const optionsValues = this.scheme.options[optionsKey as keyof typeof this.scheme.options];
 
             if (typeof configDocumentValues !== "undefined") {
                 if (Array.isArray(optionsValues) && Array.isArray(configDocumentValues)) {
@@ -97,7 +96,7 @@ export class ConfigurationDocument {
                     });
                 }
 
-                if (!Array.isArray(optionsValues) && Array.isArray(configDocumentValues) && !configDocumentValues.includes(optionsValues)) {
+                if (!Array.isArray(optionsValues) && Array.isArray(configDocumentValues) && !configDocumentValues.includes(optionsValues as string)) {
                     ConfigurationDocumentWarning(`Value of scheme option ${optionsKey} is not supported by ${configDocumentKey} of by Authorization Server.`);
                 }
 

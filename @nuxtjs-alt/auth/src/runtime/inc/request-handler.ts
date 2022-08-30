@@ -1,11 +1,11 @@
-import type { TokenableScheme, RefreshableScheme, HTTPRequest } from "../../types";
+import type { TokenableScheme, RefreshableScheme } from "../../types";
 import { ExpiredAuthSessionError } from "./expired-auth-session-error";
-import { FetchInstance } from "@refactorjs/ofetch"
+import { FetchInstance, FetchConfig } from "@refactorjs/ofetch"
 
 export class RequestHandler {
-    scheme!: TokenableScheme | RefreshableScheme;
+    scheme: TokenableScheme | RefreshableScheme;
     http: FetchInstance;
-    interceptor: number | null;
+    interceptor: number | undefined | null;
 
     constructor(scheme: TokenableScheme | RefreshableScheme, http: FetchInstance) {
         this.scheme = scheme;
@@ -15,34 +15,34 @@ export class RequestHandler {
 
     setHeader(token: string): void {
         if (this.scheme.options.token && this.scheme.options.token.global) {
-            // Set Authorization token for all axios requests
+            // Set Authorization token for all fetch requests
             this.http.setHeader(this.scheme.options.token.name, token);
         }
     }
 
     clearHeader(): void {
         if (this.scheme.options.token && this.scheme.options.token.global) {
-            // Clear Authorization token for all axios requests
+            // Clear Authorization token for all fetch requests
             this.http.setHeader(this.scheme.options.token.name, null);
         }
     }
 
     // ---------------------------------------------------------------
-    initializeRequestInterceptor(refreshEndpoint?: string): void {
+    initializeRequestInterceptor(refreshEndpoint?: string | Request): void {
         this.interceptor = this.http.interceptors.request.use(
-            async (config: any) => {
+            async (config: FetchConfig) => {
                 // Don't intercept refresh token requests
                 if ((this.scheme.options.token && !this.#needToken(config)) || config.url === refreshEndpoint) {
                     return config;
                 }
 
                 // Perform scheme checks.
-                const { valid, tokenExpired, refreshTokenExpired, isRefreshable } = this.scheme.check(true);
+                const { valid, tokenExpired, refreshTokenExpired, isRefreshable } = this.scheme.check!(true);
                 let isValid = valid;
 
                 // Refresh token has expired. There is no way to refresh. Force reset.
                 if (refreshTokenExpired) {
-                    this.scheme.reset();
+                    this.scheme.reset!();
                     throw new ExpiredAuthSessionError();
                 }
 
@@ -50,7 +50,7 @@ export class RequestHandler {
                 if (tokenExpired) {
                     // Refresh token is not available. Force reset.
                     if (!isRefreshable) {
-                        this.scheme.reset();
+                        this.scheme.reset!();
                         throw new ExpiredAuthSessionError();
                     }
 
@@ -60,7 +60,7 @@ export class RequestHandler {
                         .then(() => true)
                         .catch(() => {
                             // Tokens couldn't be refreshed. Force reset.
-                            this.scheme.reset();
+                            this.scheme.reset!();
                             throw new ExpiredAuthSessionError();
                         });
                 }
@@ -88,14 +88,14 @@ export class RequestHandler {
 
     reset(): void {
         // Eject request interceptor
-        this.http.interceptors.request.eject(this.interceptor);
+        this.http.interceptors.request.eject(this.interceptor as number);
         this.interceptor = null;
     }
 
     #needToken(config: any): boolean {
         const options = this.scheme.options;
-        // @ts-ignore
-        return ( options.token.global || Object.values(options.endpoints).some((endpoint: HTTPRequest | string) => typeof endpoint === "object" ? endpoint.url === config.url : endpoint === config.url));
+
+        return ( options.token!.global || Object.values(options.endpoints).some((endpoint: any) => typeof endpoint === "object" ? endpoint.url === config.url : endpoint === config.url));
     }
 
     // ---------------------------------------------------------------
@@ -104,13 +104,13 @@ export class RequestHandler {
 
     #getUpdatedRequestConfig(config: any, token: string | boolean) {
         if (typeof token === "string") {
-            config.headers[this.scheme.options.token.name] = token;
+            config.headers[this.scheme.options.token!.name] = token;
         }
 
         return config;
     }
 
-    #requestHasAuthorizationHeader(config): boolean {
-        return !!config.headers[this.scheme.options.token.name];
+    #requestHasAuthorizationHeader(config: FetchConfig): boolean {
+        return !!config.headers[this.scheme.options.token!.name];
     }
 }

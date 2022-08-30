@@ -212,8 +212,8 @@ export default defineNuxtPlugin(ctx => {
 
     if (nuxtOptions.proxyHeaders) {
         // Proxy SSR request headers
-        if (process.server && ctx.ssrContext.req && ctx.ssrContext.req.headers) {
-            const reqHeaders = { ...ctx.ssrContext.req.headers }
+        if (process.server && ctx.ssrContext?.event.req && ctx.ssrContext?.event.req.headers) {
+            const reqHeaders = { ...ctx.ssrContext?.event.req.headers }
             for (const h of nuxtOptions.proxyHeadersIgnore) {
                 delete reqHeaders[h]
             }

@@ -2,9 +2,9 @@ import type { RecursivePartial } from "../types";
 import type { RouteLocationNormalized } from "vue-router";
 import { NuxtApp } from "#app/nuxt";
 
-export const isUnset = (o: unknown): boolean => typeof o === "undefined" || o === null;
+export const isUnset = (o: any): boolean => typeof o === "undefined" || o === null;
 
-export const isSet = (o: unknown): boolean => !isUnset(o);
+export const isSet = (o: any): boolean => !isUnset(o);
 
 export const isSameURL = (ctx: NuxtApp, a: string, b: string): boolean => normalizePath(a, ctx) === normalizePath(b, ctx);
 
@@ -12,12 +12,12 @@ export function isRelativeURL(u: string) {
     return (u && u.length && new RegExp(["^\\/([a-zA-Z0-9@\\-%_~.:]", "[/a-zA-Z0-9@\\-%_~.:]*)?", "([?][^#]*)?(#[^#]*)?$"].join("")).test(u));
 }
 
-export function parseQuery(queryString: string): Record<string, unknown> {
-    const query = {};
+export function parseQuery(queryString: string): Record<string, any> {
+    const query: any = {};
     const pairs = queryString.split("&");
     for (let i = 0; i < pairs.length; i++) {
         const pair = pairs[i].split("=");
-        query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || "");
+        query[decodeURIComponent(pair[0]) as keyof typeof query] = decodeURIComponent(pair[1] || "");
     }
     return query;
 }
@@ -27,29 +27,18 @@ export function encodeQuery(queryObject: {
 }): string {
     return Object.entries(queryObject)
         .filter(([_key, value]) => typeof value !== "undefined")
-        .map(
-            ([key, value]) =>
-                encodeURIComponent(key) +
-                (value != null ? "=" + encodeURIComponent(value) : "")
-        )
+        .map(([key, value]) => encodeURIComponent(key) + (value != null ? "=" + encodeURIComponent(value) : ""))
         .join("&");
 }
 
-export function routeOption(
-    route: RouteLocationNormalized,
-    key: string,
-    value: string | boolean
-): boolean {
-    return route.matched.some((m) => m.meta[key] === value);
+export function routeOption(route: RouteLocationNormalized, key: string, value: string | boolean): boolean {
+    return route.matched.some((m: any) => m.meta[key] === value);
 }
 
-export function getMatchedComponents(
-    route: RouteLocationNormalized,
-    matches: unknown[] = []
-): unknown[] {
+export function getMatchedComponents(route: RouteLocationNormalized, matches: any[] = []): any[] {
     return [].concat(
         ...[],
-        ...route.matched.map(function (m, index) {
+        ...route.matched.map(function (m: any, index: any) {
             return Object.keys(m.components).map(function (key) {
                 matches.push(index);
                 return m.components[key];
@@ -78,14 +67,14 @@ export function normalizePath(path: string = "", ctx?: NuxtApp): string {
     return result;
 }
 
-export function encodeValue(val: unknown): string {
+export function encodeValue(val: any): string {
     if (typeof val === "string") {
         return val;
     }
     return JSON.stringify(val);
 }
 
-export function decodeValue(val: unknown): unknown {
+export function decodeValue(val: any): any {
     // Try to parse as json
     if (typeof val === "string") {
         try {
@@ -105,7 +94,7 @@ export function decodeValue(val: unknown): unknown {
  * @param  { string } propName Dot notation, like 'this.a.b.c'
  * @return { * }          A property value
  */
-export function getProp(holder: Record<string, any>, propName: string | false): unknown {
+export function getProp(holder: Record<string, any>, propName: string | false): any {
     if (!propName || !holder || typeof holder !== "object") {
         return holder;
     }
@@ -114,7 +103,7 @@ export function getProp(holder: Record<string, any>, propName: string | false): 
         return holder[propName];
     }
 
-    const propParts = Array.isArray(propName) ? propName : (propName + "").split(".");
+    const propParts = Array.isArray(propName) ? propName : (propName as string).split(".");
 
     let result = holder;
     while (propParts.length && result) {
@@ -126,12 +115,7 @@ export function getProp(holder: Record<string, any>, propName: string | false): 
 
 // Ie "Bearer " + token
 export function addTokenPrefix(token: string | boolean, tokenType: string | false): string | boolean {
-    if (
-        !token ||
-        !tokenType ||
-        typeof token !== "string" ||
-        token.startsWith(tokenType)
-    ) {
+    if (!token || !tokenType || typeof token !== "string" || token.startsWith(tokenType)) {
         return token;
     }
 
@@ -157,7 +141,7 @@ export function urlJoin(...args: string[]): string {
         .replace("&", "?");
 }
 
-export function cleanObj<T extends Record<string, unknown>>(obj: T): RecursivePartial<T> {
+export function cleanObj<T extends Record<string, any>>(obj: T): RecursivePartial<T> {
     for (const key in obj) {
         if (obj[key] === undefined) {
             delete obj[key];
@@ -168,7 +152,7 @@ export function cleanObj<T extends Record<string, unknown>>(obj: T): RecursivePa
 }
 
 const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-export function randomString(length) {
+export function randomString(length: number) {
     let result = "";
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {

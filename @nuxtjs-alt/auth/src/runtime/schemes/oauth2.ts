@@ -1,6 +1,7 @@
 import type { RefreshableScheme, SchemePartialOptions, SchemeCheck, RefreshableSchemeOptions, UserOptions, SchemeOptions, HTTPResponse, EndpointsOption, TokenableSchemeOptions } from "../../types";
+import type { IncomingMessage } from 'http'
 import type { Auth } from "../core";
-import { encodeQuery, getProp,normalizePath, parseQuery, removeTokenPrefix, urlJoin, randomString } from "../../utils";
+import { encodeQuery, getProp, normalizePath, parseQuery, removeTokenPrefix, urlJoin, randomString } from "../../utils";
 import { RefreshController, RequestHandler, ExpiredAuthSessionError, Token, RefreshToken } from "../inc";
 import { useActiveRoute } from "#app";
 import { BaseScheme } from "./base";
@@ -18,17 +19,11 @@ export interface Oauth2SchemeOptions extends SchemeOptions, TokenableSchemeOptio
     user: UserOptions;
     responseMode: "query.jwt" | "fragment.jwt" | "form_post.jwt" | "jwt";
     responseType: "code" | "token" | "id_token" | "none" | string;
-    grantType:
-        | "implicit"
-        | "authorization_code"
-        | "client_credentials"
-        | "password"
-        | "refresh_token"
-        | "urn:ietf:params:oauth:grant-type:device_code";
+    grantType: "implicit" | "authorization_code" | "client_credentials" | "password" | "refresh_token" | "urn:ietf:params:oauth:grant-type:device_code";
     accessType: "online" | "offline";
     redirectUri: string;
     logoutRedirectUri: string;
-    clientId: string | number;
+    clientId: string;
     clientSecretTransport: "body" | "aurthorization_header";
     scope: string | string[];
     state: string;
@@ -36,25 +31,28 @@ export interface Oauth2SchemeOptions extends SchemeOptions, TokenableSchemeOptio
     acrValues: string;
     audience: string;
     autoLogout: boolean;
+    clientWindow: boolean
+    clientWindowWidth: number
+    clientWindowHeight: number
 }
 
 const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
     name: "oauth2",
-    accessType: null,
-    redirectUri: null,
-    logoutRedirectUri: null,
-    clientId: null,
+    accessType: undefined,
+    redirectUri: undefined,
+    logoutRedirectUri: undefined,
+    clientId: undefined,
     clientSecretTransport: "body",
-    audience: null,
-    grantType: null,
-    responseMode: null,
-    acrValues: null,
+    audience: undefined,
+    grantType: undefined,
+    responseMode: undefined,
+    acrValues: undefined,
     autoLogout: false,
     endpoints: {
-        logout: null,
-        authorization: null,
-        token: null,
-        userInfo: null,
+        logout: undefined,
+        authorization: undefined,
+        token: undefined,
+        userInfo: undefined,
     },
     scope: [],
     token: {
@@ -77,21 +75,23 @@ const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
     },
     responseType: "token",
     codeChallengeMethod: "implicit",
+    clientWindow: false,
+    clientWindowWidth: 400,
+    clientWindowHeight: 600
 };
 
-export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOptions> extends BaseScheme<OptionsT> implements RefreshableScheme
-{
-    req;
+export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOptions> extends BaseScheme<OptionsT> implements RefreshableScheme {
+    req: IncomingMessage;
     token: Token;
     refreshToken: RefreshToken;
     refreshController: RefreshController;
     requestHandler: RequestHandler;
+    #clientWindowReference: Window | undefined | null
 
     constructor($auth: Auth, options: SchemePartialOptions<Oauth2SchemeOptions>, ...defaults: SchemePartialOptions<Oauth2SchemeOptions>[]) {
         super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT);
 
-        // @ts-ignore
-        this.req = process.server ? $auth.ctx.ssrContext.req : "";
+        this.req = process.server ? $auth.ctx.ssrContext?.event.req : "";
 
         // Initialize Token instance
         this.token = new Token(this, this.$auth.$storage);
@@ -119,10 +119,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     }
 
     protected get logoutRedirectURI(): string {
-        return (
-            this.options.logoutRedirectUri ||
-            urlJoin(requrl(this.req), this.$auth.options.redirect.logout)
-        );
+        return (this.options.logoutRedirectUri || urlJoin(requrl(this.req), this.$auth.options.redirect.logout));
     }
 
     check(checkStatus = false): SchemeCheck {
@@ -197,7 +194,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         this.requestHandler.reset();
     }
 
-    async login( _opts: { state?: string; params?; nonce?: string } = {} ): Promise<void> {
+    async login($opts: { state?: string; params?: any; nonce?: string } = {}): Promise<void> {
         const opts = {
             protocol: "oauth2",
             response_type: this.options.responseType,
@@ -207,9 +204,12 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             scope: this.scope,
             // Note: The primary reason for using the state parameter is to mitigate CSRF attacks.
             // https://auth0.com/docs/protocols/oauth2/oauth-state
-            state: _opts.state || randomString(10),
+            state: $opts.state || randomString(10),
             code_challenge_method: this.options.codeChallengeMethod,
-            ..._opts.params,
+            clientWindow: this.options.clientWindow,
+            clientWindowWidth: this.options.clientWindowWidth,
+            clientWindowHeight: this.options.clientWindowHeight,
+            ...$opts.params,
         };
 
         if (this.options.audience) {
@@ -222,7 +222,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         // Keycloak uses nonce for token as well, so support that too
         // https://github.com/nuxt-community/auth-module/pull/709
         if (opts.response_type.includes("token") || opts.response_type.includes("id_token")) {
-            opts.nonce = _opts.nonce || randomString(10);
+            opts.nonce = $opts.nonce || randomString(10);
         }
 
         if (opts.code_challenge_method) {
@@ -233,12 +233,8 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                         const state = this.generateRandomString();
                         this.$auth.$storage.setUniversal(this.name + ".pkce_state", state);
                         const codeVerifier = this.generateRandomString();
-                        this.$auth.$storage.setUniversal(
-                            this.name + ".pkce_code_verifier",
-                            codeVerifier
-                        );
-                        const codeChallenge =
-                            await this.pkceChallengeFromVerifier(codeVerifier, opts.code_challenge_method === "S256");
+                        this.$auth.$storage.setUniversal(this.name + ".pkce_code_verifier", codeVerifier);
+                        const codeChallenge = await this.pkceChallengeFromVerifier(codeVerifier, opts.code_challenge_method === "S256");
                         opts.code_challenge = window.encodeURIComponent(codeChallenge);
                     }
                     break;
@@ -258,16 +254,56 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
 
         this.$auth.$storage.setUniversal(this.name + ".state", opts.state);
 
-        const url =
-            this.options.endpoints.authorization + "?" + encodeQuery(opts);
+        const url = this.options.endpoints.authorization + "?" + encodeQuery(opts);
 
-        window.location.replace(url);
+        if (opts.clientWindow) {
+            if (this.#clientWindowReference === null || this.#clientWindowReference!.closed) {
+                // Window features to center popup in middle of parent window
+                const windowFeatures = this.clientWindowFeatures(window, opts.clientWindowWidth, opts.clientWindowHeight)
+
+                this.#clientWindowReference = window.open(url, 'oauth2-client-window', windowFeatures)
+
+                let strategy = this.$auth.$state.strategy
+
+                let listener = this.clientWindowCallback.bind(this)
+
+                // setting listener to know about approval from oauth provider
+                window.addEventListener('message', listener)
+
+                // watching pop up window and clearing listener when it closes
+                // or is being used by a different provider
+                let checkPopUpInterval = setInterval(() => {
+                    if (this.#clientWindowReference!.closed || strategy !== this.$auth.$state.strategy) {
+                        window.removeEventListener('message', listener)
+                        this.#clientWindowReference = null
+                        clearInterval(checkPopUpInterval)
+                    }
+                }, 500)
+            } else {
+                this.#clientWindowReference!.focus()
+            }
+        } else {
+            window.location.replace(url)
+        }
+    }
+
+    clientWindowCallback(event: MessageEvent): void {
+        const isLogInSuccessful: boolean = !!event.data.isLoggedIn
+        if (isLogInSuccessful) {
+            this.$auth.fetchUserOnce()
+        }
+    }
+
+    clientWindowFeatures(window: Window, clientWindowWidth: number, clientWindowHeight: number): string {
+        const top = window.top!.outerHeight / 2 + window.top!.screenY - clientWindowHeight / 2
+        const left = window.top!.outerWidth / 2 + window.top!.screenX - clientWindowWidth / 2
+        return `toolbar=no, menubar=no, width=${clientWindowWidth}, height=${clientWindowHeight}, top=${top}, left=${left}`
     }
 
     logout(): void {
         if (this.options.endpoints.logout) {
             const opts = {
-                client_id: this.options.clientId + "",
+                client_id: this.options.clientId,
                 logout_uri: this.logoutRedirectURI,
             };
             const url = this.options.endpoints.logout + "?" + encodeQuery(opts);
@@ -290,7 +326,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             url: this.options.endpoints.userInfo,
         });
 
-        this.$auth.setUser(getProp(response, this.options.user.property));
+        this.$auth.setUser(getProp(response, this.options.user.property!));
     }
 
     async #handleCallback(): Promise<boolean | void> {
@@ -307,7 +343,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         const hash = parseQuery(route.hash.substr(1));
         const parsedQuery = Object.assign({}, route.query, hash);
         // accessToken/idToken
-        let token: string = parsedQuery[this.options.token.property] as string;
+        let token: string = parsedQuery[this.options.token!.property] as string;
         // refresh token
         let refreshToken: string;
 
@@ -324,7 +360,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
 
         // -- Authorization Code Grant --
         if (this.options.responseType === "code" && parsedQuery.code) {
-            let codeVerifier;
+            let codeVerifier: any;
 
             // Retrieve code verifier and remove it from storage
             if (this.options.codeChallengeMethod && this.options.codeChallengeMethod !== "implicit") {
@@ -338,7 +374,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                 baseURL: "",
                 body: encodeQuery({
                     code: parsedQuery.code as string,
-                    client_id: this.options.clientId + "",
+                    client_id: this.options.clientId as string,
                     redirect_uri: this.redirectURI,
                     response_type: this.options.responseType,
                     audience: this.options.audience,
@@ -347,8 +383,8 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                 }),
             });
 
-            token = (getProp(response, this.options.token.property) as string) || token;
-            refreshToken = (getProp(response, this.options.refreshToken.property) as string) || refreshToken;
+            token = (getProp(response, this.options.token!.property) as string) || token;
+            refreshToken = (getProp(response, this.options.refreshToken.property) as string) || refreshToken!;
         }
 
         if (!token || !token.length) {
@@ -359,12 +395,18 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         this.token.set(token);
 
         // Store refresh token
-        if (refreshToken && refreshToken.length) {
+        if (refreshToken! && refreshToken.length) {
             this.refreshToken.set(refreshToken);
         }
 
+        if (this.options.clientWindow) {
+            if (window.opener) {
+                window.opener.postMessage({ isLoggedIn: true })
+                window.close()
+            }
+        }
         // Redirect to home
-        if (this.$auth.options.watchLoggedIn) {
+        else if (this.$auth.options.watchLoggedIn) {
             this.$auth.redirect("home", { noRouter: true });
             return true; // True means a redirect happened
         }
@@ -392,24 +434,20 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         // Delete current token from the request header before refreshing
         this.requestHandler.clearHeader();
 
-        const response = await this.$auth
-            .request({
-                method: "post",
-                url: this.options.endpoints.token,
-                baseURL: "",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: encodeQuery({
-                    refresh_token: removeTokenPrefix(
-                        refreshToken,
-                        this.options.token.type
-                    ),
-                    scopes: this.scope,
-                    client_id: this.options.clientId + "",
-                    grant_type: "refresh_token",
-                }),
-            })
+        const response = await this.$auth.request({
+            method: "post",
+            url: this.options.endpoints.token,
+            baseURL: "",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: encodeQuery({
+                refresh_token: removeTokenPrefix(refreshToken, this.options.token!.type),
+                scopes: this.scope,
+                client_id: this.options.clientId as string,
+                grant_type: "refresh_token",
+            }),
+        })
             .catch((error) => {
                 this.$auth.callOnError(error, { method: "refreshToken" });
                 return Promise.reject(error);
@@ -421,7 +459,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     }
 
     protected updateTokens(response: HTTPResponse): void {
-        const token = getProp(response, this.options.token.property) as string;
+        const token = getProp(response, this.options.token!.property) as string;
         const refreshToken = getProp(response, this.options.refreshToken.property) as string;
 
         this.token.set(token);
@@ -442,9 +480,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     protected generateRandomString(): string {
         const array = new Uint32Array(28); // this is of minimum required length for servers with PKCE-enabled
         window.crypto.getRandomValues(array);
-        return Array.from(array, (dec) =>
-            ("0" + dec.toString(16)).slice(-2)
-        ).join("");
+        return Array.from(array, (dec) => ("0" + dec.toString(16)).slice(-2)).join("");
     }
 
     #sha256(plain: string): Promise<ArrayBuffer> {
@@ -457,7 +493,8 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         // Convert the ArrayBuffer to string using Uint8 array to convert to what btoa accepts.
         // btoa accepts chars only within ascii 0-255 and base64 encodes them.
         // Then convert the base64 encoded to base64url encoded
-        //   (replace + with -, replace / with _, trim trailing =)
+        // (replace + with -, replace / with _, trim trailing =)
+        // @ts-ignore
         return btoa(String.fromCharCode.apply(null, new Uint8Array(str)))
             .replace(/\+/g, "-")
             .replace(/\//g, "_")

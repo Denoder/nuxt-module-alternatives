@@ -7,13 +7,9 @@ import { defineStore } from "pinia";
 export class Storage {
     ctx: NuxtApp;
     options: ModuleOptions;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     #store: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     #initStore: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     state: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     #state: any;
     #piniaEnabled: boolean;
 
@@ -51,7 +47,7 @@ export class Storage {
     }
 
     getUniversal(key: string): any {
-        let value;
+        let value: any;
 
         // Local state
         if (process.server) {
@@ -97,9 +93,9 @@ export class Storage {
 
     removeUniversal(key: string): void {
         this.removeState(key);
+        this.removeCookie(key);
         this.removeLocalStorage(key);
         this.removeSessionStorage(key);
-        this.removeCookie(key);
     }
 
     // ------------------------------------
@@ -115,10 +111,12 @@ export class Storage {
         this.#piniaEnabled = this.options.pinia && !!this.ctx.$pinia;
 
         if (this.#piniaEnabled) {
+            // @ts-ignore
             this.#store = defineStore(this.options.pinia.namespace, {
                 state: () => this.options.initialState,
                 actions: {
                     SET(payload: any) {
+                        // @ts-ignore
                         this.$patch({ [payload.key]: payload.value });
                     },
                 },
@@ -129,23 +127,24 @@ export class Storage {
         } else {
             this.state = {};
 
-            // eslint-disable-next-line no-console
             console.warn("[AUTH] The pinia store is not activated. This might cause issues in auth module behavior, like redirects not working properly. To activate it, please install it and add it to your config after this module");
         }
     }
 
-    getStore(pinia: any): any {
-        return pinia ? this.#store(pinia) : this.#initStore;
+    getStore(): any {
+        return this.#initStore;
     }
 
     setState<V extends any>(key: string, value: V): V {
         if (key[0] === "_") {
             this.#state[key] = value;
-        } else if (this.#piniaEnabled) {
+        }
+        else if (this.#piniaEnabled) {
             const { SET } = this.#initStore;
 
             SET({ key, value });
-        } else {
+        }
+        else {
             this.state[key] = value;
         }
 
@@ -162,9 +161,9 @@ export class Storage {
 
     watchState(watchKey: string, fn: (value: any) => void) {
         if (this.#piniaEnabled) {
-            return this.#initStore.$onAction(({ name, args }) => {
-                if ((name as string) === "SET") {
-                    const { key, value } = <any>args[0];
+            return this.#initStore.$onAction((context: { name: string, args: any[] }) => {
+                if (context.name === "SET") {
+                    const { key, value } = context.args[0];
                     if (key === watchKey) {
                         fn(value);
                     }
@@ -191,10 +190,10 @@ export class Storage {
             return;
         }
 
-        const _key = this.getLocalStoragePrefix() + key;
+        const $key = this.getLocalStoragePrefix() + key;
 
         try {
-            localStorage.setItem(_key, encodeValue(value));
+            localStorage.setItem($key, encodeValue(value));
         } catch (e) {
             if (!this.options.ignoreExceptions) {
                 throw e;
@@ -209,9 +208,9 @@ export class Storage {
             return;
         }
 
-        const _key = this.getLocalStoragePrefix() + key;
+        const $key = this.getLocalStoragePrefix() + key;
 
-        const value = localStorage.getItem(_key);
+        const value = localStorage.getItem($key);
 
         return decodeValue(value);
     }
@@ -221,9 +220,9 @@ export class Storage {
             return;
         }
 
-        const _key = this.getLocalStoragePrefix() + key;
+        const $key = this.getLocalStoragePrefix() + key;
 
-        localStorage.removeItem(_key);
+        localStorage.removeItem($key);
     }
 
     getLocalStoragePrefix(): string {
@@ -256,7 +255,6 @@ export class Storage {
             return true;
         } catch (e) {
             if (!this.options.ignoreExceptions) {
-                // eslint-disable-next-line no-console
                 console.warn("[AUTH] Local storage is enabled in config, but the browser does not support it.");
             }
             return false;
@@ -277,10 +275,10 @@ export class Storage {
             return
         }
     
-        const _key = this.getSessionStoragePrefix() + key
+        const $key = this.getSessionStoragePrefix() + key
     
         try {
-            sessionStorage.setItem(_key, encodeValue(value))
+            sessionStorage.setItem($key, encodeValue(value))
         } catch (e) {
             if (!this.options.ignoreExceptions) {
                 throw e
@@ -295,9 +293,9 @@ export class Storage {
             return
         }
 
-        const _key = this.getSessionStoragePrefix() + key
+        const $key = this.getSessionStoragePrefix() + key
 
-        const value = sessionStorage.getItem(_key)
+        const value = sessionStorage.getItem($key)
 
         return decodeValue(value)
     }
@@ -307,9 +305,9 @@ export class Storage {
             return
         }
 
-        const _key = this.getSessionStoragePrefix() + key
+        const $key = this.getSessionStoragePrefix() + key
 
-        sessionStorage.removeItem(_key)
+        sessionStorage.removeItem($key)
     }
 
     getSessionStoragePrefix(): string {
@@ -339,7 +337,6 @@ export class Storage {
             return true
         } catch (e) {
             if (!this.options.ignoreExceptions) {
-                // eslint-disable-next-line no-console
                 console.warn("[AUTH] Session storage is enabled in config, but the browser does not support it.")
             }
             return false
@@ -350,20 +347,18 @@ export class Storage {
     // Cookies
     // ------------------------------------
 
-    getCookies(): Record<string, any> {
+    getCookies(): Record<string, any> | undefined {
         if (!this.isCookiesEnabled()) {
             return;
         }
 
-        // @ts-ignore
-        const cookieStr = process.client ? document.cookie: this.ctx.ssrContext!.req.headers.cookie;
+        const cookieStr = process.client ? document.cookie: this.ctx.ssrContext?.event.req.headers.cookie;
 
         return parse(cookieStr || "") || {};
     }
 
     setCookie<V extends any>(key: string, value: V, options: { prefix?: string } = {}) {
-        // @ts-ignore
-        if (!this.options.cookie || (process.server && !this.ctx.ssrContext!.res)) {
+        if (!this.options.cookie || (process.server && !this.ctx.ssrContext?.event.res)) {
             return;
         }
 
@@ -371,35 +366,35 @@ export class Storage {
             return;
         }
 
-        const _prefix = options.prefix !== undefined ? options.prefix : this.options.cookie.prefix;
-        const _key = _prefix + key;
-        const _options = Object.assign({}, this.options.cookie.options, options);
-        const _value = encodeValue(value);
+        const prefix = options.prefix !== undefined ? options.prefix : this.options.cookie.prefix;
+        const $key = prefix + key;
+        const $options = Object.assign({}, this.options.cookie.options, options);
+        const $value = encodeValue(value);
 
         // Unset null, undefined
         if (isUnset(value)) {
-            _options.maxAge = -1;
+            $options.maxAge = -1;
         }
 
         // Accept expires as a number for js-cookie compatiblity
-        if (typeof _options.expires === "number") {
-            _options.expires = new Date(Date.now() + _options.expires * 864e5);
+        if (typeof $options.expires === "number") {
+            $options.expires = new Date(Date.now() + $options.expires * 864e5);
         }
 
-        /* @ts-ignore */
-        const serializedCookie = serialize(_key, _value, _options);
+        // @ts-ignore
+        const serializedCookie = serialize($key, $value, $options);
 
         if (process.client) {
             // Set in browser
             document.cookie = serializedCookie;
-        } else if (process.server && this.ctx.ssrContext!.res) {
+        } 
+        else if (process.server && this.ctx.ssrContext?.event.res) {
             // Send Set-Cookie header from server side
-            // @ts-ignore
-            let cookies = (this.ctx.ssrContext!.res.getHeader("Set-Cookie") as string[]) || [];
+            let cookies = (this.ctx.ssrContext?.event.res.getHeader("Set-Cookie") as string[]) || [];
             if (!Array.isArray(cookies)) cookies = [cookies];
             cookies.unshift(serializedCookie);
 
-            this.ctx.ssrContext!.res.setHeader("Set-Cookie", cookies.filter(
+            this.ctx.ssrContext?.event.res.setHeader("Set-Cookie", cookies.filter(
                 (v, i, arr) => arr.findIndex( 
                     (val) => val.startsWith(v.slice(0, v.indexOf("="))) 
                 ) === i
@@ -410,7 +405,7 @@ export class Storage {
     }
 
     getCookie(key: string): any {
-        if ( !this.options.cookie || (process.server && !this.ctx.ssrContext!.req)) {
+        if (!this.options.cookie || (process.server && !this.ctx.ssrContext?.event.req)) {
             return;
         }
 
@@ -418,11 +413,11 @@ export class Storage {
             return;
         }
 
-        const _key = this.options.cookie.prefix + key;
+        const $key = this.options.cookie.prefix + key;
 
         const cookies = this.getCookies();
 
-        const value = cookies[_key] ? decodeURIComponent(cookies[_key] as string) : undefined;
+        const value = cookies![$key] ? decodeURIComponent(cookies![$key] as string) : undefined;
 
         return decodeValue(value);
     }
@@ -446,7 +441,6 @@ export class Storage {
         if (window.navigator.cookieEnabled) {
             return true;
         } else {
-            // eslint-disable-next-line no-console
             console.warn("[AUTH] Cookies are enabled in config, but the browser does not support it.");
             return false;
         }

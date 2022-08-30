@@ -24,16 +24,15 @@ export class RefreshController {
 
     #doRefresh(): Promise<HTTPResponse | void> {
         this.#refreshPromise = new Promise((resolve, reject) => {
-            this.scheme
-                .refreshTokens()
-                .then((response) => {
-                    this.#refreshPromise = null;
-                    resolve(response);
-                })
-                .catch((error) => {
-                    this.#refreshPromise = null;
-                    reject(error);
-                });
+            this.scheme.refreshTokens()
+            .then((response) => {
+                this.#refreshPromise = null;
+                resolve(response);
+            })
+            .catch((error) => {
+                this.#refreshPromise = null;
+                reject(error);
+            });
         });
 
         return this.#refreshPromise;

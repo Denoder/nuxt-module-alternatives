@@ -1,7 +1,7 @@
-import type { EndpointsOption, SchemePartialOptions, SchemeCheck, UserCookieOptions, HTTPRequest, HTTPResponse } from "../../types";
+import type { EndpointsOption, SchemePartialOptions, SchemeCheck, CookieUserOptions, HTTPRequest, HTTPResponse } from "../../types";
+import type { Auth } from "..";
 import { BaseScheme } from "./base";
 import { getProp } from "../../utils";
-import type { Auth } from "../core";
 import { RequestHandler } from "../inc";
 
 export interface CookieSchemeEndpoints extends EndpointsOption {
@@ -19,14 +19,14 @@ export interface CookieSchemeCookie {
 export interface CookieSchemeOptions {
     name: string;
     endpoints: CookieSchemeEndpoints;
-    user: UserCookieOptions;
+    user: CookieUserOptions;
     cookie: CookieSchemeCookie;
 }
 
 const DEFAULTS: SchemePartialOptions<CookieSchemeOptions> = {
     name: "cookie",
     cookie: {
-        name: null,
+        name: undefined,
         server: false,
     },
     endpoints: {
@@ -67,11 +67,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
     async mounted(): Promise<HTTPResponse | void> {
         if (process.server) {
             const handler = this.$auth.ctx.$http ? this.$auth.ctx.$http : this.$auth.ctx.$fetch
-            handler.setHeader(
-                "referer",
-                // @ts-ignore
-                this.$auth.ctx.ssrContext.req.headers.host
-            );
+            handler.setHeader("referer", this.$auth.ctx.ssrContext?.event.req.headers.host);
         }
 
         // Initialize request interceptor
@@ -90,7 +86,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
             const cookies = this.$auth.$storage.getCookies();
 
             if (this.isServerCookie() || this.isClientCookie()) {
-                response.valid = Boolean(cookies[this.options.cookie.name]);
+                response.valid = Boolean(cookies![this.options.cookie.name]);
             } else {
                 response.valid = true;
             }
@@ -160,9 +156,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
                 }
 
                 if (!userData) {
-                    const error = new Error(
-                        `User Data response does not contain field ${this.options.user.property}`
-                    );
+                    const error = new Error(`User Data response does not contain field ${this.options.user.property}`);
 
                     return Promise.reject(error);
                 }
@@ -180,12 +174,12 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
     async logout(endpoint: HTTPRequest = {}): Promise<void> {
         // Only connect to logout endpoint if it's configured
         if (this.options.endpoints.logout) {
-            await this.$auth.requestWith(endpoint, this.options.endpoints.logout).catch((err) => console.error(err));
+            await this.$auth.requestWith(endpoint, this.options.endpoints.logout).catch((err: any) => console.error(err));
         }
 
         // But reset regardless
-        this.$auth.reset();
         this.$auth.redirect("logout");
+        return this.$auth.reset();
     }
 
     reset({ resetInterceptor = true } = {}): void {

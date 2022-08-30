@@ -1,12 +1,10 @@
 import { defineNuxtConfig } from "nuxt";
+import axiosModule from '..'
 
 export default defineNuxtConfig({
     buildModules: [
-        "@nuxtjs-alt/axios"
+        axiosModule
     ],
-    auth: {
-        enableMiddleware: false,
-    },
     vite: {
         server: {
             hmr: {

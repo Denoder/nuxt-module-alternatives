@@ -8,7 +8,7 @@ export interface ModuleOptions {
         [strategy: string]: Strategy;
     };
     ignoreExceptions: boolean;
-    resetOnError: boolean | ((...args: unknown[]) => boolean);
+    resetOnError: boolean | ((...args: any[]) => boolean);
     defaultStrategy: string | undefined;
     watchLoggedIn: boolean;
     rewriteRedirects: boolean;
@@ -40,5 +40,6 @@ export interface ModuleOptions {
     initialState?: {
         user: null;
         loggedIn: boolean;
+        [key: string]: any;
     };
 }

@@ -1,4 +1,4 @@
-import jwtDecode, { JwtPayload } from "jwt-decode";
+import decode, { JwtPayload } from "jwt-decode";
 import { addTokenPrefix } from "../../utils";
 import type { IdTokenableScheme } from "../../types";
 import type { Storage } from "../core";
@@ -14,16 +14,13 @@ export class IdToken {
     }
 
     get(): string | boolean {
-        const _key = this.scheme.options.idToken.prefix + this.scheme.name;
+        const key = this.scheme.options.idToken.prefix + this.scheme.name;
 
-        return this.$storage.getUniversal(_key) as string | boolean;
+        return this.$storage.getUniversal(key) as string | boolean;
     }
 
     set(tokenValue: string | boolean): string | boolean {
-        const idToken = addTokenPrefix(
-            tokenValue,
-            this.scheme.options.idToken.type
-        );
+        const idToken = addTokenPrefix(tokenValue, this.scheme.options.idToken.type);
 
         this.#setToken(idToken);
         this.#updateExpiration(idToken);
@@ -48,42 +45,36 @@ export class IdToken {
     }
 
     #getExpiration(): number | false {
-        const _key =
-            this.scheme.options.idToken.expirationPrefix + this.scheme.name;
+        const key = this.scheme.options.idToken.expirationPrefix + this.scheme.name;
 
-        return this.$storage.getUniversal(_key) as number | false;
+        return this.$storage.getUniversal(key) as number | false;
     }
 
     #setExpiration(expiration: number | false): number | false {
-        const _key =
-            this.scheme.options.idToken.expirationPrefix + this.scheme.name;
+        const key = this.scheme.options.idToken.expirationPrefix + this.scheme.name;
 
-        return this.$storage.setUniversal(_key, expiration) as number | false;
+        return this.$storage.setUniversal(key, expiration) as number | false;
     }
 
     #syncExpiration(): number | false {
-        const _key =
+        const key =
             this.scheme.options.idToken.expirationPrefix + this.scheme.name;
 
-        return this.$storage.syncUniversal(_key) as number | false;
+        return this.$storage.syncUniversal(key) as number | false;
     }
 
     #updateExpiration(idToken: string | boolean): number | false | void {
         let idTokenExpiration: number;
-        const _tokenIssuedAtMillis = Date.now();
-        const _tokenTTLMillis =
-            Number(this.scheme.options.idToken.maxAge) * 1000;
-        const _tokenExpiresAtMillis = _tokenTTLMillis
-            ? _tokenIssuedAtMillis + _tokenTTLMillis
-            : 0;
+        const tokenIssuedAtMillis = Date.now();
+        const tokenTTLMillis = Number(this.scheme.options.idToken.maxAge) * 1000;
+        const tokenExpiresAtMillis = tokenTTLMillis ? tokenIssuedAtMillis + tokenTTLMillis : 0;
 
         try {
-            idTokenExpiration =
-                jwtDecode<JwtPayload>(idToken + "").exp * 1000 ||
-                _tokenExpiresAtMillis;
-        } catch (error) {
-            // If the token is not jwt, we can't decode and refresh it, use _tokenExpiresAt value
-            idTokenExpiration = _tokenExpiresAtMillis;
+            idTokenExpiration = decode<JwtPayload>(idToken as string).exp * 1000 || tokenExpiresAtMillis;
+        } 
+        catch (error: any) {
+            // If the token is not jwt, we can't decode and refresh it, use tokenExpiresAt value
+            idTokenExpiration = tokenExpiresAtMillis;
 
             if (!(error && error.name === "InvalidTokenError")) {
                 throw error;
@@ -95,21 +86,21 @@ export class IdToken {
     }
 
     #setToken(idToken: string | boolean): string | boolean {
-        const _key = this.scheme.options.idToken.prefix + this.scheme.name;
+        const key = this.scheme.options.idToken.prefix + this.scheme.name;
 
-        return this.$storage.setUniversal(_key, idToken) as string | boolean;
+        return this.$storage.setUniversal(key, idToken) as string | boolean;
     }
 
     #syncToken(): string | boolean {
-        const _key = this.scheme.options.idToken.prefix + this.scheme.name;
+        const key = this.scheme.options.idToken.prefix + this.scheme.name;
 
-        return this.$storage.syncUniversal(_key) as string | boolean;
+        return this.$storage.syncUniversal(key) as string | boolean;
     }
 
     userInfo() {
         const idToken = this.get();
         if (typeof idToken === "string") {
-            return jwtDecode(idToken);
+            return decode(idToken);
         }
     }
 }
