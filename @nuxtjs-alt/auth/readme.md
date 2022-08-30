@@ -81,6 +81,6 @@ Laravel Sanctum wokrs a tiny bit differently, It inherits the same config as the
 
 Oauth2 now has client window authentication thanks to this pull request: https://github.com/nuxt-community/auth-module/pull/1746
 properties have been changed to:
-`clientWindow`: `boolean`
-`clientWindowWidth`: `number`
-`clientWindowHeight`: `number`
+- `clientWindow`: `boolean`
+- `clientWindowWidth`: `number`
+- `clientWindowHeight`: `number`
