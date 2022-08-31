@@ -1,5 +1,5 @@
 import type { ModuleOptions } from './types'
-import { $fetch } from '@refactorjs/ofetch'
+import type { FetchInstance } from '@refactorjs/ofetch'
 import { defineNuxtModule, addPluginTemplate, createResolver, addAutoImport } from '@nuxt/kit'
 import { name, version } from '../package.json'
 
@@ -17,30 +17,18 @@ export default defineNuxtModule({
         },
     },
     defaults: {} as ModuleOptions,
-    setup(_moduleOptions, nuxt) {
+    setup(opts, nuxt) {
         // Combine options
-        const moduleOptions: ModuleOptions = {
-            ..._moduleOptions,
+        const moduleOptions = {
+            ...opts,
             ...(nuxt.options.runtimeConfig.public && nuxt.options.runtimeConfig.public[CONFIG_KEY])
         }
 
         // Default port
-        const defaultPort =
-            process.env.API_PORT ||
-            moduleOptions.port ||
-            process.env.PORT ||
-            process.env.npm_package_config_nuxt_port ||
-            (nuxt.options.server && nuxt.options.server.port) ||
-            3000
+        const defaultPort = process.env.API_PORT || moduleOptions.port || process.env.PORT || process.env.npm_package_config_nuxt_port || (nuxt.options.server && nuxt.options.server.port) || 3000
 
         // Default host
-        let defaultHost =
-            process.env.API_HOST ||
-            moduleOptions.host ||
-            process.env.HOST ||
-            process.env.npm_package_config_nuxt_host ||
-            (nuxt.options.server && nuxt.options.server.host) ||
-            'localhost'
+        let defaultHost = process.env.API_HOST || moduleOptions.host || process.env.HOST || process.env.npm_package_config_nuxt_host || (nuxt.options.server && nuxt.options.server.host) || 'localhost'
 
         /* istanbul ignore if */
         if (defaultHost === '0.0.0.0') {
@@ -64,7 +52,7 @@ export default defineNuxtModule({
         }
 
         // Apply defaults
-        const options = {
+        const options: ModuleOptions = {
             baseURL: `http://${defaultHost}:${defaultPort}${prefix}`,
             browserBaseURL: undefined,
             proxyHeaders: true,
@@ -94,17 +82,14 @@ export default defineNuxtModule({
             ...moduleOptions
         }
 
-        /* istanbul ignore if */
         if (process.env.API_URL) {
             options.baseURL = process.env.API_URL
         }
 
-        /* istanbul ignore if */
         if (process.env.API_URL_BROWSER) {
             options.browserBaseURL = process.env.API_URL_BROWSER
         }
 
-        // Default browserBaseURL
         if (typeof options.browserBaseURL === 'undefined') {
             options.browserBaseURL = options.proxy ? prefix : options.baseURL
         }
@@ -123,7 +108,7 @@ export default defineNuxtModule({
         addPluginTemplate({
             src: resolver.resolve('runtime/templates/http.plugin.mjs'),
             filename: 'http.plugin.mjs',
-            options
+            options: options
         })
 
         // Set _FETCH_BASE_URL_ for dynamic SSR baseURL
@@ -144,7 +129,7 @@ export default defineNuxtModule({
 
 declare module "#app" {
     export interface NuxtApp {
-        $http: typeof $fetch;
+        $http: FetchInstance;
     }
     export interface NuxtOptions {
         http: ModuleOptions;

@@ -1,14 +1,16 @@
+import type { FetchInstance } from '@refactorjs/ofetch'
+
 export interface ModuleOptions {
-    baseURL?: string;
+    baseURL: string;
     baseUrl?: string;
-    browserBaseURL?: string;
+    browserBaseURL: string;
     browserBaseUrl?: string;
     host?: string;
     prefix?: string;
     proxyHeaders?: boolean;
     proxyHeadersIgnore?: string[];
-    serverTimeout: number,
-    clientTimeout: number,
+    serverTimeout?: number,
+    clientTimeout?: number,
     proxy?: boolean;
     port?: string | number;
     retry?: boolean;

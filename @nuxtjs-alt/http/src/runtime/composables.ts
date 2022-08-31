@@ -1,8 +1,9 @@
-import type { FetchOptions } from 'ohmyfetch'
+import type { FetchConfig } from '@refactorjs/ofetch'
 import type { TypedInternalResponse, NitroFetchRequest } from 'nitropack'
-import { computed, isRef, Ref } from 'vue'
 import type { AsyncDataOptions, _Transform, KeyOfRes, AsyncData, PickFrom } from '#app'
+import { computed, isRef, Ref } from 'vue'
 import { useAsyncData } from '#imports'
+import { hash } from 'ohash'
 
 export type FetchResult<ReqT extends NitroFetchRequest> = TypedInternalResponse<ReqT, unknown>
 
@@ -10,7 +11,7 @@ export interface UseFetchOptions<
     DataT,
     Transform extends _Transform<DataT, any> = _Transform<DataT, DataT>,
     PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
-    > extends AsyncDataOptions<DataT, Transform, PickKeys>, FetchOptions {
+    > extends AsyncDataOptions<DataT, Transform, PickKeys>, FetchConfig {
     key?: string
 }
 
@@ -23,7 +24,7 @@ export function useFetch<
     PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
 >(
     request: Ref<ReqT> | ReqT | (() => ReqT),
-    opts?: UseFetchOptions<_ResT, Transform, PickKeys>
+    opts: UseFetchOptions<_ResT, Transform, PickKeys>
 ): AsyncData<PickFrom<ReturnType<Transform>, PickKeys>, ErrorT | null | true>
 export function useFetch<
     ResT = void,
@@ -34,19 +35,17 @@ export function useFetch<
     PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
 >(
     request: Ref<ReqT> | ReqT | (() => ReqT),
-    arg1?: string | UseFetchOptions<_ResT, Transform, PickKeys>,
-    arg2?: string
+    opts: UseFetchOptions<_ResT, Transform, PickKeys> = {},
 ) {
-    const [opts, autoKey] = typeof arg1 === 'string' ? [{}, arg1] : [arg1, arg2]
-    // @ts-ignore
-    const _key = opts.key || autoKey
-    if (!_key || typeof _key !== 'string') {
-        throw new TypeError('[nuxt] [useFetch] key must be a string: ' + _key)
+    if (process.dev && !opts.key && Object.values(opts).some(v => typeof v === 'function' || v instanceof Blob)) {
+        console.warn('[nuxt] [useFetch] You should provide a key when passing options that are not serializable to JSON:', opts)
     }
+
     if (!request) {
         throw new Error('[nuxt] [useFetch] request is missing.')
     }
-    const key = '$f' + _key
+
+    const key = '$f_' + (opts.key || hash([request, { ...opts, transform: null }]))
 
     const _request = computed(() => {
         let r = request
@@ -56,12 +55,10 @@ export function useFetch<
         return (isRef(r) ? r.value : r)
     })
 
-    // @ts-ignore
     const { server, lazy, default: defaultFn, transform, pick, watch, initialCache, ...fetchOptions } = opts
 
     const _fetchOptions = {
         ...fetchOptions,
-        // @ts-ignore
         cache: typeof opts.cache === 'boolean' ? undefined : opts.cache
     }
 
@@ -79,10 +76,8 @@ export function useFetch<
     }
 
     const asyncData = useAsyncData<_ResT, ErrorT, Transform, PickKeys>(key, () => {
-        // @ts-ignore
         const method = opts && opts.method && ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method.toLowerCase()) ? opts.method.toLowerCase() : 'get'
-        // @ts-ignore
-        return $fetch['$' + method](_request.value, _fetchOptions) as Promise<_ResT>
+        return globalThis.$fetch['$' + method](_request.value, _fetchOptions) as Promise<_ResT>
     }, _asyncDataOptions)
 
     return asyncData
@@ -97,7 +92,7 @@ export function useLazyFetch<
     PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
 >(
     request: Ref<ReqT> | ReqT | (() => ReqT),
-    opts?: Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'>
+    opts: Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'>
 ): AsyncData<PickFrom<ReturnType<Transform>, PickKeys>, ErrorT | null | true>
 export function useLazyFetch<
     ResT = void,
@@ -108,16 +103,12 @@ export function useLazyFetch<
     PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
 >(
     request: Ref<ReqT> | ReqT | (() => ReqT),
-    arg1?: string | Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'>,
-    arg2?: string
+    opts: Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'> = {},
 ) {
-    const [opts, autoKey] = typeof arg1 === 'string' ? [{}, arg1] : [arg1, arg2]
-
     return useFetch<ResT, ErrorT, ReqT, _ResT, Transform, PickKeys>(request, {
         ...opts,
         lazy: true
-    // @ts-ignore 
-    }, autoKey)
+    })
 }
 
 export function useHttp<
@@ -129,7 +120,7 @@ export function useHttp<
     PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
 >(
     request: Ref<ReqT> | ReqT | (() => ReqT),
-    opts?: UseFetchOptions<_ResT, Transform, PickKeys>
+    opts: UseFetchOptions<_ResT, Transform, PickKeys>
 ): AsyncData<PickFrom<ReturnType<Transform>, PickKeys>, ErrorT | null | true>
 export async function useHttp<
     ResT = void,
@@ -140,19 +131,17 @@ export async function useHttp<
     PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
 >(
     request: Ref<ReqT> | ReqT | (() => ReqT),
-    arg1?: string | UseFetchOptions<_ResT, Transform, PickKeys>,
-    arg2?: string
+    opts: UseFetchOptions<_ResT, Transform, PickKeys> = {}
 ) {
-    const [opts, autoKey] = typeof arg1 === 'string' ? [{}, arg1] : [arg1, arg2]
-    // @ts-ignore
-    const _key = opts.key || autoKey
-    if (!_key || typeof _key !== 'string') {
-        throw new TypeError('[nuxt] [useHttp] key must be a string: ' + _key)
+    if (process.dev && !opts.key && Object.values(opts).some(v => typeof v === 'function' || v instanceof Blob)) {
+        console.warn('[nuxt] [useFetch] You should provide a key when passing options that are not serializable to JSON:', opts)
     }
+
     if (!request) {
         throw new Error('[nuxt] [useHttp] request is missing.')
     }
-    const key = '$h' + _key
+
+    const key = '$h_' + (opts.key || hash([request, { ...opts, transform: null }]))
 
     const _request = computed(() => {
         let r = request
@@ -162,12 +151,11 @@ export async function useHttp<
         return (isRef(r) ? r.value : r)
     })
 
-    // @ts-ignore
+
     const { server, lazy, default: defaultFn, transform, pick, watch, initialCache, ...fetchOptions } = opts
 
     const _fetchOptions = {
         ...fetchOptions,
-        // @ts-ignore
         cache: typeof opts.cache === 'boolean' ? undefined : opts.cache
     }
 
@@ -185,10 +173,8 @@ export async function useHttp<
     }
 
     const asyncData = useAsyncData<_ResT, ErrorT, Transform, PickKeys>(key, () => {
-        // @ts-ignore
         const method = opts && opts.method && ['get', 'head', 'delete', 'post', 'put', 'patch'].includes(opts.method.toLowerCase()) ? opts.method.toLowerCase() : 'get'
-        // @ts-ignore
-        return $http['$' + method](_request.value, _fetchOptions) as Promise<_ResT>
+        return globalThis.$http['$' + method](_request.value, _fetchOptions) as Promise<_ResT>
     }, _asyncDataOptions)
 
     return asyncData
@@ -203,7 +189,7 @@ export function useLazyHttp<
     PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
 >(
     request: Ref<ReqT> | ReqT | (() => ReqT),
-    opts?: Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'>
+    opts: Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'>
 ): AsyncData<PickFrom<ReturnType<Transform>, PickKeys>, ErrorT | null | true>
 export function useLazyHttp<
     ResT = void,
@@ -214,14 +200,11 @@ export function useLazyHttp<
     PickKeys extends KeyOfRes<Transform> = KeyOfRes<Transform>
 >(
     request: Ref<ReqT> | ReqT | (() => ReqT),
-    arg1?: string | Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'>,
-    arg2?: string
+    opts: Omit<UseFetchOptions<_ResT, Transform, PickKeys>, 'lazy'> = {},
 ) {
-    const [opts, autoKey] = typeof arg1 === 'string' ? [{}, arg1] : [arg1, arg2]
 
     return useHttp<ResT, ErrorT, ReqT, _ResT, Transform, PickKeys>(request, {
         ...opts,
         lazy: true
-    // @ts-ignore 
-    }, autoKey)
+    })
 }
