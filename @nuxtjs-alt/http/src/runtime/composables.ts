@@ -122,7 +122,7 @@ export function useHttp<
     request: Ref<ReqT> | ReqT | (() => ReqT),
     opts: UseFetchOptions<_ResT, Transform, PickKeys>
 ): AsyncData<PickFrom<ReturnType<Transform>, PickKeys>, ErrorT | null | true>
-export async function useHttp<
+export function useHttp<
     ResT = void,
     ErrorT = Error,
     ReqT extends NitroFetchRequest = NitroFetchRequest,
