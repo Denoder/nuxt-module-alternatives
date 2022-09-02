@@ -1,4 +1,4 @@
-import type { ProxyServer } from '@refactorjs/http-proxy'
+import type { ProxyServer, Server } from '@refactorjs/http-proxy'
 import type { IncomingMessage, ServerResponse } from 'http'
 import { name, version } from '../package.json'
 import { addServerHandler, addTemplate, defineNuxtModule } from '@nuxt/kit'
@@ -11,7 +11,7 @@ export interface ModuleOptions {
     [key: string]: string | ProxyOptions
 }
 
-interface ProxyOptions {
+interface ProxyOptions extends Server.ServerOptions {
     /**
      * rewrite path
      */
@@ -68,10 +68,11 @@ function converter(key, val) {
 function proxyMiddlewareContent(options: ModuleOptions): string {
     return `
 import * as http from 'http'
-import { ProxyServer, createProxyServer } from '@refactorjs/http-proxy'
+import * as net from 'net'
+import { createProxyServer, ProxyServer, Server } from '@refactorjs/http-proxy'
 import { defineEventHandler } from 'h3'
 
-interface ProxyOptions {
+interface ProxyOptions extends Server.ServerOptions {
     /**
      * rewrite path
      */
@@ -94,10 +95,10 @@ interface ProxyOptions {
 
 // lazy require only when proxy is used
 const proxies: Record<string, [ProxyServer, ProxyOptions]> = {}
-let options = ${JSON.stringify(options, converter)};
+let options: ProxyOptions = ${JSON.stringify(options, converter)};
 
 Object.keys(options).forEach((context) => {
-    let opts = options[context]
+    let opts: ProxyOptions = options[context]
 
     if (typeof opts === 'string') {
         opts = { target: opts, changeOrigin: true } as ProxyOptions
@@ -129,7 +130,7 @@ Object.keys(options).forEach((context) => {
                     .end()
             }
         } else {
-            config.logger.error('ws proxy error:' + err.stack, {
+            console.error('ws proxy error:' + err.stack, {
                 timestamp: true,
                 error: err
             })
@@ -160,7 +161,7 @@ export default defineEventHandler(async (event) => {
         for (const context in proxies) {
             if (doesProxyContextMatchUrl(context, url)) {
                 const [proxy, opts] = proxies[context]
-                const options: HttpProxy.ServerOptions = {}
+                const options: Server.ServerOptions = {}
 
                 if (opts.bypass) {
                     const bypassResult = opts.bypass(event.req, event.res, opts)
@@ -181,7 +182,7 @@ export default defineEventHandler(async (event) => {
                 console.debug(event.req.url + ' -> ' + opts.target || opts.forward)
 
                 if (opts.rewrite) {
-                    event.req.url = opts.rewrite(event.req.url!)
+                    event.req.url = opts.rewrite(event.req.url!) as string
                 }
 
                 proxy.web(event.req, event.res, options)
@@ -204,10 +205,4 @@ function doesProxyContextMatchUrl(context: string, url: string): boolean {
     )
 }
 `
-}
-
-declare module "#app" {
-    export interface NuxtConfig {
-        proxy?: ModuleOptions
-    }
 }
