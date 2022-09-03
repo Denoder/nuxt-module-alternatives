@@ -70,7 +70,7 @@ export class IdToken {
         const tokenExpiresAtMillis = tokenTTLMillis ? tokenIssuedAtMillis + tokenTTLMillis : 0;
 
         try {
-            idTokenExpiration = decode<JwtPayload>(idToken as string).exp * 1000 || tokenExpiresAtMillis;
+            idTokenExpiration = decode<JwtPayload>(idToken as string).exp! * 1000 || tokenExpiresAtMillis;
         } 
         catch (error: any) {
             // If the token is not jwt, we can't decode and refresh it, use tokenExpiresAt value

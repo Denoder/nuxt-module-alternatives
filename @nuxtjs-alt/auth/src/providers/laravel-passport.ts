@@ -1,5 +1,6 @@
 import type { RefreshTokenOptions, TokenOptions, UserOptions, RecursivePartial, ProviderPartialOptions, ProviderOptions } from "../types";
 import type { Oauth2SchemeOptions, RefreshSchemeOptions } from "../runtime";
+import type { Nuxt } from '@nuxt/schema'
 import { assignDefaults, addAuthorize, initializePasswordGrantFlow, assignAbsoluteEndpoints } from "../utils/provider";
 
 export interface LaravelPassportProviderOptions extends ProviderOptions, Oauth2SchemeOptions {
@@ -17,7 +18,7 @@ function isPasswordGrant(strategy: PartialPassportOptions | PartialPassportPassw
     return strategy.grantType === "password";
 }
 
-export function laravelPassport(nuxt: any, strategy: PartialPassportOptions | PartialPassportPasswordOptions): void {
+export function laravelPassport(nuxt: Nuxt, strategy: PartialPassportOptions | PartialPassportPasswordOptions): void {
     const { url } = strategy;
 
     if (!url) {
@@ -47,10 +48,10 @@ export function laravelPassport(nuxt: any, strategy: PartialPassportOptions | Pa
         },
     };
 
-    let _DEFAULTS: typeof strategy
+    let DEFAULTS: typeof strategy
 
     if (isPasswordGrant(strategy)) {
-        _DEFAULTS = {
+        DEFAULTS = {
             ...defaults,
             scheme: "refresh",
             endpoints: {
@@ -69,12 +70,12 @@ export function laravelPassport(nuxt: any, strategy: PartialPassportOptions | Pa
             grantType: "password",
         };
 
-        assignDefaults(strategy, _DEFAULTS);
+        assignDefaults(strategy, DEFAULTS);
 
         assignAbsoluteEndpoints(strategy);
         initializePasswordGrantFlow(nuxt, strategy);
     } else {
-        _DEFAULTS = {
+        DEFAULTS = {
             ...defaults,
             scheme: "oauth2",
             endpoints: {
@@ -88,7 +89,7 @@ export function laravelPassport(nuxt: any, strategy: PartialPassportOptions | Pa
             scope: "*",
         };
 
-        assignDefaults(strategy, _DEFAULTS);
+        assignDefaults(strategy, DEFAULTS);
 
         assignAbsoluteEndpoints(strategy);
         addAuthorize(nuxt, strategy);

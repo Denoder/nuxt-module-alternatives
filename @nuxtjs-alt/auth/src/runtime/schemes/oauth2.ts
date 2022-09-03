@@ -448,10 +448,10 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                 grant_type: "refresh_token",
             }),
         })
-            .catch((error) => {
-                this.$auth.callOnError(error, { method: "refreshToken" });
-                return Promise.reject(error);
-            });
+        .catch((error) => {
+            this.$auth.callOnError(error, { method: "refreshToken" });
+            return Promise.reject(error);
+        });
 
         this.updateTokens(response);
 

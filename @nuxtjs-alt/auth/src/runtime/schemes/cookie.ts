@@ -104,9 +104,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
 
         // Make CSRF request if required
         if (this.options.endpoints.csrf) {
-            await this.$auth.request(this.options.endpoints.csrf, {
-                maxRedirects: 0,
-            });
+            await this.$auth.request(this.options.endpoints.csrf);
         }
 
         if (!this.options.endpoints.login) {

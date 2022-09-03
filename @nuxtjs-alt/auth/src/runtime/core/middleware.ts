@@ -1,6 +1,7 @@
 import type { RouteLocationNormalized } from "vue-router";
-import { useNuxtApp, defineNuxtRouteMiddleware } from "#imports";
 import { routeOption, getMatchedComponents, normalizePath } from "../../utils";
+import { useNuxtApp, defineNuxtRouteMiddleware } from "#imports";
+import { NuxtApp } from '#app/nuxt'
 
 export default defineNuxtRouteMiddleware((to: RouteLocationNormalized, from: RouteLocationNormalized) => {
     // Disable middleware if options: { auth: false } is set on the route
@@ -9,20 +10,20 @@ export default defineNuxtRouteMiddleware((to: RouteLocationNormalized, from: Rou
     }
 
     // Disable middleware if no route was matched to allow 404/error page
-    const matches: Array<any> = [];
+    const matches: unknown[] = [];
     const Components = getMatchedComponents(to, matches);
 
     if (!Components.length) {
         return;
     }
 
-    const ctx = useNuxtApp();
+    const ctx: NuxtApp = useNuxtApp();
 
     const { login, callback } = ctx.$auth.options.redirect;
 
     const pageIsInGuestMode = routeOption(to, "auth", "guest");
 
-    const insidePage = (page: any) => normalizePath(to.path, ctx) === normalizePath(page, ctx);
+    const insidePage = (page: string) => normalizePath(to.path, ctx) === normalizePath(page, ctx);
 
     if (ctx.$auth.$state.loggedIn) {
         // Perform scheme checks.

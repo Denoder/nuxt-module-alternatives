@@ -1,5 +1,6 @@
 import type { Oauth2SchemeOptions, RefreshSchemeOptions, LocalSchemeOptions, CookieSchemeOptions } from "../runtime";
 import type { StrategyOptions, HTTPRequest } from "../types";
+import type { Nuxt } from '@nuxt/schema'
 import { addServerHandler, addTemplate } from "@nuxt/kit";
 import { join } from 'pathe';
 import { defu } from "defu";
@@ -8,7 +9,7 @@ export function assignDefaults<SOptions extends StrategyOptions>(strategy: SOpti
     Object.assign(strategy, defu(strategy, defaults));
 }
 
-export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOptions>>(nuxt: any, strategy: SOptions, useForms: boolean = false): void {
+export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOptions>>(nuxt: Nuxt, strategy: SOptions, useForms: boolean = false): void {
     // Get clientSecret, clientId, endpoints.token and audience
     const clientSecret = strategy.clientSecret;
     const clientID = strategy.clientId;
@@ -56,8 +57,8 @@ export function initializePasswordGrantFlow<SOptions extends StrategyOptions<Ref
 
     // Endpoint
     const endpoint = `/_auth/${strategy.name}/token`;
-    strategy.endpoints!.login.url = endpoint;
-    strategy.endpoints!.refresh.url = endpoint;
+    strategy.endpoints!.login!.url = endpoint;
+    strategy.endpoints!.refresh!.url = endpoint;
 
     addTemplate({
         filename: 'auth-passwordGrant.ts',
@@ -91,7 +92,7 @@ export function assignAbsoluteEndpoints<SOptions extends StrategyOptions<(LocalS
                     }
                     (endpoints[key] as HTTPRequest).url = url + endpoint.url;
                 } else {
-                    if (endpoint.startsWith(url)) {
+                    if (endpoint.startsWith(url as string)) {
                         continue;
                     }
                     endpoints[key] = url + endpoint;

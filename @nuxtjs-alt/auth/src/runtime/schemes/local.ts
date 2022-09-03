@@ -131,17 +131,17 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
 
         // Add client id to payload if defined
         if (this.options.clientId) {
-            endpoint.body.client_id = this.options.clientId;
+            endpoint.body!['client_id'] = this.options.clientId;
         }
 
         // Add grant type to payload if defined
         if (this.options.grantType) {
-            endpoint.body.grant_type = this.options.grantType;
+            endpoint.body!['grant_type'] = this.options.grantType;
         }
 
         // Add scope to payload if defined
         if (this.options.scope) {
-            endpoint.body.scope = this.options.scope;
+            endpoint.body!['scope'] = this.options.scope;
         }
 
         // Make login request

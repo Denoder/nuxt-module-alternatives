@@ -290,7 +290,7 @@ export class Auth {
         });
     }
 
-    async requestWith(endpoint: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse> {
+    async requestWith(endpoint?: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse> {
         const request = Object.assign({}, defaults, endpoint);
 
         if ((this.getStrategy() as TokenableScheme).token) {

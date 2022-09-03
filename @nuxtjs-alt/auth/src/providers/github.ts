@@ -1,10 +1,11 @@
 import type { ProviderOptions, ProviderPartialOptions } from "../types";
 import type { Oauth2SchemeOptions } from "../runtime";
+import type { Nuxt } from '@nuxt/schema'
 import { assignDefaults, addAuthorize } from "../utils/provider";
 
 export interface GithubProviderOptions extends ProviderOptions, Oauth2SchemeOptions {}
 
-export function github(nuxt: any, strategy: ProviderPartialOptions<GithubProviderOptions>): void {
+export function github(nuxt: Nuxt, strategy: ProviderPartialOptions<GithubProviderOptions>): void {
     const DEFAULTS: typeof strategy = {
         scheme: "oauth2",
         endpoints: {

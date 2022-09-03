@@ -1,10 +1,11 @@
 import type { ProviderPartialOptions, HTTPRequest, ProviderOptions } from "../types";
 import type { CookieSchemeOptions } from "../runtime";
+import type { Nuxt } from '@nuxt/schema'
 import { assignDefaults } from "../utils/provider";
 
 export interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOptions {}
 
-export function laravelSanctum(nuxt: any, strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>): void {
+export function laravelSanctum(nuxt: Nuxt, strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>): void {
     const endpointDefaults: Partial<HTTPRequest> = {
         credentials: 'include',
     };

@@ -1,4 +1,5 @@
 import type { ModuleOptions } from "./types";
+import type { ImportOptions } from "./resolve";
 import { name, version } from "../package.json";
 import { moduleDefaults } from "./options";
 import { resolveStrategies } from "./resolve";
@@ -33,11 +34,12 @@ export default defineNuxtModule({
 
         // Resolve strategies
         const { strategies, strategyScheme } = await resolveStrategies(nuxt, options);
+        // @ts-ignore
         delete options.strategies;
 
         // Resolve required imports
         const uniqueImports = new Set();
-        const schemeImports = Object.values(strategyScheme).filter((i: any) => {
+        const schemeImports = Object.values(strategyScheme).filter((i: ImportOptions) => {
             if (uniqueImports.has(i.as)) {
                 return false;
             }

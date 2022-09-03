@@ -1,5 +1,5 @@
 import type { RecursivePartial } from "../types";
-import type { RouteLocationNormalized } from "vue-router";
+import type { RouteLocationNormalized, RouteRecordNormalized, RouteComponent } from "vue-router";
 import { NuxtApp } from "#app/nuxt";
 
 export const isUnset = (o: any): boolean => typeof o === "undefined" || o === null;
@@ -32,22 +32,21 @@ export function encodeQuery(queryObject: {
 }
 
 export function routeOption(route: RouteLocationNormalized, key: string, value: string | boolean): boolean {
-    return route.matched.some((m: any) => m.meta[key] === value);
+    return route.matched.some((m: RouteRecordNormalized) => m.meta[key] === value);
 }
 
-export function getMatchedComponents(route: RouteLocationNormalized, matches: any[] = []): any[] {
-    return [].concat(
-        ...[],
-        ...route.matched.map(function (m: any, index: any) {
-            return Object.keys(m.components).map(function (key) {
+export function getMatchedComponents(route: RouteLocationNormalized, matches: unknown[] = []): RouteComponent {
+    return [
+        ...route.matched.map(function (m: RouteRecordNormalized, index: number) {
+            return Object.keys(m.components as RouteComponent).map(function (key) {
                 matches.push(index);
-                return m.components[key];
+                return m.components![key];
             });
         })
-    );
+    ]
 }
 
-export function normalizePath(path: string = "", ctx?: NuxtApp): string {
+export function normalizePath(path: string = "", ctx: NuxtApp): string {
     // Remove query string
     let result = path.split("?")[0];
 

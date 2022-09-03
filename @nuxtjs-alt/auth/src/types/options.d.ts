@@ -3,9 +3,8 @@ import type { Strategy } from "./strategy";
 export interface ModuleOptions {
     globalMiddleware?: boolean;
     enableMiddleware?: boolean;
-    plugins?: Array<string | { src: string; ssr: boolean }>;
-    strategies?: {
-        [strategy: string]: Strategy;
+    strategies: {
+        [strategy: string]: Strategy | false;
     };
     ignoreExceptions: boolean;
     resetOnError: boolean | ((...args: any[]) => boolean);

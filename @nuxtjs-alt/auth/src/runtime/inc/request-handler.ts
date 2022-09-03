@@ -27,7 +27,6 @@ export class RequestHandler {
         }
     }
 
-    // ---------------------------------------------------------------
     initializeRequestInterceptor(refreshEndpoint?: string | Request): void {
         this.interceptor = this.http.interceptors.request.use(
             async (config: FetchConfig) => {
@@ -111,6 +110,6 @@ export class RequestHandler {
     }
 
     #requestHasAuthorizationHeader(config: FetchConfig): boolean {
-        return !!config.headers[this.scheme.options.token!.name];
+        return !!config.headers![this.scheme.options.token!.name];
     }
 }

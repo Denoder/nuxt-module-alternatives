@@ -1,12 +1,13 @@
 import type { ProviderPartialOptions, ProviderOptions } from "../types";
 import type { RefreshSchemeOptions } from "../runtime";
+import type { Nuxt } from '@nuxt/schema'
 import { assignDefaults, assignAbsoluteEndpoints } from "../utils/provider";
 
 export interface LaravelJWTProviderOptions extends ProviderOptions, RefreshSchemeOptions {
     url: string;
 }
 
-export function laravelJWT(nuxt: any, strategy: ProviderPartialOptions<LaravelJWTProviderOptions>): void {
+export function laravelJWT(nuxt: Nuxt, strategy: ProviderPartialOptions<LaravelJWTProviderOptions>): void {
     const { url } = strategy;
 
     if (!url) {

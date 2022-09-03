@@ -352,7 +352,7 @@ export class Storage {
             return;
         }
 
-        const cookieStr = process.client ? document.cookie: this.ctx.ssrContext?.event.req.headers.cookie;
+        const cookieStr = process.client ? document.cookie : this.ctx.ssrContext?.event.req.headers.cookie;
 
         return parse(cookieStr || "") || {};
     }

@@ -1,9 +1,17 @@
-export const getAuthPlugin = (options: any): string => {
+import { ImportOptions } from "./resolve"
+import { ModuleOptions, Strategy } from "./types"
+
+export const getAuthPlugin = (options: {
+    options: ModuleOptions
+    schemeImports: ImportOptions[]
+    strategies: Strategy[]
+    strategyScheme: Record<string, ImportOptions>
+}): string => {
 return `
 import { Auth, ExpiredAuthSessionError } from '#auth/runtime'
 import { defineNuxtPlugin } from '#imports'
 // Active schemes
-${options.schemeImports.map((i: any) => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n')}
+${options.schemeImports.map((i: ImportOptions) => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n')}
 
 export default defineNuxtPlugin(async nuxtApp => {
     // Options
@@ -13,7 +21,7 @@ export default defineNuxtPlugin(async nuxtApp => {
     const auth = new Auth(nuxtApp, options)
 
     // Register strategies
-    ${options.strategies.map((strategy: any) => {
+    ${options.strategies.map((strategy: Strategy) => {
         const scheme = options.strategyScheme[strategy.name]
         const schemeOptions = JSON.stringify(strategy, null, 2)
         return `auth.registerStrategy('${strategy.name}', new ${scheme.as}(auth, ${schemeOptions}));`

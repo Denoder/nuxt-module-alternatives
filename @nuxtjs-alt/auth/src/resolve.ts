@@ -25,13 +25,13 @@ export async function resolveStrategies(nuxt: any, options: ModuleOptions): Prom
     const strategies: Strategy[] = [];
     const strategyScheme = {} as Record<string, ImportOptions>;
 
-    for (const name of Object.keys(options.strategies!)) {
-        if (!options.strategies![name] || options.strategies![name].enabled === false) {
+    for (const name of Object.keys(options.strategies)) {
+        if (!options.strategies[name] || (options.strategies as Strategy)[name].enabled === false) {
             continue;
         }
 
         // Clone strategy
-        const strategy: Strategy = Object.assign({}, options.strategies![name]);
+        const strategy = Object.assign({}, options.strategies[name]) as Strategy;
 
         // Default name
         if (!strategy.name) {
@@ -44,7 +44,7 @@ export async function resolveStrategies(nuxt: any, options: ModuleOptions): Prom
         }
 
         // Try to resolve provider
-        const provider: (...args: any[]) => any = resolveProvider(strategy.provider);
+        const provider: (...args: any) => any = resolveProvider(strategy.provider);
 
         delete strategy.provider;
 
@@ -62,7 +62,7 @@ export async function resolveStrategies(nuxt: any, options: ModuleOptions): Prom
             // Resolve and keep scheme needed for strategy
             const schemeImport = await resolveScheme(strategy.scheme);
             delete strategy.scheme;
-            strategyScheme[strategy.name] = schemeImport;
+            strategyScheme[strategy.name] = schemeImport as ImportOptions;
 
             // Add strategy to array
             strategies.push(strategy);
@@ -77,7 +77,7 @@ export async function resolveStrategies(nuxt: any, options: ModuleOptions): Prom
     };
 }
 
-export async function resolveScheme(scheme: string): Promise<ImportOptions | any> {
+export async function resolveScheme(scheme: string): Promise<ImportOptions | void> {
     if (typeof scheme !== "string") {
         return;
     }
