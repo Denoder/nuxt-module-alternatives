@@ -1,10 +1,13 @@
 import type { ModuleOptions } from "./types";
 import type { ImportOptions } from "./resolve";
-import { name, version } from "../package.json";
-import { moduleDefaults } from "./options";
-import { resolveStrategies } from "./resolve";
-import { getAuthPlugin } from "./plugin";
+import type { NuxtApp } from '@nuxt/schema';
+import type { Nuxt } from '@nuxt/schema';
 import { defineNuxtModule, addPluginTemplate, createResolver } from "@nuxt/kit";
+import { name, version } from "../package.json";
+import { resolveStrategies } from "./resolve";
+import { moduleDefaults } from "./options";
+import { getAuthPlugin } from "./plugin";
+import { defu } from 'defu';
 
 const CONFIG_KEY = "auth";
 
@@ -14,16 +17,13 @@ export default defineNuxtModule({
         version,
         configKey: CONFIG_KEY,
         compatibility: {
-            nuxt: "^3.0.0",
+            nuxt: "^3.0.0-rc.9",
         },
     },
     defaults: moduleDefaults,
-    async setup(moduleOptions: ModuleOptions, nuxt: any) {
+    async setup(moduleOptions: ModuleOptions, nuxt: Nuxt) {
         // Merge all option sources
-        const options: ModuleOptions = {
-            ...moduleDefaults,
-            ...moduleOptions,
-        }
+        const options = defu(moduleOptions, moduleDefaults)
 
         // Resolver
         const resolver = createResolver(import.meta.url);
@@ -58,7 +58,7 @@ export default defineNuxtModule({
         });
 
         if (options.enableMiddleware) {
-            nuxt.hook("app:resolve", (app: any) => {
+            nuxt.hook("app:resolve", (app: NuxtApp) => {
                 app.middleware.push({
                     name: "auth",
                     path: resolver.resolve("runtime/core/middleware"),

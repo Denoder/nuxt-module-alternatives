@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/vuetify",
-    "version": "0.0.3",
+    "version": "0.0.7",
     "description": "A module to handle vuetify 3",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -26,21 +26,16 @@
         "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground"
     },
     "dependencies": {
-        "@nuxt/kit": "npm:@nuxt/kit-edge@latest",
-        "@vuetify/vite-plugin": "^1.0.0-alpha.10",
-        "sass": "^1.51.0",
-        "sass-loader": "^12.6.0",
-        "unplugin-vue-components": "latest",
-        "vuetify": "^3.0.0-beta.1",
-        "vuetify-loader": "^2.0.0-alpha.9"
+        "@nuxt/kit": "^3.0.0-rc.9",
+        "sass": "^1.54.8",
+        "sass-loader": "^13.0.2",
+        "unplugin-vue-components": "^0.22.4",
+        "vuetify": "^3.0.0-beta.10",
+        "vite-plugin-vuetify": "^1.0.0-alpha.15"
     },
     "devDependencies": {
-        "@nuxt/module-builder": "latest",
-        "eslint": "latest",
-        "nuxt": "^3.0.0-rc.1"
-    },
-    "peerDependencies": {
-        "vue": "*"
+        "@nuxt/module-builder": "^0.1.7",
+        "nuxt": "^3.0.0-rc.9"
     },
     "repository": {
         "type": "git",

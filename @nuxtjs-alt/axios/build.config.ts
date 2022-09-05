@@ -1,14 +1,13 @@
+import type { NuxtModule } from '@nuxt/schema'
 import { defineBuildConfig } from "unbuild";
 import { existsSync, promises as fsp } from 'fs'
 import { pathToFileURL } from 'url'
 import { resolve } from 'path'
-import type { NuxtModule } from '@nuxt/schema'
 
 export default defineBuildConfig({
     declaration: true,
     entries: [
         'src/module',
-        'src/types',
         { input: 'src/runtime/', outDir: 'dist/runtime', ext: 'mjs' },
     ],
     rollup: {
@@ -16,21 +15,20 @@ export default defineBuildConfig({
         cjsBridge: true,
     },
     externals: [
-        "#app",
-        "#imports",
-        "axios",
-        // Defaults
-        "@nuxt/schema",
-        "@nuxt/kit",
-        "nuxt",
-        "vue",
+        '@nuxt/schema',
+        '@nuxt/schema-edge',
+        '@nuxt/kit',
+        '@nuxt/kit-edge',
+        'nuxt',
+        'nuxt-edge',
+        'nuxt3',
+        'vue'
     ],
     hooks: {
         async 'rollup:done' (ctx) {
-
             // Generate CommonJS stup
             await writeCJSStub(ctx.options.outDir)
-    
+
             // Load module meta
             const moduleEntryPath = resolve(ctx.options.outDir, 'module.mjs')
             const moduleFn: NuxtModule<any> = await import(
@@ -43,7 +41,7 @@ export default defineBuildConfig({
             if (!moduleFn) {
                 return
             }
-            const moduleMeta = await moduleFn.getMeta()
+            const moduleMeta = await moduleFn.getMeta!()
     
             // Enhance meta using package.json
             if (ctx.pkg) {

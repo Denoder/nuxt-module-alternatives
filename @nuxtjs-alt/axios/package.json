@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/axios",
-    "version": "1.0.17",
+    "version": "1.0.19",
     "description": "An alternative module to @nuxtjs/axios",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -15,11 +15,16 @@
     ],
     "license": "MIT",
     "type": "module",
-    "main": "./dist/module.mjs",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "import": "./dist/module.mjs",
+            "require": "./dist/module.cjs"
+        }
+    },
+    "main": "./dist/module.cjs",
     "module": "./dist/module.mjs",
-    "commonjs": "./dist/module.cjs",
-    "types": "./dist/types.d.ts",
-    "typings": "./dist/types.d.ts",
+    "types": "./dist/module.d.ts",
     "files": [
         "dist"
     ],
@@ -27,18 +32,20 @@
         "dev": "nuxi dev playground",
         "dev:build": "nuxi build playground",
         "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
-        "prepack": "npx unbuild"
+        "prepack": "unbuild"
     },
     "dependencies": {
-        "@nuxt/kit": "^3.0.0-rc.8",
-        "axios": "latest",
-        "axios-retry": "latest"
+        "@nuxt/kit": "^3.0.0-rc.9",
+        "axios": "^0.27.2",
+        "axios-retry": "^3.3.1",
+        "defu": "^6.1.0"
     },
     "devDependencies": {
-        "@nuxt/module-builder": "latest",
-        "@types/node": "latest",
-        "eslint": "latest",
-        "nuxt": "^3.0.0-rc.8"
+        "@nuxt/module-builder": "^0.1.7",
+        "@nuxt/schema": "3.0.0-rc.9",
+        "@types/node": "^18.7.15",
+        "nuxt": "^3.0.0-rc.9",
+        "unbuild": "^0.8.10"
     },
     "repository": {
         "type": "git",

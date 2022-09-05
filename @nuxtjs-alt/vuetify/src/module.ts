@@ -15,7 +15,7 @@ export default defineNuxtModule({
         version,
         configKey: 'vuetify',
         compatibility: {
-            nuxt: '^3.0.0'
+            nuxt: '^3.0.0-rc.9'
         }
     },
     defaults: {
@@ -29,6 +29,12 @@ export default defineNuxtModule({
             ...moduleOptions,
             ...nuxt.options['vuetify']
         }
+
+        // Add Vuetify styles
+        nuxt.options.css.push('vuetify/lib/styles/main.sass')
+
+        // Transpile Vuetify
+        nuxt.options.build.transpile.push('vuetify')
 
         // Custom variables
         if (options.customVariables && options.customVariables.length > 0) {

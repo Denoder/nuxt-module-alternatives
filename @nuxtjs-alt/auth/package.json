@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/auth",
-    "version": "2.0.4",
+    "version": "2.0.7",
     "description": "An alternative module to @nuxtjs/auth",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -33,23 +33,21 @@
         "prepack": "npx unbuild"
     },
     "dependencies": {
-        "@nuxt/kit": "^3.0.0-rc.8",
-        "@nuxtjs-alt/http": "^1.2.6",
+        "@nuxt/kit": "^3.0.0-rc.9",
+        "@nuxtjs-alt/http": "^1.2.14",
         "@pinia/nuxt": "^0.4.1",
-        "body-parser": "latest",
-        "cookie-es": "latest",
-        "defu": "^6.0.0",
-        "fs-extra": "latest",
-        "jwt-decode": "latest",
-        "ohash": "latest",
-        "pathe": "latest",
-        "requrl": "latest"
+        "body-parser": "1.20.0",
+        "cookie-es": "^0.5.0",
+        "defu": "^6.1.0",
+        "jwt-decode": "^3.1.0",
+        "ohash": "^0.1.5",
+        "pathe": "^0.3.5",
+        "requrl": "^3.0.2"
     },
     "devDependencies": {
-        "@nuxt/module-builder": "latest",
-        "@types/fs-extra": "latest",
-        "eslint": "latest",
-        "nuxt": "^3.0.0-rc.8"
+        "@nuxt/module-builder": "^0.1.7",
+        "@nuxt/schema": "3.0.0-rc.9",
+        "nuxt": "^3.0.0-rc.9"
     },
     "repository": {
         "type": "git",

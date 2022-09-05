@@ -9,7 +9,7 @@ export default defineBuildConfig({
     entries: [
         'src/module',
         { input: 'src/runtime/', outDir: 'dist/runtime', ext: 'mjs' },
-        { input: 'src/types/', outDir: 'dist/types', ext: 'd.ts' },
+        { input: 'src/types/', outDir: 'dist/types', ext: 'ts' },
         { input: 'src/utils/', outDir: 'dist/utils', ext: 'mjs' },
         { input: 'src/providers/', outDir: 'dist/providers', ext: 'mjs' },
     ],
@@ -18,20 +18,14 @@ export default defineBuildConfig({
         cjsBridge: true,
     },
     externals: [
-        "#app",
-        "#imports",
-        "@refactorjs/ofetch",
-        "ohmyfetch",
-        "vue-router",
-        "node:fs",
-        "fs-extra",
-        "follow-redirects",
-        "@pinia/nuxt",
-        "pinia",
-        // Defaults
-        "@nuxt/schema",
-        "@nuxt/kit",
-        "nuxt",
+        '@nuxt/schema',
+        '@nuxt/schema-edge',
+        '@nuxt/kit',
+        '@nuxt/kit-edge',
+        'nuxt',
+        'nuxt-edge',
+        'nuxt3',
+        'vue'
     ],
     hooks: {
         async 'rollup:done' (ctx) {
@@ -51,7 +45,7 @@ export default defineBuildConfig({
             if (!moduleFn) {
                 return
             }
-            const moduleMeta = await moduleFn.getMeta()
+            const moduleMeta = await moduleFn.getMeta!()
     
             // Enhance meta using package.json
             if (ctx.pkg) {

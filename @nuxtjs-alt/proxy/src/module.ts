@@ -1,9 +1,9 @@
 import type { ProxyServer, Server } from '@refactorjs/http-proxy'
 import type { IncomingMessage, ServerResponse } from 'http'
-import { name, version } from '../package.json'
 import { addServerHandler, addTemplate, defineNuxtModule } from '@nuxt/kit'
-import { defu } from 'defu'
+import { name, version } from '../package.json'
 import { join } from 'pathe'
+import { defu } from 'defu'
 
 const CONFIG_KEY = 'proxy'
 
@@ -38,7 +38,7 @@ export default defineNuxtModule<ModuleOptions>({
         version,
         configKey: CONFIG_KEY,
         compatibility: {
-            nuxt: '^3.0.0'
+            nuxt: '^3.0.0-rc.9'
         }
     },
     defaults: {},

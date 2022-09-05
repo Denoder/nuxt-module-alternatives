@@ -1,4 +1,7 @@
 {
   "private": true,
-  "name": "@nuxtjs-alt/proxy"
+  "name": "@nuxtjs-alt/proxy",
+  "devDependencies": {
+    "@types/node": "^18.7.14"
+  }
 }

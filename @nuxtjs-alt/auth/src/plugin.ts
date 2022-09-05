@@ -22,7 +22,7 @@ export default defineNuxtPlugin(async nuxtApp => {
 
     // Register strategies
     ${options.strategies.map((strategy: Strategy) => {
-        const scheme = options.strategyScheme[strategy.name]
+        const scheme = options.strategyScheme[strategy.name!]
         const schemeOptions = JSON.stringify(strategy, null, 2)
         return `auth.registerStrategy('${strategy.name}', new ${scheme.as}(auth, ${schemeOptions}));`
     }).join(";\n")}

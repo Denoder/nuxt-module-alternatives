@@ -194,15 +194,15 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         }
     }
 
-    protected isServerCookie(): boolean {
+    isServerCookie(): boolean {
         return this.options.cookie.server && process.server;
     }
 
-    protected isClientCookie(): boolean {
+    isClientCookie(): boolean {
         return !this.options.cookie.server && process.client;
     }
 
-    protected initializeRequestInterceptor(): void {
+    initializeRequestInterceptor(): void {
         this.requestHandler.initializeRequestInterceptor();
     }
 }

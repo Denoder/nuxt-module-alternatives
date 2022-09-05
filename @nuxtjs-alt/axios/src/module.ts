@@ -1,8 +1,12 @@
-import { name, version } from '../package.json'
+import type { ModuleOptions } from './types'
+import type { Nuxt } from '@nuxt/schema'
 import { defineNuxtModule, addPluginTemplate, createResolver } from '@nuxt/kit'
-import { ModuleOptions, NuxtAxiosInstance } from './options'
+import { name, version } from '../package.json'
+import { defu } from 'defu'
 
 const CONFIG_KEY = 'axios'
+
+export * from './types'
 
 export default defineNuxtModule({
     meta: {
@@ -10,37 +14,20 @@ export default defineNuxtModule({
         version,
         configKey: CONFIG_KEY,
         compatibility: {
-            nuxt: '^3.0.0'
+            nuxt: '^3.0.0-rc.9'
         },
     },
     defaults: {} as ModuleOptions,
-    setup(_moduleOptions, nuxt) {
-        // Combine options
-
-        const moduleOptions: ModuleOptions = {
-            ..._moduleOptions,
-            ...(nuxt.options.runtimeConfig.public && nuxt.options.runtimeConfig.public[CONFIG_KEY])
-        }
+    setup(opts: ModuleOptions, nuxt: Nuxt) {
+        // Combine options with runtime config
+        const moduleOptions: ModuleOptions = defu(nuxt.options.runtimeConfig?.public[CONFIG_KEY], opts)
 
         // Default port
-        const defaultPort =
-            process.env.API_PORT ||
-            moduleOptions.port ||
-            process.env.PORT ||
-            process.env.npm_package_config_nuxt_port ||
-            (nuxt.options.server && nuxt.options.server.port) ||
-            3000
+        const defaultPort = process.env.API_PORT || moduleOptions.port || process.env.PORT || process.env.npm_package_config_nuxt_port || 3000
 
         // Default host
-        let defaultHost =
-            process.env.API_HOST ||
-            moduleOptions.host ||
-            process.env.HOST ||
-            process.env.npm_package_config_nuxt_host ||
-            (nuxt.options.server && nuxt.options.server.host) ||
-            'localhost'
+        let defaultHost = process.env.API_HOST || moduleOptions.host || process.env.HOST || process.env.npm_package_config_nuxt_host || 'localhost'
 
-        /* istanbul ignore if */
         if (defaultHost === '0.0.0.0') {
             defaultHost = 'localhost'
         }
@@ -48,34 +35,19 @@ export default defineNuxtModule({
         // Default prefix
         const prefix = process.env.API_PREFIX || moduleOptions.prefix || '/'
 
-        // HTTPS
-        const https = Boolean(nuxt.options.server && nuxt.options.server.https)
-
-        // Headers
-        const headers = {
-            common: {
-                accept: 'application/json, text/plain, */*'
-            },
-            delete: {},
-            get: {},
-            head: {},
-            post: {},
-            put: {},
-            patch: {}
-        }
-
         // Support baseUrl alternative
         if (moduleOptions.baseUrl) {
             moduleOptions.baseURL = moduleOptions.baseUrl
             delete moduleOptions.baseUrl
         }
+
         if (moduleOptions.browserBaseUrl) {
             moduleOptions.browserBaseURL = moduleOptions.browserBaseUrl
             delete moduleOptions.browserBaseUrl
         }
 
         // Apply defaults
-        const options = {
+        const options: ModuleOptions = defu(moduleOptions, {
             baseURL: `http://${defaultHost}:${defaultPort}${prefix}`,
             browserBaseURL: undefined,
             credentials: false,
@@ -98,24 +70,30 @@ export default defineNuxtModule({
             ],
             proxy: false,
             retry: false,
-            https,
-            headers,
-            ...moduleOptions
-        }
+            https: false,
+            headers: {
+                common: {
+                    accept: 'application/json, text/plain, */*'
+                },
+                delete: {},
+                get: {},
+                head: {},
+                post: {},
+                put: {},
+                patch: {}
+            },
+        })
 
-        /* istanbul ignore if */
         if (process.env.API_URL) {
             options.baseURL = process.env.API_URL
         }
 
-        /* istanbul ignore if */
         if (process.env.API_URL_BROWSER) {
             options.browserBaseURL = process.env.API_URL_BROWSER
         }
 
-        // Default browserBaseURL
         if (typeof options.browserBaseURL === 'undefined') {
-            options.browserBaseURL = options.proxy ? prefix : options.baseURL
+            options.browserBaseURL = options.baseURL
         }
 
         // Normalize options
@@ -133,30 +111,19 @@ export default defineNuxtModule({
         // globalName
         options.globalName = nuxt.options.globalName || 'nuxt'
 
+        // Set _AXIOS_BASE_URL_ for dynamic SSR baseURL
+        process.env._AXIOS_BASE_URL_ = options.baseURL
+
         // resolver
         const resolver = createResolver(import.meta.url)
 
         // Register plugin
         addPluginTemplate({
-            /* @ts-ignore */
             src: resolver.resolve('runtime/templates/axios.plugin.mjs'),
-            filename: 'axios.plugin.mjs',
-            options
+            options: options
         })
-
-        // Set _AXIOS_BASE_URL_ for dynamic SSR baseURL
-        process.env._AXIOS_BASE_URL_ = options.baseURL
 
         console.debug(`baseURL: ${options.baseURL}`)
         console.debug(`browserBaseURL: ${options.browserBaseURL}`)
     }
 })
-
-declare module "#app" {
-    export interface NuxtApp {
-        $axios: NuxtAxiosInstance;
-    }
-    export interface NuxtOptions {
-        axios: ModuleOptions;
-    }
-}

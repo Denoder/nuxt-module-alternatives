@@ -7,7 +7,7 @@ export interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSc
 
 export function laravelSanctum(nuxt: Nuxt, strategy: ProviderPartialOptions<LaravelSanctumProviderOptions>): void {
     const endpointDefaults: Partial<HTTPRequest> = {
-        credentials: 'include',
+        credentials: 'include'
     };
 
     const DEFAULTS: typeof strategy = {
@@ -15,7 +15,7 @@ export function laravelSanctum(nuxt: Nuxt, strategy: ProviderPartialOptions<Lara
         name: "laravelSanctum",
         cookie: {
             name: "XSRF-TOKEN",
-            server: true,
+            server: nuxt.options.ssr
         },
         endpoints: {
             csrf: {
@@ -37,8 +37,8 @@ export function laravelSanctum(nuxt: Nuxt, strategy: ProviderPartialOptions<Lara
         },
         user: {
             property: {
-                client: false,
                 server: false,
+                client: false
             },
             autoFetch: true,
         },

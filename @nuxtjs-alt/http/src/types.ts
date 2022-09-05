@@ -1,5 +1,3 @@
-import type { FetchInstance } from '@refactorjs/ofetch'
-
 export interface ModuleOptions {
     baseURL: string;
     baseUrl?: string;
@@ -11,10 +9,7 @@ export interface ModuleOptions {
     proxyHeadersIgnore?: string[];
     serverTimeout?: number,
     clientTimeout?: number,
-    proxy?: boolean;
     port?: string | number;
-    retry?: boolean;
-    undici?: boolean;
     useConflict?: boolean;
     https?: boolean;
     headers?: any;

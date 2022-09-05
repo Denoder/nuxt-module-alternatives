@@ -2,7 +2,7 @@ import { defineNuxtConfig } from "nuxt";
 import axiosModule from '..'
 
 export default defineNuxtConfig({
-    buildModules: [
+    modules: [
         axiosModule
     ],
     vite: {

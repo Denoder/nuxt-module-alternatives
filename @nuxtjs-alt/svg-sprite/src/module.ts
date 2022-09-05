@@ -23,7 +23,10 @@ export default defineNuxtModule<ModuleOptions>({
     meta: {
         name,
         version,
-        configKey: 'svgSprite'
+        configKey: 'svgSprite',
+        compatibility: {
+            nuxt: '^3.0.0-rc.9'
+        }
     },
     defaults: {
         input: '~/assets/sprite/svg',

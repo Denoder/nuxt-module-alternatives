@@ -273,7 +273,6 @@ export class Auth {
         const method = request.method ? request.method.toLowerCase() : 'get'
 
         if (request.baseURL === "") {
-            /* @ts-ignore */
             request.baseURL = requrl(process.server ? this.ctx.ssrContext?.event.req : "");
         }
 
@@ -281,7 +280,7 @@ export class Auth {
             return Promise.reject(new Error("[AUTH] add the @nuxtjs-alt/http module to nuxt.config file"));
         }
 
-        return handler['$' + method](request.url, request).catch((error: Error) => {
+        return handler['$' + method](request).catch((error: Error) => {
             // Call all error handlers
             this.callOnError(error, { method: "request" });
 

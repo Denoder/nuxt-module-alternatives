@@ -1,10 +1,6 @@
-import { defineNuxtPlugin } from '#imports'
 import { createInstance } from '@refactorjs/ofetch'
-'<% if (options.undici) { %>'
-import { $fetch as http } from 'ohmyfetch/undici'
-'<% } else { %>'
+import { defineNuxtPlugin } from '#imports'
 import { $fetch as http } from 'ohmyfetch'
-'<% } %>'
 
 const httpInstance = (options) => {
     // Create new Fetch instance
@@ -52,5 +48,10 @@ export default defineNuxtPlugin(ctx => {
     const providerName = useConflict ? 'fetch' : 'http'
 
     globalThis['$' + providerName] = http
-    ctx.provide(providerName, http);
+
+    return {
+        provide: {
+            [providerName]: http
+        }
+    }
 })

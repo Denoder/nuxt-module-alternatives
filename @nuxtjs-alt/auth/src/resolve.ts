@@ -1,9 +1,9 @@
-import { existsSync } from "node:fs";
-import { hash } from 'ohash'
-import * as AUTH_PROVIDERS from "./providers";
-import { ProviderAliases } from "./providers";
 import type { Strategy, ModuleOptions } from "./types";
 import { resolvePath, requireModule } from "@nuxt/kit";
+import { ProviderAliases } from "./providers";
+import * as AUTH_PROVIDERS from "./providers";
+import { existsSync } from "fs";
+import { hash } from 'ohash'
 
 const BuiltinSchemes = {
     local: "LocalScheme",

@@ -3,7 +3,7 @@ import { routeOption, getMatchedComponents, normalizePath } from "../../utils";
 import { useNuxtApp, defineNuxtRouteMiddleware } from "#imports";
 import { NuxtApp } from '#app/nuxt'
 
-export default defineNuxtRouteMiddleware((to: RouteLocationNormalized, from: RouteLocationNormalized) => {
+export default defineNuxtRouteMiddleware(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
     // Disable middleware if options: { auth: false } is set on the route
     if (routeOption(to, "auth", false)) {
         return;
@@ -42,7 +42,7 @@ export default defineNuxtRouteMiddleware((to: RouteLocationNormalized, from: Rou
             if (isRefreshable) {
                 // Refresh token is available. Attempt refresh.
                 try {
-                    ctx.$auth.refreshTokens();
+                    await ctx.$auth.refreshTokens();
                 } catch (error) {
                     // Reset when refresh was not successfull
                     ctx.$auth.reset();

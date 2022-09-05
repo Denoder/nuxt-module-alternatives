@@ -1,8 +1,7 @@
-import * as NuxtSchema from '@nuxt/schema';
-import { AxiosStatic, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import { IAxiosRetryConfig } from 'axios-retry';
+import type { AxiosStatic, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import type { IAxiosRetryConfig } from 'axios-retry';
 
-interface NuxtAxiosInstance extends AxiosStatic {
+export interface NuxtAxiosInstance extends AxiosStatic {
     $request<T = any>(config: AxiosRequestConfig): Promise<T>;
     $get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
     $delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
@@ -22,10 +21,10 @@ interface NuxtAxiosInstance extends AxiosStatic {
     create(options?: AxiosRequestConfig): NuxtAxiosInstance;
 }
 
-interface ModuleOptions {
-    baseURL?: string;
+export interface ModuleOptions {
+    baseURL: string;
     baseUrl?: string;
-    browserBaseURL?: string;
+    browserBaseURL: string;
     browserBaseUrl?: string;
     globalName?: string;
     credentials?: boolean;
@@ -57,23 +56,10 @@ declare module "axios" {
 }
 
 declare module '@nuxt/schema' {
-    interface NuxtConfig {
+    export interface NuxtConfig {
         ['axios']?: Partial<ModuleOptions>;
     }
-    interface NuxtOptions {
+    export interface NuxtOptions {
         ['axios']?: ModuleOptions;
     }
 }
-
-declare const module: NuxtSchema.NuxtModule<ModuleOptions>;
-
-declare module "#app" {
-    interface NuxtApp {
-        $axios: NuxtAxiosInstance;
-    }
-    interface NuxtOptions {
-        axios: ModuleOptions;
-    }
-}
-
-export { module as default, ModuleOptions, NuxtAxiosInstance };

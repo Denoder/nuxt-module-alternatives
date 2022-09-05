@@ -10,6 +10,6 @@ export class BaseScheme<OptionsT extends SchemeOptions> {
     }
 
     get name(): string {
-        return this.options.name;
+        return this.options.name as string;
     }
 }

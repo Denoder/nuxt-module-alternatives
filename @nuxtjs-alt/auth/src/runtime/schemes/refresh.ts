@@ -163,8 +163,7 @@ export class RefreshScheme<OptionsT extends RefreshSchemeOptions = RefreshScheme
 
         // Make refresh request
         try {
-            const response = await this.$auth
-                .request(endpoint, this.options.endpoints.refresh);
+            const response = await this.$auth.request(endpoint, this.options.endpoints.refresh);
             // Update tokens
             this.updateTokens(response, { isRefreshing: true });
             return await response;

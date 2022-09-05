@@ -1,7 +1,8 @@
 import type { ModuleOptions } from './types'
-import type { FetchInstance } from '@refactorjs/ofetch'
-import { defineNuxtModule, addPluginTemplate, createResolver, addAutoImport } from '@nuxt/kit'
+import type { Nuxt } from '@nuxt/schema'
+import { defineNuxtModule, addPluginTemplate, createResolver, addImports } from '@nuxt/kit'
 import { name, version } from '../package.json'
+import { defu } from 'defu'
 
 const CONFIG_KEY = 'http'
 
@@ -13,24 +14,20 @@ export default defineNuxtModule({
         version,
         configKey: CONFIG_KEY,
         compatibility: {
-            nuxt: '^3.0.0'
+            nuxt: '^3.0.0-rc.9'
         },
     },
     defaults: {} as ModuleOptions,
-    setup(opts, nuxt) {
-        // Combine options
-        const moduleOptions = {
-            ...opts,
-            ...(nuxt.options.runtimeConfig.public && nuxt.options.runtimeConfig.public[CONFIG_KEY])
-        }
+    setup(opts: ModuleOptions, nuxt: Nuxt) {
+        // Combine options with runtime config
+        const moduleOptions: ModuleOptions = defu(nuxt.options.runtimeConfig?.public[CONFIG_KEY], opts)
 
         // Default port
-        const defaultPort = process.env.API_PORT || moduleOptions.port || process.env.PORT || process.env.npm_package_config_nuxt_port || (nuxt.options.server && nuxt.options.server.port) || 3000
+        const defaultPort = process.env.API_PORT || moduleOptions.port || process.env.PORT || process.env.npm_package_config_nuxt_port || 3000
 
         // Default host
-        let defaultHost = process.env.API_HOST || moduleOptions.host || process.env.HOST || process.env.npm_package_config_nuxt_host || (nuxt.options.server && nuxt.options.server.host) || 'localhost'
+        let defaultHost = process.env.API_HOST || moduleOptions.host || process.env.HOST || process.env.npm_package_config_nuxt_host || 'localhost'
 
-        /* istanbul ignore if */
         if (defaultHost === '0.0.0.0') {
             defaultHost = 'localhost'
         }
@@ -38,26 +35,25 @@ export default defineNuxtModule({
         // Default prefix
         const prefix = process.env.API_PREFIX || moduleOptions.prefix || '/'
 
-        // HTTPS
-        const https = Boolean(nuxt.options.server && nuxt.options.server.https)
-
         // Support baseUrl alternative
         if (moduleOptions.baseUrl) {
             moduleOptions.baseURL = moduleOptions.baseUrl
             delete moduleOptions.baseUrl
         }
+
         if (moduleOptions.browserBaseUrl) {
             moduleOptions.browserBaseURL = moduleOptions.browserBaseUrl
             delete moduleOptions.browserBaseUrl
         }
 
         // Apply defaults
-        const options: ModuleOptions = {
+        const options: ModuleOptions = defu(moduleOptions, {
             baseURL: `http://${defaultHost}:${defaultPort}${prefix}`,
             browserBaseURL: undefined,
             proxyHeaders: true,
             proxyHeadersIgnore: [
                 'accept',
+                'connection',
                 'cf-connecting-ip',
                 'cf-ray',
                 'content-length',
@@ -72,15 +68,11 @@ export default defineNuxtModule({
             ],
             serverTimeout: 10000,
             clientTimeout: 25000,
-            proxy: false,
-            retry: false,
-            undici: false,
             useConflict: false,
-            https,
+            https: false,
             headers: {},
-            credentials: 'omit',
-            ...moduleOptions
-        }
+            credentials: 'omit'
+        })
 
         if (process.env.API_URL) {
             options.baseURL = process.env.API_URL
@@ -91,7 +83,7 @@ export default defineNuxtModule({
         }
 
         if (typeof options.browserBaseURL === 'undefined') {
-            options.browserBaseURL = options.proxy ? prefix : options.baseURL
+            options.browserBaseURL = options.baseURL
         }
 
         // Convert http:// to https:// if https option is on
@@ -107,7 +99,6 @@ export default defineNuxtModule({
         // Register plugin
         addPluginTemplate({
             src: resolver.resolve('runtime/templates/http.plugin.mjs'),
-            filename: 'http.plugin.mjs',
             options: options
         })
 
@@ -118,20 +109,11 @@ export default defineNuxtModule({
         console.debug(`browserBaseURL: ${options.browserBaseURL}`)
 
         // Add auto imports
-        const composables = resolver.resolve('./runtime/composables')
+        const composables = resolver.resolve('runtime/composables')
 
-        addAutoImport([
+        addImports([
             { from: composables, name: options.useConflict ? 'useFetch' : 'useHttp' },
             { from: composables, name: options.useConflict ? 'useLazyFetch' : 'useLazyHttp' }
         ])
     }
 })
-
-declare module "#app" {
-    export interface NuxtApp {
-        $http: FetchInstance;
-    }
-    export interface NuxtOptions {
-        http: ModuleOptions;
-    }
-}

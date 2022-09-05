@@ -1,18 +1,9 @@
 import { defineNuxtConfig } from "nuxt";
+import MyModule from '..'
 
 export default defineNuxtConfig({
-    buildModules: [
-        "@nuxtjs-alt/vuetify"
+    modules: [
+        MyModule
     ],
-    vuetify: {
-
-    },
-    vite: {
-        server: {
-            hmr: {
-                clientPort: 443,
-                path: "hmr/",
-            },
-        },
-    },
+    vuetify: {},
 });

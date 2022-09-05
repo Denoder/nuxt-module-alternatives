@@ -4,7 +4,7 @@ import type { Token, IdToken, RefreshToken, RefreshController, RequestHandler,} 
 import type { PartialExcept } from "./utils";
 
 export interface UserOptions {
-    property?: string | false;
+    property: string | false;
     autoFetch: boolean;
 }
 
@@ -23,7 +23,7 @@ export interface EndpointsOption {
 // Scheme
 
 export interface SchemeOptions {
-    name: string;
+    name?: string;
 }
 
 export type SchemePartialOptions<Options extends SchemeOptions> = PartialExcept<Options, keyof SchemeOptions>;
