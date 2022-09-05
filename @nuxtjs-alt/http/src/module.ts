@@ -24,20 +24,6 @@ export default defineNuxtModule({
             ...(nuxt.options.runtimeConfig.public && nuxt.options.runtimeConfig.public[CONFIG_KEY])
         }
 
-        // Default port
-        const defaultPort = process.env.API_PORT || moduleOptions.port || process.env.PORT || process.env.npm_package_config_nuxt_port || (nuxt.options.server && nuxt.options.server.port) || 3000
-
-        // Default host
-        let defaultHost = process.env.API_HOST || moduleOptions.host || process.env.HOST || process.env.npm_package_config_nuxt_host || (nuxt.options.server && nuxt.options.server.host) || 'localhost'
-
-        /* istanbul ignore if */
-        if (defaultHost === '0.0.0.0') {
-            defaultHost = 'localhost'
-        }
-
-        // Default prefix
-        const prefix = process.env.API_PREFIX || moduleOptions.prefix || '/'
-
         // HTTPS
         const https = Boolean(nuxt.options.server && nuxt.options.server.https)
 
@@ -53,7 +39,7 @@ export default defineNuxtModule({
 
         // Apply defaults
         const options: ModuleOptions = {
-            baseURL: `http://${defaultHost}:${defaultPort}${prefix}`,
+            baseURL: nuxt.options.app.baseURL,
             browserBaseURL: undefined,
             proxyHeaders: true,
             proxyHeadersIgnore: [
