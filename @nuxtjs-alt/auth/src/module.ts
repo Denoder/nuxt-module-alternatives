@@ -22,6 +22,7 @@ export default defineNuxtModule({
     },
     defaults: moduleDefaults,
     async setup(moduleOptions: ModuleOptions, nuxt: Nuxt) {
+        nuxt.options.plugins
         // Merge all option sources
         const options = defu(moduleOptions, moduleDefaults)
 
@@ -39,7 +40,7 @@ export default defineNuxtModule({
 
         // Resolve required imports
         const uniqueImports = new Set();
-        const schemeImports = Object.values(strategyScheme).filter((i: ImportOptions) => {
+        const schemeImports = Object.values(strategyScheme).filter((i) => {
             if (uniqueImports.has(i.as)) {
                 return false;
             }
@@ -65,6 +66,12 @@ export default defineNuxtModule({
                     global: options.globalMiddleware,
                 });
             });
+        }
+
+        // Extend auth with plugins
+        if (options.plugins) {
+            options.plugins.forEach((p) => nuxt.options.plugins.push(p))
+            delete options.plugins
         }
     }
 });
