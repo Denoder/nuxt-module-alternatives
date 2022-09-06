@@ -1,4 +1,5 @@
 import type { Strategy, ModuleOptions } from "./types";
+import type { Nuxt, NuxtModule } from '@nuxt/schema'
 import { resolvePath, requireModule } from "@nuxt/kit";
 import { ProviderAliases } from "./providers";
 import * as AUTH_PROVIDERS from "./providers";
@@ -21,17 +22,17 @@ export interface ImportOptions {
     from: string;
 }
 
-export async function resolveStrategies(nuxt: any, options: ModuleOptions): Promise<{ strategies: Strategy[]; strategyScheme: Record<string, ImportOptions>; }> {
+export async function resolveStrategies(nuxt: Nuxt, options: ModuleOptions): Promise<{ strategies: Strategy[]; strategyScheme: Record<string, ImportOptions>; }> {
     const strategies: Strategy[] = [];
     const strategyScheme = {} as Record<string, ImportOptions>;
 
-    for (const name of Object.keys(options.strategies)) {
-        if (!options.strategies[name] || (options.strategies as Strategy)[name].enabled === false) {
+    for (const name of Object.keys(options.strategies!)) {
+        if (!options.strategies![name] || (options.strategies as Strategy)[name].enabled === false) {
             continue;
         }
 
         // Clone strategy
-        const strategy = Object.assign({}, options.strategies[name]) as Strategy;
+        const strategy = Object.assign({}, options.strategies![name]) as Strategy;
 
         // Default name
         if (!strategy.name) {
@@ -48,8 +49,7 @@ export async function resolveStrategies(nuxt: any, options: ModuleOptions): Prom
 
         delete strategy.provider;
 
-        // @ts-ignore
-        if (typeof provider === "function" && !provider.getOptions) {
+        if (typeof provider === "function" && !(provider as NuxtModule).getOptions) {
             provider(nuxt, strategy);
         }
 
@@ -111,7 +111,7 @@ export function resolveProvider(provider: string | ((...args: any[]) => any)) {
         return;
     }
 
-    provider = (ProviderAliases[provider as keyof typeof ProviderAliases] || provider) as string;
+    provider = (ProviderAliases[provider as keyof typeof ProviderAliases] || provider);
 
     if (AUTH_PROVIDERS[provider as keyof typeof AUTH_PROVIDERS]) {
         return AUTH_PROVIDERS[provider as keyof typeof AUTH_PROVIDERS];

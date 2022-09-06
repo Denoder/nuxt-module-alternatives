@@ -114,7 +114,6 @@ export class Auth {
     }
 
     registerStrategy(name: string, strategy: Scheme): void {
-        // @ts-ignore
         this.strategies[name] = strategy;
     }
 
@@ -273,7 +272,7 @@ export class Auth {
         const method = request.method ? request.method.toLowerCase() : 'get'
 
         if (request.baseURL === "") {
-            request.baseURL = requrl(process.server ? this.ctx.ssrContext?.event.req : "");
+            request.baseURL = requrl(process.server ? this.ctx.ssrContext?.event.req : undefined);
         }
 
         if (!handler) {

@@ -1,8 +1,8 @@
+import type { NuxtModule } from '@nuxt/schema'
 import { defineBuildConfig } from "unbuild";
 import { existsSync, promises as fsp } from 'fs'
 import { pathToFileURL } from 'url'
 import { resolve } from 'path'
-import type { NuxtModule } from '@nuxt/schema'
 
 export default defineBuildConfig({
     declaration: true,
@@ -18,6 +18,10 @@ export default defineBuildConfig({
         cjsBridge: true,
     },
     externals: [
+        '#app',
+        '#app/nuxt',
+        '#imports',
+        '@refactorjs/ofetch',
         '@nuxt/schema',
         '@nuxt/schema-edge',
         '@nuxt/kit',
@@ -28,11 +32,11 @@ export default defineBuildConfig({
         'vue'
     ],
     hooks: {
-        async 'rollup:done' (ctx) {
+        async 'rollup:done'(ctx) {
 
             // Generate CommonJS stup
             await writeCJSStub(ctx.options.outDir)
-    
+
             // Load module meta
             const moduleEntryPath = resolve(ctx.options.outDir, 'module.mjs')
             const moduleFn: NuxtModule<any> = await import(
@@ -46,7 +50,7 @@ export default defineBuildConfig({
                 return
             }
             const moduleMeta = await moduleFn.getMeta!()
-    
+
             // Enhance meta using package.json
             if (ctx.pkg) {
                 if (!moduleMeta.name) {
@@ -56,7 +60,7 @@ export default defineBuildConfig({
                     moduleMeta.version = ctx.pkg.version
                 }
             }
-    
+
             // Write meta
             const metaFile = resolve(ctx.options.outDir, 'module.json')
             await fsp.writeFile(metaFile, JSON.stringify(moduleMeta, null, 2), 'utf8')
@@ -64,14 +68,14 @@ export default defineBuildConfig({
     }
 });
 
-async function writeCJSStub (distDir: string) {
+async function writeCJSStub(distDir: string) {
     const cjsStubFile = resolve(distDir, 'module.cjs')
     if (existsSync(cjsStubFile)) {
         return
     }
 
     const cjsStub =
-`module.exports = function(...args) {
+        `module.exports = function(...args) {
     return import('./module.mjs').then(m => m.default.call(this, ...args))
 }
 

@@ -1,9 +1,11 @@
 import type { Strategy } from "./strategy";
+import type { NuxtPlugin } from '@nuxt/schema'
 
 export interface ModuleOptions {
     globalMiddleware?: boolean;
     enableMiddleware?: boolean;
-    strategies: {
+    plugins?: (NuxtPlugin | string)[];
+    strategies?: {
         [strategy: string]: Strategy | false;
     };
     ignoreExceptions: boolean;

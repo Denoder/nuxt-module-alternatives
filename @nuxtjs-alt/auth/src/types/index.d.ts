@@ -1,4 +1,5 @@
 import type { ModuleOptions } from "./options";
+import * as NuxtSchema from '@nuxt/schema';
 
 export * from "./openIDConnectConfigurationDocument";
 export * from "./provider";
@@ -9,6 +10,8 @@ export * from "./strategy";
 export * from "./utils";
 export * from "./options";
 
+declare const AuthModule: NuxtSchema.NuxtModule<ModuleOptions>;
+
 declare module "@nuxt/schema" {
     export interface NuxtConfig {
         ["auth"]?: Partial<ModuleOptions>;
@@ -17,3 +20,5 @@ declare module "@nuxt/schema" {
         ["auth"]?: ModuleOptions;
     }
 }
+
+export default AuthModule

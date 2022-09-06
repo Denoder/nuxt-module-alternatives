@@ -46,7 +46,7 @@ export function getMatchedComponents(route: RouteLocationNormalized, matches: un
     ]
 }
 
-export function normalizePath(path: string = "", ctx: NuxtApp): string {
+export function normalizePath(path: string = "", ctx?: NuxtApp): string {
     // Remove query string
     let result = path.split("?")[0];
 

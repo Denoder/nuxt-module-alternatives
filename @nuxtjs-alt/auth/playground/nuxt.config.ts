@@ -3,14 +3,11 @@ import Module from '..'
 
 export default defineNuxtConfig({
     buildModules: [
-        Module as any,
+        Module,
         "@nuxtjs-alt/http",
         "@pinia/nuxt",
     ],
     auth: {
         enableMiddleware: false,
-    },
-    imports: {
-        autoImport: false
-    },
+    }
 });

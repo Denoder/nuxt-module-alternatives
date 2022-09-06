@@ -1,7 +1,4 @@
 import type { ModuleOptions } from "./types";
-import type { ImportOptions } from "./resolve";
-import type { NuxtApp } from '@nuxt/schema';
-import type { Nuxt } from '@nuxt/schema';
 import { defineNuxtModule, addPluginTemplate, createResolver } from "@nuxt/kit";
 import { name, version } from "../package.json";
 import { resolveStrategies } from "./resolve";
@@ -20,11 +17,11 @@ export default defineNuxtModule({
             nuxt: "^3.0.0-rc.9",
         },
     },
-    defaults: moduleDefaults,
-    async setup(moduleOptions: ModuleOptions, nuxt: Nuxt) {
-        nuxt.options.plugins
+    defaults: moduleDefaults as ModuleOptions,
+    async setup(moduleOptions, nuxt) {
+
         // Merge all option sources
-        const options = defu(moduleOptions, moduleDefaults)
+        const options: ModuleOptions = defu(moduleOptions, moduleDefaults)
 
         // Resolver
         const resolver = createResolver(import.meta.url);
@@ -35,7 +32,7 @@ export default defineNuxtModule({
 
         // Resolve strategies
         const { strategies, strategyScheme } = await resolveStrategies(nuxt, options);
-        // @ts-ignore
+
         delete options.strategies;
 
         // Resolve required imports
@@ -59,7 +56,7 @@ export default defineNuxtModule({
         });
 
         if (options.enableMiddleware) {
-            nuxt.hook("app:resolve", (app: NuxtApp) => {
+            nuxt.hook("app:resolve", (app) => {
                 app.middleware.push({
                     name: "auth",
                     path: resolver.resolve("runtime/core/middleware"),

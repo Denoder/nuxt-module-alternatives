@@ -11,7 +11,7 @@ return `
 import { Auth, ExpiredAuthSessionError } from '#auth/runtime'
 import { defineNuxtPlugin } from '#imports'
 // Active schemes
-${options.schemeImports.map((i: ImportOptions) => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n')}
+${options.schemeImports.map((i) => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : '' } } from '${i.from}'`).join('\n')}
 
 export default defineNuxtPlugin(async nuxtApp => {
     // Options

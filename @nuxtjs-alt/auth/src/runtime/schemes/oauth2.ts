@@ -3,7 +3,7 @@ import type { IncomingMessage } from 'http'
 import type { Auth } from "../core";
 import { encodeQuery, getProp, normalizePath, parseQuery, removeTokenPrefix, urlJoin, randomString } from "../../utils";
 import { RefreshController, RequestHandler, ExpiredAuthSessionError, Token, RefreshToken } from "../inc";
-import { useActiveRoute } from "#app";
+import { useRoute } from "#app";
 import { BaseScheme } from "./base";
 import requrl from "requrl";
 
@@ -91,7 +91,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     constructor($auth: Auth, options: SchemePartialOptions<Oauth2SchemeOptions>, ...defaults: SchemePartialOptions<Oauth2SchemeOptions>[]) {
         super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT);
 
-        this.req = process.server ? $auth.ctx.ssrContext?.event.req : "";
+        this.req = process.server ? $auth.ctx.ssrContext?.event.req : undefined;
 
         // Initialize Token instance
         this.token = new Token(this, this.$auth.$storage);
@@ -330,7 +330,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     }
 
     async #handleCallback(): Promise<boolean | void> {
-        const route = useActiveRoute();
+        const route = useRoute();
         // Handle callback only for specified route
         if (this.$auth.options.redirect && normalizePath(route.path, this.$auth.ctx) !== normalizePath(this.$auth.options.redirect.callback, this.$auth.ctx)) {
             return;
@@ -340,7 +340,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             return;
         }
 
-        const hash = parseQuery(route.hash.substr(1));
+        const hash = parseQuery(route.hash.slice(1));
         const parsedQuery = Object.assign({}, route.query, hash);
         // accessToken/idToken
         let token: string = parsedQuery[this.options.token!.property] as string;
