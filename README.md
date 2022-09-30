@@ -11,7 +11,7 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 
 **Module Order**
 
-If you're using a combination of axios, pinia and auth you need to load them in `modules` in the following order.
+If you're using a combination of http/ohmyfetch, pinia and auth you need to load them in `modules` in the following order.
 ```
 modules: [
     '@nuxtjs-alt/auth',
