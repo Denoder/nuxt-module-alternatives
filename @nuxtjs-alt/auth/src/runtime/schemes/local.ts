@@ -1,4 +1,4 @@
-import type { EndpointsOption, SchemePartialOptions, TokenableSchemeOptions, TokenableScheme, UserOptions, HTTPRequest, HTTPResponse, SchemeCheck,} from "../../types";
+import type { EndpointsOption, SchemePartialOptions, TokenableSchemeOptions, TokenableScheme, UserOptions, HTTPRequest, HTTPResponse, SchemeCheck } from "../../types";
 import type { Auth } from "..";
 import { getProp } from "../../utils";
 import { Token, RequestHandler } from "../inc";

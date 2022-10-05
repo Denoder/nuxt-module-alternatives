@@ -3,8 +3,8 @@ import type { IncomingMessage } from 'http'
 import type { Auth } from "../core";
 import { encodeQuery, getProp, normalizePath, parseQuery, removeTokenPrefix, urlJoin, randomString } from "../../utils";
 import { RefreshController, RequestHandler, ExpiredAuthSessionError, Token, RefreshToken } from "../inc";
-import { useRoute } from "#app";
 import { BaseScheme } from "./base";
+import { useRoute } from "nuxt/app";
 import requrl from "requrl";
 
 export interface Oauth2SchemeEndpoints extends EndpointsOption {
@@ -81,7 +81,7 @@ const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
 };
 
 export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOptions> extends BaseScheme<OptionsT> implements RefreshableScheme {
-    req: IncomingMessage;
+    req: IncomingMessage | undefined;
     token: Token;
     refreshToken: RefreshToken;
     refreshController: RefreshController;
@@ -407,7 +407,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         }
         // Redirect to home
         else if (this.$auth.options.watchLoggedIn) {
-            this.$auth.redirect("home", { noRouter: true });
+            this.$auth.redirect("home", false, false);
             return true; // True means a redirect happened
         }
     }

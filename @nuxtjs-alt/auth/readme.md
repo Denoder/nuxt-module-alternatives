@@ -11,6 +11,10 @@ Please note, any issues regarding typescript is not a priorty for me. If you're 
 The module now requires '@nuxtjs-alt/http' to function in version 2.0.0 and up, that module extends ohmyfetch. Please note that if you were using `data` to post data, you now need to use `body` since this is what `ohmyfetch` uses.
 Please tell me if you encounter any issues with these changes.
 
+**Composable**
+
+A `useAuth` composable is available to utitlize if `$auth` from `useNuxtApp()` isnt working out for you in terms of type hinting. 
+
 **Cookie-based auth**
 
 If you have any specific changes that need to be made to accomodate cookie based-auth please tell me, at this moment the way I configured it is that it pretty much does the same thing as the official auth module cookie, but in cases where the server autmaitcally attaches the server cookie to all requests it will function conrrently (in this case setting a cookie on all requests via laravel).
@@ -28,8 +32,14 @@ the config would look like this
                 },
                 endpoints: {
                     csrf: false,
-                    login: { url: '/api/user/login', method: 'post' },
-                    user: { url: '/api/user/me', method: 'get' }
+                    login: { 
+                        url: '/api/user/login', 
+                        method: 'post' 
+                    },
+                    user: { 
+                        url: '/api/user/me', 
+                        method: 'get' 
+                    }
                 },
                 user: {
                     property: {
@@ -60,10 +70,18 @@ Laravel Sanctum wokrs a tiny bit differently, It inherits the same config as the
                     name: 'XSRF-TOKEN',
                 },
                 endpoints: {
-                    csrf: { url: '/sanctum/csrf-cookie' },
-                    login: { url: '/login' },
-                    logout: { url: '/logout' },
-                    user: { url: '/api/user' }
+                    csrf: { 
+                        url: '/sanctum/csrf-cookie' 
+                    },
+                    login: { 
+                        url: '/login' 
+                    },
+                    logout: { 
+                        url: '/logout' 
+                    },
+                    user: { 
+                        url: '/api/user' 
+                    }
                 },
                 user: {
                     property: {
@@ -81,6 +99,6 @@ Laravel Sanctum wokrs a tiny bit differently, It inherits the same config as the
 
 Oauth2 now has client window authentication thanks to this pull request: https://github.com/nuxt-community/auth-module/pull/1746
 properties have been changed to:
-`clientWindow`: `boolean`
-`clientWindowWidth`: `number`
-`clientWindowHeight`: `number`
+- `clientWindow`: `boolean`
+- `clientWindowWidth`: `number`
+- `clientWindowHeight`: `number`

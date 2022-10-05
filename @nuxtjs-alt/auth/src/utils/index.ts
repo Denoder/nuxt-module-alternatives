@@ -1,6 +1,6 @@
-import type { RecursivePartial } from "../types";
 import type { RouteLocationNormalized, RouteRecordNormalized, RouteComponent } from "vue-router";
-import { NuxtApp } from "#app/nuxt";
+import type { RecursivePartial } from "../types";
+import type { NuxtApp } from "nuxt/app";
 
 export const isUnset = (o: any): boolean => typeof o === "undefined" || o === null;
 
@@ -35,10 +35,10 @@ export function routeOption(route: RouteLocationNormalized, key: string, value: 
     return route.matched.some((m: RouteRecordNormalized) => m.meta[key] === value);
 }
 
-export function getMatchedComponents(route: RouteLocationNormalized, matches: unknown[] = []): RouteComponent {
+export function getMatchedComponents(route: RouteLocationNormalized, matches: unknown[] = []): RouteComponent[][] {
     return [
         ...route.matched.map(function (m: RouteRecordNormalized, index: number) {
-            return Object.keys(m.components as RouteComponent).map(function (key) {
+            return Object.keys(m.components as Record<string, RouteComponent>).map(function (key) {
                 matches.push(index);
                 return m.components![key];
             });
@@ -93,7 +93,7 @@ export function decodeValue(val: any): any {
  * @param  { string } propName Dot notation, like 'this.a.b.c'
  * @return { * }          A property value
  */
-export function getProp(holder: Record<string, any>, propName: string | false): any {
+export function getProp(holder: any, propName: string | false): any {
     if (!propName || !holder || typeof holder !== "object") {
         return holder;
     }

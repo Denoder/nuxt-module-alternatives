@@ -1,13 +1,15 @@
 import type { NuxtModule } from '@nuxt/schema'
-import { defineBuildConfig } from "unbuild";
-import { existsSync, promises as fsp } from 'fs'
+import { existsSync, promises as fsp, createReadStream, createWriteStream } from 'fs'
+import { defineBuildConfig } from "unbuild"
 import { pathToFileURL } from 'url'
 import { resolve } from 'path'
 
 export default defineBuildConfig({
+    failOnWarn: false,
     declaration: true,
     entries: [
         'src/module',
+        'src/types',
         { input: 'src/runtime/', outDir: 'dist/runtime', ext: 'mjs' },
     ],
     rollup: {
@@ -25,13 +27,18 @@ export default defineBuildConfig({
         'vue'
     ],
     hooks: {
+        async 'rollup:dts:build'(ctx) {
+            // Types file
+            const typesFile = resolve(ctx.options.outDir, 'types.mjs')
+            await fsp.unlink(typesFile)
+        },
         async 'rollup:done' (ctx) {
             // Generate CommonJS stup
             await writeCJSStub(ctx.options.outDir)
 
             // Load module meta
             const moduleEntryPath = resolve(ctx.options.outDir, 'module.mjs')
-            const moduleFn: NuxtModule<any> = await import(
+            const moduleFn: Required<NuxtModule<any>> = await import(
                 pathToFileURL(moduleEntryPath).toString()
             ).then(r => r.default || r).catch((err) => {
                 console.error(err)
@@ -41,8 +48,8 @@ export default defineBuildConfig({
             if (!moduleFn) {
                 return
             }
-            const moduleMeta = await moduleFn.getMeta!()
-    
+            const moduleMeta = await moduleFn.getMeta()
+
             // Enhance meta using package.json
             if (ctx.pkg) {
                 if (!moduleMeta.name) {
@@ -52,7 +59,7 @@ export default defineBuildConfig({
                     moduleMeta.version = ctx.pkg.version
                 }
             }
-    
+
             // Write meta
             const metaFile = resolve(ctx.options.outDir, 'module.json')
             await fsp.writeFile(metaFile, JSON.stringify(moduleMeta, null, 2), 'utf8')

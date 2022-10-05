@@ -1,36 +1,61 @@
 import { createInstance } from '@refactorjs/ofetch'
 import { defineNuxtPlugin } from '#imports'
-import { $fetch as http } from 'ohmyfetch'
+
+// Nuxt Options
+const options = JSON.parse('<%= JSON.stringify(options) %>')
 
 const httpInstance = (options) => {
     // Create new Fetch instance
-    return createInstance(options, http)
+    const instance = createInstance(options)
+    '<% if (options.debug) { %>';debugInterceptor(instance);'<% } %>'
+
+    return instance
 }
 
+'<% if (options.debug) { %>'
+const debugInterceptor = http => {
+    const log = (level, ...messages) => console[level]('[http]', ...messages)
+
+    // request
+    http.onRequest(config => {
+        log('info', 'Request:', config)
+        return config
+    })
+
+    http.onRequestError(error => {
+        log('error', 'Request error:', error)
+    })
+
+    // response
+    http.onResponse(res => {
+        log('info', 'Response:', res)
+        return res
+    })
+
+    http.onResponseError(error => {
+        log('error', 'Response error:', error)
+    })
+}
+'<% } %>'
+
 export default defineNuxtPlugin(ctx => {
-    // runtimeConfig
-    const runtimeConfig = ctx.$config && ctx.$config.public.http || {}
-
-    // Nuxt Options
-    const nuxtOptions = JSON.parse('<%= JSON.stringify(options) %>')
-
     // baseURL
-    const baseURL = process.client ? (runtimeConfig.browserBaseURL || runtimeConfig.browserBaseUrl || runtimeConfig.baseURL || runtimeConfig.baseUrl || nuxtOptions.browserBaseURL || '') : (runtimeConfig.baseURL || runtimeConfig.baseUrl || process.env._HTTP_BASE_URL_ || nuxtOptions.baseURL || '')
+    const baseURL = process.client ? options.browserBaseURL : options.baseURL
 
     // Defaults
     const defaults = {
         baseURL,
-        retry: nuxtOptions.retry,
-        timeout: process.server ? nuxtOptions.serverTimeout : nuxtOptions.clientTimeout,
-        credentials: nuxtOptions.credentials,
-        headers: nuxtOptions.headers,
+        retry: options.retry,
+        timeout: process.server ? options.serverTimeout : options.clientTimeout,
+        credentials: options.credentials,
+        headers: options.headers,
     }
 
-    if (nuxtOptions.proxyHeaders) {
+    if (options.proxyHeaders) {
         // Proxy SSR request headers
         if (process.server && ctx.ssrContext?.event.req && ctx.ssrContext?.event.req.headers) {
             const reqHeaders = { ...ctx.ssrContext.event.req.headers }
-            for (const h of nuxtOptions.proxyHeadersIgnore) {
+            for (const h of options.proxyHeadersIgnore) {
                 delete reqHeaders[h]
             }
 
@@ -38,14 +63,8 @@ export default defineNuxtPlugin(ctx => {
         }
     }
 
-    if (process.server) {
-        // Don't accept brotli encoding because Node can't parse it
-        defaults.headers['accept-encoding'] = 'gzip, deflate'
-    }
-
     const http = httpInstance(defaults)
-    const useConflict = nuxtOptions.useConflict
-    const providerName = useConflict ? 'fetch' : 'http'
+    const providerName = options.useConflict ? 'fetch' : 'http'
 
     globalThis['$' + providerName] = http
 

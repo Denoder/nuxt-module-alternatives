@@ -4,4 +4,7 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+  const { $http } = useNuxtApp()
+  console.log($http)
+</script>

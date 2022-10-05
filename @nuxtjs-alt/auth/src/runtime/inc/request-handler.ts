@@ -91,19 +91,19 @@ export class RequestHandler {
         this.interceptor = null;
     }
 
-    #needToken(config: any): boolean {
+    #needToken(config: FetchConfig): boolean {
         const options = this.scheme.options;
 
-        return ( options.token!.global || Object.values(options.endpoints).some((endpoint: any) => typeof endpoint === "object" ? endpoint.url === config.url : endpoint === config.url));
+        return ( options.token!.global || Object.values(options.endpoints).some((endpoint) => typeof endpoint === "object" ? endpoint.url === config.url : endpoint === config.url));
     }
 
     // ---------------------------------------------------------------
     // Watch requests for token expiration
     // Refresh tokens if token has expired
 
-    #getUpdatedRequestConfig(config: any, token: string | boolean) {
+    #getUpdatedRequestConfig(config: FetchConfig, token: string | boolean) {
         if (typeof token === "string") {
-            config.headers[this.scheme.options.token!.name] = token;
+            config.headers![this.scheme.options.token!.name] = token;
         }
 
         return config;

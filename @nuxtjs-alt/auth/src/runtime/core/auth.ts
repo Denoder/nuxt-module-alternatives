@@ -1,12 +1,13 @@
-import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions } from "../../types";
+import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions, Route } from "../../types";
+import type { NuxtApp } from "nuxt/app"
 import { isRelativeURL, isSet, isSameURL, getProp, routeOption } from "../../utils";
-import { useRouter, useRoute } from "#imports";
-import { NuxtApp } from '#app/nuxt'
+import { useRouter, useRoute } from "nuxt/app";
 import { Storage } from "./storage";
 import requrl from "requrl";
 
 export type ErrorListener = (...args: any[]) => void;
 export type RedirectListener = (to: string, from: string) => string;
+
 
 export class Auth {
     ctx: NuxtApp;
@@ -27,15 +28,18 @@ export class Auth {
         this.options = options;
 
         // Storage & State
-        const initialState = { user: null, loggedIn: false };
-        const storage = new Storage(ctx, { ...options, ...{ initialState } });
+        const initialState = {
+            user: null,
+            loggedIn: false
+        };
+
+        const storage = new Storage(ctx, { 
+            ...options,
+            initialState
+        });
 
         this.$storage = storage;
         this.$state = storage.state;
-    }
-
-    get strategy(): Scheme {
-        return this.getStrategy();
     }
 
     getStrategy(throwException = true): Scheme {
@@ -50,6 +54,11 @@ export class Auth {
 
         return this.strategies[this.$state.strategy];
     }
+
+    get strategy(): Scheme {
+        return this.getStrategy();
+    }
+
 
     get user(): Record<string, any> | null {
         return this.$state.user;
@@ -199,7 +208,7 @@ export class Auth {
 
     async setUserToken(token: string | boolean, refreshToken?: string | boolean): Promise<HTTPResponse | void> {
         if (!this.getStrategy().setUserToken) {
-            (<TokenableScheme>this.getStrategy()).token!.set(token);
+            (this.getStrategy() as TokenableScheme).token!.set(token);
             return Promise.resolve();
         }
 
@@ -210,10 +219,10 @@ export class Auth {
     }
 
     reset(...args: any[]): void {
-        if ((<TokenableScheme>this.getStrategy()).token && !this.getStrategy().reset) {
+        if ((this.getStrategy() as TokenableScheme).token && !this.getStrategy().reset) {
             this.setUser(false);
-            (<TokenableScheme>this.getStrategy()).token!.reset();
-            (<RefreshableScheme>this.getStrategy()).refreshToken.reset();
+            (this.getStrategy() as TokenableScheme).token!.reset();
+            (this.getStrategy() as RefreshableScheme).refreshToken.reset();
         }
 
         return this.getStrategy().reset!(
@@ -266,12 +275,14 @@ export class Auth {
         this.$storage.setState("loggedIn", check.valid);
     }
 
-    async request(endpoint: HTTPRequest, defaults: HTTPRequest = {}): Promise<HTTPResponse> {
+    async request(endpoint: HTTPRequest, defaults: HTTPRequest = {}): Promise<HTTPResponse | void> {
+        // @ts-expect-error
         const handler = this.ctx.$http ? this.ctx.$http : this.ctx.$fetch
         const request = typeof defaults === "object" ? Object.assign({}, defaults, endpoint) : endpoint;
         const method = request.method ? request.method.toLowerCase() : 'get'
 
         if (request.baseURL === "") {
+            // @ts-ignore
             request.baseURL = requrl(process.server ? this.ctx.ssrContext?.event.req : undefined);
         }
 
@@ -288,7 +299,7 @@ export class Auth {
         });
     }
 
-    async requestWith(endpoint?: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse> {
+    async requestWith(endpoint?: HTTPRequest, defaults?: HTTPRequest): Promise<HTTPResponse | void> {
         const request = Object.assign({}, defaults, endpoint);
 
         if ((this.getStrategy() as TokenableScheme).token) {
@@ -334,17 +345,27 @@ export class Auth {
         }
     }
 
-    redirect(name: string, opt: { route?: any; noRouter?: boolean } = { route: false, noRouter: false }): void {
-        const router = useRouter();
-        const route = useRoute();
+    /**
+     * 
+     * @param name redirect name
+     * @param route (default: false) Internal useRoute() (false) or manually specify
+     * @param router (default: true) Whether to use nuxt redirect (true) or window redirect (false)
+     *
+     * @returns
+     */
+    redirect(name: string, route: Route | false = false, router: boolean = true): void {
+        const activeRouter = useRouter();
+        const activeRoute = useRoute();
 
         if (!this.options.redirect) {
             return;
         }
 
-        const from = opt.route ? (this.options.fullPathRedirect ? opt.route.fullPath : opt.route.path) : this.options.fullPathRedirect ? route.fullPath : route.path;
+        const optRoute = route && this.options.fullPathRedirect ? route.fullPath : route && route.path
+        const nuxtRoute = this.options.fullPathRedirect ? activeRoute.fullPath : activeRoute.path
+        const from = route ? optRoute : nuxtRoute;
 
-        let to = this.options.redirect[name as keyof typeof this.options.redirect];
+        let to: string = this.options.redirect[name];
 
         if (!to) {
             return;
@@ -375,13 +396,13 @@ export class Auth {
             return;
         }
 
-        const query = opt.route ? opt.route.query : route.query;
+        const query = route ? route.query : activeRoute.query;
         const queryString = Object.keys(query).map((key) => key + "=" + query[key]).join("&");
 
-        if (opt.noRouter) {
+        if (!router) {
             window.location.replace(to + (queryString ? "?" + queryString : ""));
         } else {
-            router.push(to + (queryString ? "?" + queryString : ""));
+            activeRouter.push(to + (queryString ? "?" + queryString : ""));
         }
     }
 

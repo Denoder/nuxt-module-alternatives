@@ -1,8 +1,8 @@
 import type { ModuleOptions } from "../../types";
-import type { NuxtApp } from '#app/nuxt'
+import type { NuxtApp } from 'nuxt/app'
 import { isUnset, isSet, decodeValue, encodeValue } from "../../utils";
-import { parse, serialize } from "cookie-es";
-import { defineStore } from "pinia";
+import { parse, serialize, CookieSerializeOptions } from "cookie-es";
+import { defineStore, StateTree } from "pinia";
 
 export class Storage {
     ctx: NuxtApp;
@@ -111,12 +111,10 @@ export class Storage {
         this.#piniaEnabled = this.options.pinia && !!this.ctx.$pinia;
 
         if (this.#piniaEnabled) {
-            // @ts-ignore
             this.#store = defineStore(this.options.pinia.namespace, {
-                state: () => this.options.initialState,
+                state: () => this.options.initialState as StateTree,
                 actions: {
                     SET(payload: any) {
-                        // @ts-ignore
                         this.$patch({ [payload.key]: payload.value });
                     },
                 },
@@ -131,7 +129,11 @@ export class Storage {
         }
     }
 
-    getStore(): any {
+    get store() {
+        return this.#initStore
+    }
+
+    getStore() {
         return this.#initStore;
     }
 
@@ -347,7 +349,7 @@ export class Storage {
     // Cookies
     // ------------------------------------
 
-    getCookies(): Record<string, any> | undefined {
+    getCookies(): Record<string, any> | void {
         if (!this.isCookiesEnabled()) {
             return;
         }
@@ -381,8 +383,7 @@ export class Storage {
             $options.expires = new Date(Date.now() + $options.expires * 864e5);
         }
 
-        // @ts-ignore
-        const serializedCookie = serialize($key, $value, $options);
+        const serializedCookie = serialize($key, $value, $options as CookieSerializeOptions);
 
         if (process.client) {
             // Set in browser
@@ -417,7 +418,7 @@ export class Storage {
 
         const cookies = this.getCookies();
 
-        const value = cookies![$key] ? decodeURIComponent(cookies![$key] as string) : undefined;
+        const value = cookies[$key] ? decodeURIComponent(cookies[$key] as string) : undefined;
 
         return decodeValue(value);
     }

@@ -4,6 +4,7 @@ import { Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions } from "./oaut
 import { encodeQuery, parseQuery, normalizePath, getProp } from "../../utils";
 import { IdToken, ConfigurationDocument } from "../inc";
 import { IdTokenableSchemeOptions } from "../../types";
+import { useRoute } from "nuxt/app";
 
 export interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
     configuration: string;
@@ -171,7 +172,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
     }
 
     async #handleCallback() {
-        const route = this.$auth.ctx._route;
+        const route = useRoute();
         // Handle callback only for specified route
         if (this.$auth.options.redirect && normalizePath(route.path) !== normalizePath(this.$auth.options.redirect.callback)) {
             return;
@@ -256,7 +257,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
         }
 
         // Redirect to home
-        this.$auth.redirect("home", { noRouter: true });
+        this.$auth.redirect("home", false, false);
 
         return true; // True means a redirect happened
     }

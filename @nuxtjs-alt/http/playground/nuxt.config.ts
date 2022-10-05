@@ -1,10 +1,11 @@
-import { defineNuxtConfig } from "nuxt";
 import httpModule from '..'
 
 export default defineNuxtConfig({
+    bridge: false,
     buildModules: [
         httpModule
     ],
+    http: {},
     vite: {
         server: {
             hmr: {

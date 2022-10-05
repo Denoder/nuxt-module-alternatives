@@ -1,4 +1,7 @@
-export interface ModuleOptions {
+import { FetchConfig, FetchInstance } from '@refactorjs/ofetch'
+import * as NuxtSchema from '@nuxt/schema';
+
+export interface ModuleOptions extends Omit<FetchConfig, 'credentials'> {
     baseURL: string;
     baseUrl?: string;
     browserBaseURL: string;
@@ -12,15 +15,44 @@ export interface ModuleOptions {
     port?: string | number;
     useConflict?: boolean;
     https?: boolean;
-    headers?: any;
+    retry?: number;
     credentials?: string;
+    headers?: any;
+    debug?: boolean;
+}
+
+declare global {
+    var $http: FetchInstance;
+    namespace NodeJS {
+        interface Global {
+            $http: FetchInstance;
+        }
+    }
+}
+
+declare module '#app' {
+    interface NuxtApp extends HttpPluginInjection {}
+}
+
+interface HttpPluginInjection {
+    $http: FetchInstance;
 }
 
 declare module '@nuxt/schema' {
-    export interface NuxtConfig {
-        ['http']?: Partial<ModuleOptions>
+    interface NuxtConfig {
+        http?: Partial<ModuleOptions>
     }
-    export interface NuxtOptions {
-        ['http']?: ModuleOptions
+    interface NuxtOptions {
+        http?: ModuleOptions
+    }
+    interface RuntimeConfig {
+        http?: ModuleOptions;
+    }
+    interface PublicRuntimeConfig {
+        http?: ModuleOptions
     }
 }
+
+declare const NuxtHttp: NuxtSchema.NuxtModule<ModuleOptions>
+
+export default NuxtHttp

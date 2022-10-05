@@ -1,15 +1,16 @@
 import type { NuxtModule } from '@nuxt/schema'
-import { defineBuildConfig } from "unbuild";
 import { existsSync, promises as fsp } from 'fs'
+import { defineBuildConfig } from "unbuild"
 import { pathToFileURL } from 'url'
 import { resolve } from 'path'
+import { fdir } from 'fdir'
 
 export default defineBuildConfig({
     declaration: true,
     entries: [
         'src/module',
+        { input: 'src/types/', outDir: 'dist/types', ext: 'mjs' },
         { input: 'src/runtime/', outDir: 'dist/runtime', ext: 'mjs' },
-        { input: 'src/types/', outDir: 'dist/types', ext: 'ts' },
         { input: 'src/utils/', outDir: 'dist/utils', ext: 'mjs' },
         { input: 'src/providers/', outDir: 'dist/providers', ext: 'mjs' },
     ],
@@ -18,10 +19,6 @@ export default defineBuildConfig({
         cjsBridge: true,
     },
     externals: [
-        '#app',
-        '#app/nuxt',
-        '#imports',
-        '@refactorjs/ofetch',
         '@nuxt/schema',
         '@nuxt/schema-edge',
         '@nuxt/kit',
@@ -32,14 +29,23 @@ export default defineBuildConfig({
         'vue'
     ],
     hooks: {
-        async 'rollup:done'(ctx) {
+        async 'rollup:dts:build'(ctx) {
+            const api = new fdir().withFullPaths().glob('./**/*.mjs').crawl(ctx.options.outDir + '/types').withPromise();
 
+            api.then((files) => {
+                // @ts-ignore
+                files.forEach(async (file: any) => {
+                    await fsp.unlink(file)
+                });
+            });
+        },
+        async 'rollup:done'(ctx) {
             // Generate CommonJS stup
             await writeCJSStub(ctx.options.outDir)
 
             // Load module meta
             const moduleEntryPath = resolve(ctx.options.outDir, 'module.mjs')
-            const moduleFn: NuxtModule<any> = await import(
+            const moduleFn: Required<NuxtModule<any>> = await import(
                 pathToFileURL(moduleEntryPath).toString()
             ).then(r => r.default || r).catch((err) => {
                 console.error(err)
@@ -49,7 +55,7 @@ export default defineBuildConfig({
             if (!moduleFn) {
                 return
             }
-            const moduleMeta = await moduleFn.getMeta!()
+            const moduleMeta = await moduleFn.getMeta()
 
             // Enhance meta using package.json
             if (ctx.pkg) {
