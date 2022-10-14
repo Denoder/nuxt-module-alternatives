@@ -103,8 +103,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         this.refreshController = new RefreshController(this);
 
         // Initialize Request Handler
-        const handler = this.$auth.ctx.$http ? this.$auth.ctx.$http : this.$auth.ctx.$fetch
-        this.requestHandler = new RequestHandler(this, handler);
+        this.requestHandler = new RequestHandler(this, this.$auth.ctx.$http);
     }
 
     protected get scope(): string {

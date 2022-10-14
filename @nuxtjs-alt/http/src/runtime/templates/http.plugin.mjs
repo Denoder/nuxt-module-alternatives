@@ -64,13 +64,14 @@ export default defineNuxtPlugin(ctx => {
     }
 
     const http = httpInstance(defaults)
-    const providerName = options.useConflict ? 'fetch' : 'http'
 
-    globalThis['$' + providerName] = http
+    if (!globalThis.$http) {
+        globalThis.$http = http
+    }
 
     return {
         provide: {
-            [providerName]: http
+            http: http
         }
     }
 })

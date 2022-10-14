@@ -276,8 +276,7 @@ export class Auth {
     }
 
     async request(endpoint: HTTPRequest, defaults: HTTPRequest = {}): Promise<HTTPResponse | void> {
-        // @ts-expect-error
-        const handler = this.ctx.$http ? this.ctx.$http : this.ctx.$fetch
+
         const request = typeof defaults === "object" ? Object.assign({}, defaults, endpoint) : endpoint;
         const method = request.method ? request.method.toLowerCase() : 'get'
 
@@ -286,11 +285,11 @@ export class Auth {
             request.baseURL = requrl(process.server ? this.ctx.ssrContext?.event.req : undefined);
         }
 
-        if (!handler) {
+        if (!this.ctx.$http) {
             return Promise.reject(new Error("[AUTH] add the @nuxtjs-alt/http module to nuxt.config file"));
         }
 
-        return handler['$' + method](request).catch((error: Error) => {
+        return this.ctx.$http['$' + method](request).catch((error: Error) => {
             // Call all error handlers
             this.callOnError(error, { method: "request" });
 

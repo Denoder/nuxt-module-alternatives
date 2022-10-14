@@ -13,7 +13,6 @@ export interface ModuleOptions extends Omit<FetchConfig, 'credentials'> {
     serverTimeout?: number,
     clientTimeout?: number,
     port?: string | number;
-    useConflict?: boolean;
     https?: boolean;
     retry?: number;
     credentials?: string;

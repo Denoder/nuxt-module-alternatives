@@ -3,32 +3,15 @@
 This serves as an extension to ohmyfetch for nuxt. Please note this is only for nuxt3.
 This works similar to nuxt/http and nuxtjs-alt/axios except it utilizes ohmyfetch. All property options will be under `http`
 
-**Other Information**
-
-If you want to override the global `$fetch` function you can do so by setting `useConflict` to `true` in your config. This will change:
-- `$http`
-- `useHttp`
-- `useLazyHttp`
-- `globalThis.$http`
-
-to
-
-- `$fetch`
-- `useFetch`
-- `useLazyFetch`
-- `globalThis.$fetch`
-
 Remember this is a mix of `ohmyfetch` and `nuxt/http` so to use methods you would use as an example:
 
 ```ts
 // Available methods: 'get', 'head', 'delete', 'post', 'put', 'patch', 'options'
 // $http.$get('/api') is the same as $fetch('/api', { method: 'get' })
-await $fetch.$get('/api', options)
 await $http.$get('/api', options)
 
 // Access Raw Response
 // $http.get('/api') is the same as $fetch.raw('/api', { method: 'get' })
-await $fetch.get('/api', options)
 await $http.get('/api', options)
 ```
 

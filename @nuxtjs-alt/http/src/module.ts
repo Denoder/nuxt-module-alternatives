@@ -3,6 +3,7 @@ import type { Nuxt } from '@nuxt/schema'
 import { addTemplate, defineNuxtModule, addPluginTemplate, createResolver, addImports } from '@nuxt/kit'
 import { name, version } from '../package.json'
 import { defu } from 'defu'
+import { join } from 'pathe';
 
 const CONFIG_KEY = 'http'
 
@@ -19,20 +20,7 @@ export default defineNuxtModule({
     setup(opts: ModuleOptions, nuxt: Nuxt) {
         // Combine options with runtime config
         const moduleOptions: ModuleOptions = defu(nuxt.options.runtimeConfig?.public[CONFIG_KEY], opts)
-
-        // Default host
-        let defaultHost = moduleOptions.host || process.env.HOST || 'localhost'
-
-        // Default port
-        const defaultPort = moduleOptions.port || process.env.PORT || 3000
-
-        if (defaultHost === '0.0.0.0') {
-            defaultHost = 'localhost'
-        }
-
-        // Default prefix
-        const prefix = moduleOptions.prefix || process.env.PREFIX || '/'
-
+        
         // Support baseUrl alternative
         if (moduleOptions.baseUrl) {
             console.warn('baseUrl is deprecated please use baseURL instead.')
@@ -48,7 +36,7 @@ export default defineNuxtModule({
 
         // Apply defaults
         const options: ModuleOptions = defu(moduleOptions, {
-            baseURL: `http://${defaultHost}:${defaultPort}${prefix}`,
+            baseURL: nuxt.options.app.baseURL,
             browserBaseURL: undefined,
             proxyHeaders: true,
             proxyHeadersIgnore: [
@@ -68,7 +56,6 @@ export default defineNuxtModule({
             ],
             serverTimeout: 10000,
             clientTimeout: 25000,
-            useConflict: false,
             https: false,
             retry: 1,
             headers: {
@@ -109,11 +96,38 @@ export default defineNuxtModule({
         const composables = resolver.resolve('runtime/composables')
 
         addImports([
-            { from: composables, name: options.useConflict ? 'useFetch' : 'useHttp' },
-            { from: composables, name: options.useConflict ? 'useLazyFetch' : 'useLazyHttp' }
+            { from: composables, name: 'useHttp' },
+            { from: composables, name: 'useLazyHttp' }
         ])
+
+        addTemplate({
+            getContents: () => nitroHttp(),
+            filename: 'nitro-http.ts',
+            write: true
+        })
+
+        // Add nitro plugin
+        // ensure `nitro.plugins` is initialized
+        nuxt.options.nitro.plugins = nuxt.options.nitro.plugins || []
+        nuxt.options.nitro.plugins.push(join(nuxt.options.buildDir, 'nitro-http.ts'))
     }
 })
+
+function nitroHttp()
+{
+return `import type { NitroAppPlugin } from 'nitropack'
+import { createInstance } from '@refactorjs/ofetch'
+
+export default <NitroAppPlugin> function (nitroApp) {
+    // @ts-ignore
+    const config = useRuntimeConfig()
+    // @ts-ignore
+    const $http = createInstance({ baseURL: config.app.baseURL }, $fetch)
+
+    globalThis.$http = $http
+}
+`
+}
 
 function getHttpDTS() {
 return `import type { Plugin } from '#app'
