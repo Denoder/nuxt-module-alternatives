@@ -1,13 +1,12 @@
-import type { HTTPRequest, HTTPResponse, Scheme, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions, Route } from "../../types";
-import type { NuxtApp } from "nuxt/app"
-import { isRelativeURL, isSet, isSameURL, getProp, routeOption } from "../../utils";
-import { useRouter, useRoute } from "nuxt/app";
-import { Storage } from "./storage";
-import requrl from "requrl";
+import type { HTTPRequest, HTTPResponse, Scheme, SchemeOptions, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions, Route } from '../../types';
+import type { NuxtApp } from 'nuxt/app'
+import { isRelativeURL, isSet, isSameURL, getProp, routeOption } from '../../utils';
+import { useRouter, useRoute } from 'nuxt/app';
+import { Storage } from './storage';
+import requrl from 'requrl';
 
 export type ErrorListener = (...args: any[]) => void;
 export type RedirectListener = (to: string, from: string) => string;
-
 
 export class Auth {
     ctx: NuxtApp;
@@ -42,13 +41,13 @@ export class Auth {
         this.$state = storage.state;
     }
 
-    getStrategy(throwException = true): Scheme {
+    getStrategy(throwException = true): Scheme<SchemeOptions> {
         if (throwException) {
             if (!this.$state.strategy) {
-                throw new Error("No strategy is set!");
+                throw new Error('No strategy is set!');
             }
             if (!this.strategies[this.$state.strategy]) {
-                throw new Error("Strategy not supported: " + this.$state.strategy);
+                throw new Error('Strategy not supported: ' + this.$state.strategy);
             }
         }
 
@@ -73,25 +72,25 @@ export class Auth {
     }
 
     get busy(): boolean {
-        return this.$storage.getState("busy") as boolean;
+        return this.$storage.getState('busy') as boolean;
     }
 
     async init(): Promise<Auth | void> {
         // Reset on error
         if (this.options.resetOnError) {
             this.onError((...args) => {
-                if (typeof this.options.resetOnError !== "function" || this.options.resetOnError(...args)) {
+                if (typeof this.options.resetOnError !== 'function' || this.options.resetOnError(...args)) {
                     this.reset();
                 }
             });
         }
 
         // Restore strategy
-        this.$storage.syncUniversal("strategy", this.options.defaultStrategy);
+        this.$storage.syncUniversal('strategy', this.options.defaultStrategy);
 
         // Set default strategy if current one is invalid
         if (!this.getStrategy(false)) {
-            this.$storage.setUniversal("strategy", this.options.defaultStrategy);
+            this.$storage.setUniversal('strategy', this.options.defaultStrategy);
 
             // Give up if still invalid
             if (!this.getStrategy(false)) {
@@ -108,12 +107,10 @@ export class Auth {
         }
         finally {
             if (process.client && this.options.watchLoggedIn) {
-                this.$storage.watchState("loggedIn", (loggedIn: boolean) => {
-                    if (loggedIn) {
-                        const route = useRoute();
-                        if (!routeOption(route, "auth", false)) {
-                            this.redirect(loggedIn ? "home" : "logout");
-                        }
+                this.$storage.watchState('loggedIn', (loggedIn: boolean) => {
+                    const route = useRoute();
+                    if (routeOption(route, 'auth', false)) {
+                        this.redirect(loggedIn ? 'home' : 'logout');
                     }
                 });
             }
@@ -127,7 +124,7 @@ export class Auth {
     }
 
     async setStrategy(name: string): Promise<HTTPResponse | void> {
-        if (name === this.$storage.getUniversal("strategy")) {
+        if (name === this.$storage.getUniversal('strategy')) {
             return Promise.resolve();
         }
 
@@ -139,7 +136,7 @@ export class Auth {
         this.reset();
 
         // Set new strategy
-        this.$storage.setUniversal("strategy", name);
+        this.$storage.setUniversal('strategy', name);
 
         // Call mounted hook on active strategy
         return this.mounted();
@@ -152,7 +149,7 @@ export class Auth {
 
         return Promise.resolve(this.getStrategy().mounted!(...args)).catch(
             (error) => {
-                this.callOnError(error, { method: "mounted" });
+                this.callOnError(error, { method: 'mounted' });
                 return Promise.reject(error);
             }
         );
@@ -169,7 +166,7 @@ export class Auth {
 
         return this.wrapLogin(this.getStrategy().login(...args)).catch(
             (error) => {
-                this.callOnError(error, { method: "login" });
+                this.callOnError(error, { method: 'login' });
                 return Promise.reject(error);
             }
         );
@@ -182,7 +179,7 @@ export class Auth {
 
         return Promise.resolve(this.getStrategy().fetchUser(...args)).catch(
             (error) => {
-                this.callOnError(error, { method: "fetchUser" });
+                this.callOnError(error, { method: 'fetchUser' });
                 return Promise.reject(error);
             }
         );
@@ -196,7 +193,7 @@ export class Auth {
 
         return Promise.resolve(this.getStrategy().logout!(...args)).catch(
             (error) => {
-                this.callOnError(error, { method: "logout" });
+                this.callOnError(error, { method: 'logout' });
                 return Promise.reject(error);
             }
         );
@@ -213,7 +210,7 @@ export class Auth {
         }
 
         return Promise.resolve(this.getStrategy().setUserToken!(token, refreshToken)).catch((error) => {
-            this.callOnError(error, { method: "setUserToken" });
+            this.callOnError(error, { method: 'setUserToken' });
             return Promise.reject(error);
         });
     }
@@ -236,7 +233,7 @@ export class Auth {
         }
 
         return Promise.resolve((this.getStrategy() as RefreshableScheme).refreshController.handleRefresh()).catch((error) => {
-            this.callOnError(error, { method: "refreshTokens" });
+            this.callOnError(error, { method: 'refreshTokens' });
             return Promise.reject(error);
         });
     }
@@ -262,7 +259,7 @@ export class Auth {
     // ---------------------------------------------------------------
 
     setUser(user: any): void {
-        this.$storage.setState("user", user);
+        this.$storage.setState('user', user);
 
         let check = { valid: Boolean(user) };
 
@@ -272,26 +269,26 @@ export class Auth {
         }
 
         // Update `loggedIn` state
-        this.$storage.setState("loggedIn", check.valid);
+        this.$storage.setState('loggedIn', check.valid);
     }
 
     async request(endpoint: HTTPRequest, defaults: HTTPRequest = {}): Promise<HTTPResponse | void> {
 
-        const request = typeof defaults === "object" ? Object.assign({}, defaults, endpoint) : endpoint;
+        const request = typeof defaults === 'object' ? Object.assign({}, defaults, endpoint) : endpoint;
         const method = request.method ? request.method.toLowerCase() : 'get'
 
-        if (request.baseURL === "") {
+        if (request.baseURL === '') {
             // @ts-ignore
             request.baseURL = requrl(process.server ? this.ctx.ssrContext?.event.req : undefined);
         }
 
         if (!this.ctx.$http) {
-            return Promise.reject(new Error("[AUTH] add the @nuxtjs-alt/http module to nuxt.config file"));
+            return Promise.reject(new Error('[AUTH] add the @nuxtjs-alt/http module to nuxt.config file'));
         }
 
         return this.ctx.$http['$' + method](request).catch((error: Error) => {
             // Call all error handlers
-            this.callOnError(error, { method: "request" });
+            this.callOnError(error, { method: 'request' });
 
             // Throw error
             return Promise.reject(error);
@@ -304,13 +301,13 @@ export class Auth {
         if ((this.getStrategy() as TokenableScheme).token) {
             const token = (this.getStrategy() as TokenableScheme).token!.get();
 
-            const tokenName = (this.getStrategy() as TokenableScheme).options.token!.name || "Authorization";
+            const tokenName = (this.getStrategy() as TokenableScheme).options.token!.name || 'Authorization';
 
             if (!request.headers) {
                 request.headers = {};
             }
 
-            if (!request.headers[tokenName as keyof typeof request.headers] && isSet(token) && token && typeof token === "string") {
+            if (!request.headers[tokenName as keyof typeof request.headers] && isSet(token) && token && typeof token === 'string') {
                 request.headers[tokenName as keyof typeof request.headers] = token;
             }
         }
@@ -319,7 +316,7 @@ export class Auth {
     }
 
     async wrapLogin(promise: Promise<HTTPResponse | void>): Promise<HTTPResponse | void> {
-        this.$storage.setState("busy", true);
+        this.$storage.setState('busy', true);
         this.error = undefined;
 
         return Promise.resolve(promise).then((response) => {
@@ -372,14 +369,14 @@ export class Auth {
 
         // Apply rewrites
         if (this.options.rewriteRedirects) {
-            if (name === "login" && isRelativeURL(from) && !isSameURL(this.ctx, to, from)) {
-                this.$storage.setUniversal("redirect", from);
+            if (name === 'login' && isRelativeURL(from) && !isSameURL(this.ctx, to, from)) {
+                this.$storage.setUniversal('redirect', from);
             }
 
-            if (name === "home") {
-                const redirect = this.$storage.getUniversal("redirect") as string;
+            if (name === 'home') {
+                const redirect = this.$storage.getUniversal('redirect') as string;
 
-                this.$storage.setUniversal("redirect", null);
+                this.$storage.setUniversal('redirect', null);
 
                 if (isRelativeURL(redirect)) {
                     to = redirect;
@@ -396,12 +393,12 @@ export class Auth {
         }
 
         const query = route ? route.query : activeRoute.query;
-        const queryString = Object.keys(query).map((key) => key + "=" + query[key]).join("&");
+        const queryString = Object.keys(query).map((key) => key + '=' + query[key]).join('&');
 
         if (!router) {
-            window.location.replace(to + (queryString ? "?" + queryString : ""));
+            window.location.replace(to + (queryString ? '?' + queryString : ''));
         } else {
-            activeRouter.push(to + (queryString ? "?" + queryString : ""));
+            activeRouter.push(to + (queryString ? '?' + queryString : ''));
         }
     }
 

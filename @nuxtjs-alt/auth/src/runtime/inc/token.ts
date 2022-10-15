@@ -1,9 +1,9 @@
-import type { JwtPayload } from "jwt-decode";
-import type { TokenableScheme } from "../../types";
-import type { Storage } from "../core";
-import { addTokenPrefix } from "../../utils";
-import { TokenStatus } from "./token-status";
-import decode from "jwt-decode";
+import type { JwtPayload } from 'jwt-decode';
+import type { TokenableScheme } from '../../types';
+import type { Storage } from '../core';
+import { addTokenPrefix } from '../../utils';
+import { TokenStatus } from './token-status';
+import decode from 'jwt-decode';
 
 export class Token {
     scheme: TokenableScheme;
@@ -26,7 +26,7 @@ export class Token {
         this.#setToken(token);
         this.#updateExpiration(token, expiresIn);
 
-        if (typeof token === "string") {
+        if (typeof token === 'string') {
             this.scheme.requestHandler.setHeader(token);
         }
 
@@ -37,7 +37,7 @@ export class Token {
         const token = this.#syncToken();
         this.#syncExpiration();
 
-        if (typeof token === "string") {
+        if (typeof token === 'string') {
             this.scheme.requestHandler.setHeader(token);
         }
 
@@ -86,7 +86,7 @@ export class Token {
             // If the token is not jwt, we can't decode and refresh it, use tokenExpiresAt value
             tokenExpiration = tokenExpiresAtMillis;
 
-            if (!(error && error.name === "InvalidTokenError")) {
+            if (!(error && error.name === 'InvalidTokenError')) {
                 throw error;
             }
         }

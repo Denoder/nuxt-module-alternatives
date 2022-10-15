@@ -1,8 +1,8 @@
-import { ConfigurationDocumentRequestError } from "./configuration-document-request-error";
-import { OpenIDConnectScheme, OpenIDConnectSchemeEndpoints } from "../schemes";
-import { OpenIDConnectConfigurationDocument } from "../../types";
-import { Storage } from "../core/storage";
-import { defu } from "defu";
+import { ConfigurationDocumentRequestError } from './configuration-document-request-error';
+import { OpenIDConnectScheme, OpenIDConnectSchemeEndpoints } from '../schemes';
+import { OpenIDConnectConfigurationDocument } from '../../types';
+import { Storage } from '../core/storage';
+import { defu } from 'defu';
 
 // eslint-disable-next-line no-console
 const ConfigurationDocumentWarning = (message: string) =>
@@ -25,7 +25,7 @@ export class ConfigurationDocument {
     constructor(scheme: OpenIDConnectScheme, storage: Storage) {
         this.scheme = scheme;
         this.$storage = storage;
-        this.key = "_configuration_document." + this.scheme.name;
+        this.key = '_configuration_document.' + this.scheme.name;
     }
 
     #set(value: OpenIDConnectConfigurationDocument | boolean) {
@@ -73,10 +73,10 @@ export class ConfigurationDocument {
 
     validate() {
         const mapping = {
-            responseType: "response_types_supported",
-            scope: "scopes_supported",
-            grantType: "grant_types_supported",
-            acrValues: "acr_values_supported",
+            responseType: 'response_types_supported',
+            scope: 'scopes_supported',
+            grantType: 'grant_types_supported',
+            acrValues: 'acr_values_supported',
         };
 
         Object.keys(mapping).forEach((optionsKey) => {
@@ -85,7 +85,7 @@ export class ConfigurationDocument {
             const configDocumentValues = configDocument[configDocumentKey as keyof typeof configDocument];
             const optionsValues = this.scheme.options[optionsKey as keyof typeof this.scheme.options];
 
-            if (typeof configDocumentValues !== "undefined") {
+            if (typeof configDocumentValues !== 'undefined') {
                 if (Array.isArray(optionsValues) && Array.isArray(configDocumentValues)) {
                     optionsValues.forEach((optionsValue) => {
                         if (!configDocumentValues.includes(optionsValue)) {

@@ -1,7 +1,7 @@
-import type { ProviderPartialOptions, ProviderOptions } from "../types";
-import type { RefreshSchemeOptions } from "../runtime";
+import type { ProviderPartialOptions, ProviderOptions } from '../types';
+import type { RefreshSchemeOptions } from '../runtime';
 import type { Nuxt } from '@nuxt/schema'
-import { assignDefaults, assignAbsoluteEndpoints } from "../utils/provider";
+import { assignDefaults, assignAbsoluteEndpoints } from '../utils/provider';
 
 export interface LaravelJWTProviderOptions extends ProviderOptions, RefreshSchemeOptions {
     url: string;
@@ -11,28 +11,28 @@ export function laravelJWT(nuxt: Nuxt, strategy: ProviderPartialOptions<LaravelJ
     const { url } = strategy;
 
     if (!url) {
-        throw new Error("url is required for laravel jwt!");
+        throw new Error('url is required for laravel jwt!');
     }
 
     const DEFAULTS: typeof strategy = {
-        name: "laravelJWT",
-        scheme: "laravelJWT",
+        name: 'laravelJWT',
+        scheme: 'laravelJWT',
         endpoints: {
             login: {
-                url: url + "/api/auth/login",
+                url: url + '/api/auth/login',
             },
             refresh: {
-                url: url + "/api/auth/refresh",
+                url: url + '/api/auth/refresh',
             },
             logout: {
-                url: url + "/api/auth/logout",
+                url: url + '/api/auth/logout',
             },
             user: {
-                url: url + "/api/auth/user",
+                url: url + '/api/auth/user',
             },
         },
         token: {
-            property: "access_token",
+            property: 'access_token',
             maxAge: 3600,
         },
         refreshToken: {

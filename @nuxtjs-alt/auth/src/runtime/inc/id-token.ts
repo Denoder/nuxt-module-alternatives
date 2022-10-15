@@ -1,8 +1,8 @@
-import decode, { JwtPayload } from "jwt-decode";
-import { addTokenPrefix } from "../../utils";
-import type { IdTokenableScheme } from "../../types";
-import type { Storage } from "../core";
-import { TokenStatus } from "./token-status";
+import decode, { JwtPayload } from 'jwt-decode';
+import { addTokenPrefix } from '../../utils';
+import type { IdTokenableScheme } from '../../types';
+import type { Storage } from '../core';
+import { TokenStatus } from './token-status';
 
 export class IdToken {
     scheme: IdTokenableScheme;
@@ -76,7 +76,7 @@ export class IdToken {
             // If the token is not jwt, we can't decode and refresh it, use tokenExpiresAt value
             idTokenExpiration = tokenExpiresAtMillis;
 
-            if (!(error && error.name === "InvalidTokenError")) {
+            if (!(error && error.name === 'InvalidTokenError')) {
                 throw error;
             }
         }
@@ -99,7 +99,7 @@ export class IdToken {
 
     userInfo() {
         const idToken = this.get();
-        if (typeof idToken === "string") {
+        if (typeof idToken === 'string') {
             return decode(idToken);
         }
     }

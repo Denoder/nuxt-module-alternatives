@@ -1,7 +1,7 @@
 export enum TokenStatusEnum {
-    UNKNOWN = "UNKNOWN",
-    VALID = "VALID",
-    EXPIRED = "EXPIRED",
+    UNKNOWN = 'UNKNOWN',
+    VALID = 'VALID',
+    EXPIRED = 'EXPIRED',
 }
 
 export class TokenStatus {

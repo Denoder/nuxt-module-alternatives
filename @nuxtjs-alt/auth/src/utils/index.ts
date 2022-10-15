@@ -1,23 +1,23 @@
-import type { RouteLocationNormalized, RouteRecordNormalized, RouteComponent } from "vue-router";
-import type { RecursivePartial } from "../types";
-import type { NuxtApp } from "nuxt/app";
+import type { RouteLocationNormalized, RouteRecordNormalized, RouteComponent } from 'vue-router';
+import type { RecursivePartial } from '../types';
+import type { NuxtApp } from 'nuxt/app';
 
-export const isUnset = (o: any): boolean => typeof o === "undefined" || o === null;
+export const isUnset = (o: any): boolean => typeof o === 'undefined' || o === null;
 
 export const isSet = (o: any): boolean => !isUnset(o);
 
 export const isSameURL = (ctx: NuxtApp, a: string, b: string): boolean => normalizePath(a, ctx) === normalizePath(b, ctx);
 
 export function isRelativeURL(u: string) {
-    return (u && u.length && new RegExp(["^\\/([a-zA-Z0-9@\\-%_~.:]", "[/a-zA-Z0-9@\\-%_~.:]*)?", "([?][^#]*)?(#[^#]*)?$"].join("")).test(u));
+    return (u && u.length && new RegExp(['^\\/([a-zA-Z0-9@\\-%_~.:]', '[/a-zA-Z0-9@\\-%_~.:]*)?', '([?][^#]*)?(#[^#]*)?$'].join('')).test(u));
 }
 
 export function parseQuery(queryString: string): Record<string, any> {
     const query: any = {};
-    const pairs = queryString.split("&");
+    const pairs = queryString.split('&');
     for (let i = 0; i < pairs.length; i++) {
-        const pair = pairs[i].split("=");
-        query[decodeURIComponent(pair[0]) as keyof typeof query] = decodeURIComponent(pair[1] || "");
+        const pair = pairs[i].split('=');
+        query[decodeURIComponent(pair[0]) as keyof typeof query] = decodeURIComponent(pair[1] || '');
     }
     return query;
 }
@@ -26,9 +26,9 @@ export function encodeQuery(queryObject: {
     [key: string]: string | number | boolean;
 }): string {
     return Object.entries(queryObject)
-        .filter(([_key, value]) => typeof value !== "undefined")
-        .map(([key, value]) => encodeURIComponent(key) + (value != null ? "=" + encodeURIComponent(value) : ""))
-        .join("&");
+        .filter(([_key, value]) => typeof value !== 'undefined')
+        .map(([key, value]) => encodeURIComponent(key) + (value != null ? '=' + encodeURIComponent(value) : ''))
+        .join('&');
 }
 
 export function routeOption(route: RouteLocationNormalized, key: string, value: string | boolean): boolean {
@@ -46,28 +46,28 @@ export function getMatchedComponents(route: RouteLocationNormalized, matches: un
     ]
 }
 
-export function normalizePath(path: string = "", ctx?: NuxtApp): string {
+export function normalizePath(path: string = '', ctx?: NuxtApp): string {
     // Remove query string
-    let result = path.split("?")[0];
+    let result = path.split('?')[0];
 
     // Remove base path
     if (ctx && ctx.$config.app.baseURL) {
-        result = result.replace(ctx.$config.app.baseURL, "/");
+        result = result.replace(ctx.$config.app.baseURL, '/');
     }
 
     // Remove redundant / from the end of path
-    if (result.charAt(result.length - 1) === "/") {
+    if (result.charAt(result.length - 1) === '/') {
         result = result.slice(0, -1);
     }
 
     // Remove duplicate slashes
-    result = result.replace(/\/+/g, "/");
+    result = result.replace(/\/+/g, '/');
 
     return result;
 }
 
 export function encodeValue(val: any): string {
-    if (typeof val === "string") {
+    if (typeof val === 'string') {
         return val;
     }
     return JSON.stringify(val);
@@ -75,7 +75,7 @@ export function encodeValue(val: any): string {
 
 export function decodeValue(val: any): any {
     // Try to parse as json
-    if (typeof val === "string") {
+    if (typeof val === 'string') {
         try {
             return JSON.parse(val);
         } catch (_) {}
@@ -94,7 +94,7 @@ export function decodeValue(val: any): any {
  * @return { * }          A property value
  */
 export function getProp(holder: any, propName: string | false): any {
-    if (!propName || !holder || typeof holder !== "object") {
+    if (!propName || !holder || typeof holder !== 'object') {
         return holder;
     }
 
@@ -102,7 +102,7 @@ export function getProp(holder: any, propName: string | false): any {
         return holder[propName];
     }
 
-    const propParts = Array.isArray(propName) ? propName : (propName as string).split(".");
+    const propParts = Array.isArray(propName) ? propName : (propName as string).split('.');
 
     let result = holder;
     while (propParts.length && result) {
@@ -112,32 +112,32 @@ export function getProp(holder: any, propName: string | false): any {
     return result;
 }
 
-// Ie "Bearer " + token
+// Ie 'Bearer ' + token
 export function addTokenPrefix(token: string | boolean, tokenType: string | false): string | boolean {
-    if (!token || !tokenType || typeof token !== "string" || token.startsWith(tokenType)) {
+    if (!token || !tokenType || typeof token !== 'string' || token.startsWith(tokenType)) {
         return token;
     }
 
-    return tokenType + " " + token;
+    return tokenType + ' ' + token;
 }
 
 export function removeTokenPrefix(token: string | boolean, tokenType: string | false): string | boolean {
-    if (!token || !tokenType || typeof token !== "string") {
+    if (!token || !tokenType || typeof token !== 'string') {
         return token;
     }
 
-    return token.replace(tokenType + " ", "");
+    return token.replace(tokenType + ' ', '');
 }
 
 export function urlJoin(...args: string[]): string {
     return args
-        .join("/")
-        .replace(/[/]+/g, "/")
-        .replace(/^(.+):\//, "$1://")
-        .replace(/^file:/, "file:/")
-        .replace(/\/(\?|&|#[^!])/g, "$1")
-        .replace(/\?/g, "&")
-        .replace("&", "?");
+        .join('/')
+        .replace(/[/]+/g, '/')
+        .replace(/^(.+):\//, '$1://')
+        .replace(/^file:/, 'file:/')
+        .replace(/\/(\?|&|#[^!])/g, '$1')
+        .replace(/\?/g, '&')
+        .replace('&', '?');
 }
 
 export function cleanObj<T extends Record<string, any>>(obj: T): RecursivePartial<T> {
@@ -150,9 +150,9 @@ export function cleanObj<T extends Record<string, any>>(obj: T): RecursivePartia
     return obj as RecursivePartial<T>;
 }
 
-const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 export function randomString(length: number) {
-    let result = "";
+    let result = '';
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));

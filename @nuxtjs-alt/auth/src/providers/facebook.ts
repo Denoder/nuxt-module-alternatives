@@ -1,18 +1,18 @@
-import type { ProviderPartialOptions, ProviderOptions } from "../types";
-import type { Oauth2SchemeOptions } from "../runtime";
+import type { ProviderPartialOptions, ProviderOptions } from '../types';
+import type { Oauth2SchemeOptions } from '../runtime';
 import type { Nuxt } from '@nuxt/schema'
-import { assignDefaults } from "../utils/provider";
+import { assignDefaults } from '../utils/provider';
 
 export interface FacebookProviderOptions extends ProviderOptions, Oauth2SchemeOptions {}
 
 export function facebook(nuxt: Nuxt, strategy: ProviderPartialOptions<FacebookProviderOptions>): void {
     const DEFAULTS: typeof strategy = {
-        scheme: "oauth2",
+        scheme: 'oauth2',
         endpoints: {
-            authorization: "https://facebook.com/v2.12/dialog/oauth",
-            userInfo: "https://graph.facebook.com/v2.12/me?fields=about,name,picture{url},email",
+            authorization: 'https://facebook.com/v2.12/dialog/oauth',
+            userInfo: 'https://graph.facebook.com/v2.12/me?fields=about,name,picture{url},email',
         },
-        scope: ["public_profile", "email"],
+        scope: ['public_profile', 'email'],
     };
 
     assignDefaults(strategy, DEFAULTS);

@@ -1,12 +1,12 @@
-import type { ModuleOptions } from "./types";
-import { addImports, addTemplate, defineNuxtModule, addPluginTemplate, createResolver } from "@nuxt/kit";
-import { name, version } from "../package.json";
-import { resolveStrategies } from "./resolve";
-import { moduleDefaults } from "./options";
-import { getAuthDTS, getAuthPlugin } from "./plugin";
+import type { ModuleOptions } from './types';
+import { addImports, addTemplate, defineNuxtModule, addPluginTemplate, createResolver } from '@nuxt/kit';
+import { name, version } from '../package.json';
+import { resolveStrategies } from './resolve';
+import { moduleDefaults } from './options';
+import { getAuthDTS, getAuthPlugin } from './plugin';
 import { defu } from 'defu';
 
-const CONFIG_KEY = "auth";
+const CONFIG_KEY = 'auth';
 
 export default defineNuxtModule({
     meta: {
@@ -14,7 +14,7 @@ export default defineNuxtModule({
         version,
         configKey: CONFIG_KEY,
         compatibility: {
-            nuxt: "^3.0.0-rc.9",
+            nuxt: '^3.0.0-rc.9',
         },
     },
     defaults: moduleDefaults,
@@ -29,8 +29,8 @@ export default defineNuxtModule({
         const composables = resolver.resolve('runtime/composables')
 
         // Aliases
-        const runtime = resolver.resolve("runtime");
-        nuxt.options.alias["#auth/runtime"] = runtime;
+        const runtime = resolver.resolve('runtime');
+        nuxt.options.alias['#auth/runtime'] = runtime;
         nuxt.options.build.transpile.push(runtime)
 
         // Resolve strategies
@@ -50,12 +50,12 @@ export default defineNuxtModule({
         });
 
         // Set defaultStrategy
-        options.defaultStrategy = options.defaultStrategy || strategies.length ? strategies[0].name : "";
+        options.defaultStrategy = options.defaultStrategy || strategies.length ? strategies[0].name : '';
 
         // Add auth plugin
         addPluginTemplate({
             getContents: () => getAuthPlugin({ options, strategies, strategyScheme, schemeImports }),
-            filename: "auth.plugin.mjs",
+            filename: 'auth.plugin.mjs',
         });
 
         addTemplate({
@@ -69,10 +69,10 @@ export default defineNuxtModule({
         ])
 
         if (options.enableMiddleware) {
-            nuxt.hook("app:resolve", (app) => {
+            nuxt.hook('app:resolve', (app) => {
                 app.middleware.push({
-                    name: "auth",
-                    path: resolver.resolve("runtime/core/middleware"),
+                    name: 'auth',
+                    path: resolver.resolve('runtime/core/middleware'),
                     global: options.globalMiddleware,
                 });
             });

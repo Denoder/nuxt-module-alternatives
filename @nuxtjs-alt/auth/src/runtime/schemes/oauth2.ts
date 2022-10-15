@@ -1,11 +1,11 @@
-import type { RefreshableScheme, SchemePartialOptions, SchemeCheck, RefreshableSchemeOptions, UserOptions, SchemeOptions, HTTPResponse, EndpointsOption, TokenableSchemeOptions } from "../../types";
+import type { RefreshableScheme, SchemePartialOptions, SchemeCheck, RefreshableSchemeOptions, UserOptions, SchemeOptions, HTTPResponse, EndpointsOption, TokenableSchemeOptions } from '../../types';
 import type { IncomingMessage } from 'http'
-import type { Auth } from "../core";
-import { encodeQuery, getProp, normalizePath, parseQuery, removeTokenPrefix, urlJoin, randomString } from "../../utils";
-import { RefreshController, RequestHandler, ExpiredAuthSessionError, Token, RefreshToken } from "../inc";
-import { BaseScheme } from "./base";
-import { useRoute } from "nuxt/app";
-import requrl from "requrl";
+import type { Auth } from '../core';
+import { encodeQuery, getProp, normalizePath, parseQuery, removeTokenPrefix, urlJoin, randomString } from '../../utils';
+import { RefreshController, RequestHandler, ExpiredAuthSessionError, Token, RefreshToken } from '../inc';
+import { BaseScheme } from './base';
+import { useRoute } from 'nuxt/app';
+import requrl from 'requrl';
 
 export interface Oauth2SchemeEndpoints extends EndpointsOption {
     authorization: string;
@@ -17,17 +17,17 @@ export interface Oauth2SchemeEndpoints extends EndpointsOption {
 export interface Oauth2SchemeOptions extends SchemeOptions, TokenableSchemeOptions, RefreshableSchemeOptions {
     endpoints: Oauth2SchemeEndpoints;
     user: UserOptions;
-    responseMode: "query.jwt" | "fragment.jwt" | "form_post.jwt" | "jwt";
-    responseType: "code" | "token" | "id_token" | "none" | string;
-    grantType: "implicit" | "authorization_code" | "client_credentials" | "password" | "refresh_token" | "urn:ietf:params:oauth:grant-type:device_code";
-    accessType: "online" | "offline";
+    responseMode: 'query.jwt' | 'fragment.jwt' | 'form_post.jwt' | 'jwt';
+    responseType: 'code' | 'token' | 'id_token' | 'none' | string;
+    grantType: 'implicit' | 'authorization_code' | 'client_credentials' | 'password' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:device_code';
+    accessType: 'online' | 'offline';
     redirectUri: string;
     logoutRedirectUri: string;
     clientId: string;
-    clientSecretTransport: "body" | "aurthorization_header";
+    clientSecretTransport: 'body' | 'aurthorization_header';
     scope: string | string[];
     state: string;
-    codeChallengeMethod: "implicit" | "S256" | "plain";
+    codeChallengeMethod: 'implicit' | 'S256' | 'plain';
     acrValues: string;
     audience: string;
     autoLogout: boolean;
@@ -37,12 +37,12 @@ export interface Oauth2SchemeOptions extends SchemeOptions, TokenableSchemeOptio
 }
 
 const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
-    name: "oauth2",
+    name: 'oauth2',
     accessType: undefined,
     redirectUri: undefined,
     logoutRedirectUri: undefined,
     clientId: undefined,
-    clientSecretTransport: "body",
+    clientSecretTransport: 'body',
     audience: undefined,
     grantType: undefined,
     responseMode: undefined,
@@ -56,25 +56,25 @@ const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
     },
     scope: [],
     token: {
-        property: "access_token",
-        type: "Bearer",
-        name: "Authorization",
+        property: 'access_token',
+        type: 'Bearer',
+        name: 'Authorization',
         maxAge: 1800,
         global: true,
-        prefix: "_token.",
-        expirationPrefix: "_token_expiration.",
+        prefix: '_token.',
+        expirationPrefix: '_token_expiration.',
     },
     refreshToken: {
-        property: "refresh_token",
+        property: 'refresh_token',
         maxAge: 60 * 60 * 24 * 30,
-        prefix: "_refresh_token.",
-        expirationPrefix: "_refresh_token_expiration.",
+        prefix: '_refresh_token.',
+        expirationPrefix: '_refresh_token_expiration.',
     },
     user: {
         property: false,
     },
-    responseType: "token",
-    codeChallengeMethod: "implicit",
+    responseType: 'token',
+    codeChallengeMethod: 'implicit',
     clientWindow: false,
     clientWindowWidth: 400,
     clientWindowHeight: 600
@@ -107,13 +107,13 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     }
 
     protected get scope(): string {
-        return Array.isArray(this.options.scope) ? this.options.scope.join(" ") : this.options.scope;
+        return Array.isArray(this.options.scope) ? this.options.scope.join(' ') : this.options.scope;
     }
 
     protected get redirectURI(): string {
         // @ts-ignore
-        const basePath = this.$auth.ctx.$config.app.baseURL || "";
-        const path = normalizePath(basePath + "/" + this.$auth.options.redirect.callback); // Don't pass in context since we want the base path
+        const basePath = this.$auth.ctx.$config.app.baseURL || '';
+        const path = normalizePath(basePath + '/' + this.$auth.options.redirect.callback); // Don't pass in context since we want the base path
         return this.options.redirectUri || urlJoin(requrl(this.req), path);
     }
 
@@ -195,7 +195,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
 
     async login($opts: { state?: string; params?: any; nonce?: string } = {}): Promise<void> {
         const opts = {
-            protocol: "oauth2",
+            protocol: 'oauth2',
             response_type: this.options.responseType,
             access_type: this.options.accessType,
             client_id: this.options.clientId,
@@ -220,24 +220,24 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         // More Info: https://tools.ietf.org/html/draft-ietf-oauth-v2-threatmodel-06#section-4.6.2
         // Keycloak uses nonce for token as well, so support that too
         // https://github.com/nuxt-community/auth-module/pull/709
-        if (opts.response_type.includes("token") || opts.response_type.includes("id_token")) {
+        if (opts.response_type.includes('token') || opts.response_type.includes('id_token')) {
             opts.nonce = $opts.nonce || randomString(10);
         }
 
         if (opts.code_challenge_method) {
             switch (opts.code_challenge_method) {
-                case "plain":
-                case "S256":
+                case 'plain':
+                case 'S256':
                     {
                         const state = this.generateRandomString();
-                        this.$auth.$storage.setUniversal(this.name + ".pkce_state", state);
+                        this.$auth.$storage.setUniversal(this.name + '.pkce_state', state);
                         const codeVerifier = this.generateRandomString();
-                        this.$auth.$storage.setUniversal(this.name + ".pkce_code_verifier", codeVerifier);
-                        const codeChallenge = await this.pkceChallengeFromVerifier(codeVerifier, opts.code_challenge_method === "S256");
+                        this.$auth.$storage.setUniversal(this.name + '.pkce_code_verifier', codeVerifier);
+                        const codeChallenge = await this.pkceChallengeFromVerifier(codeVerifier, opts.code_challenge_method === 'S256');
                         opts.code_challenge = window.encodeURIComponent(codeChallenge);
                     }
                     break;
-                case "implicit":
+                case 'implicit':
                 default:
                     break;
             }
@@ -251,9 +251,9 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             opts.acr_values = this.options.acrValues;
         }
 
-        this.$auth.$storage.setUniversal(this.name + ".state", opts.state);
+        this.$auth.$storage.setUniversal(this.name + '.state', opts.state);
 
-        const url = this.options.endpoints.authorization + "?" + encodeQuery(opts);
+        const url = this.options.endpoints.authorization + '?' + encodeQuery(opts);
 
         if (opts.clientWindow) {
             if (this.#clientWindowReference === null || this.#clientWindowReference!.closed) {
@@ -305,7 +305,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                 client_id: this.options.clientId,
                 logout_uri: this.logoutRedirectURI,
             };
-            const url = this.options.endpoints.logout + "?" + encodeQuery(opts);
+            const url = this.options.endpoints.logout + '?' + encodeQuery(opts);
             window.location.replace(url);
         }
         return this.$auth.reset();
@@ -351,26 +351,26 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         }
 
         // Validate state
-        const state = this.$auth.$storage.getUniversal(this.name + ".state");
-        this.$auth.$storage.setUniversal(this.name + ".state", null);
+        const state = this.$auth.$storage.getUniversal(this.name + '.state');
+        this.$auth.$storage.setUniversal(this.name + '.state', null);
         if (state && parsedQuery.state !== state) {
             return;
         }
 
         // -- Authorization Code Grant --
-        if (this.options.responseType === "code" && parsedQuery.code) {
+        if (this.options.responseType === 'code' && parsedQuery.code) {
             let codeVerifier: any;
 
             // Retrieve code verifier and remove it from storage
-            if (this.options.codeChallengeMethod && this.options.codeChallengeMethod !== "implicit") {
-                codeVerifier = this.$auth.$storage.getUniversal(this.name + ".pkce_code_verifier");
-                this.$auth.$storage.setUniversal(this.name + ".pkce_code_verifier", null);
+            if (this.options.codeChallengeMethod && this.options.codeChallengeMethod !== 'implicit') {
+                codeVerifier = this.$auth.$storage.getUniversal(this.name + '.pkce_code_verifier');
+                this.$auth.$storage.setUniversal(this.name + '.pkce_code_verifier', null);
             }
 
             const response = await this.$auth.request({
-                method: "post",
+                method: 'post',
                 url: this.options.endpoints.token,
-                baseURL: "",
+                baseURL: '',
                 body: encodeQuery({
                     code: parsedQuery.code as string,
                     client_id: this.options.clientId as string,
@@ -406,7 +406,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         }
         // Redirect to home
         else if (this.$auth.options.watchLoggedIn) {
-            this.$auth.redirect("home", false, false);
+            this.$auth.redirect('home', false, false);
             return true; // True means a redirect happened
         }
     }
@@ -434,21 +434,21 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         this.requestHandler.clearHeader();
 
         const response = await this.$auth.request({
-            method: "post",
+            method: 'post',
             url: this.options.endpoints.token,
-            baseURL: "",
+            baseURL: '',
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
+                'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: encodeQuery({
                 refresh_token: removeTokenPrefix(refreshToken, this.options.token!.type),
                 scopes: this.scope,
                 client_id: this.options.clientId as string,
-                grant_type: "refresh_token",
+                grant_type: 'refresh_token',
             }),
         })
         .catch((error) => {
-            this.$auth.callOnError(error, { method: "refreshToken" });
+            this.$auth.callOnError(error, { method: 'refreshToken' });
             return Promise.reject(error);
         });
 
@@ -479,13 +479,13 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     protected generateRandomString(): string {
         const array = new Uint32Array(28); // this is of minimum required length for servers with PKCE-enabled
         window.crypto.getRandomValues(array);
-        return Array.from(array, (dec) => ("0" + dec.toString(16)).slice(-2)).join("");
+        return Array.from(array, (dec) => ('0' + dec.toString(16)).slice(-2)).join('');
     }
 
     #sha256(plain: string): Promise<ArrayBuffer> {
         const encoder = new TextEncoder();
         const data = encoder.encode(plain);
-        return window.crypto.subtle.digest("SHA-256", data);
+        return window.crypto.subtle.digest('SHA-256', data);
     }
 
     #base64UrlEncode(str: ArrayBuffer): string {
@@ -495,8 +495,8 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         // (replace + with -, replace / with _, trim trailing =)
         // @ts-ignore
         return btoa(String.fromCharCode.apply(null, new Uint8Array(str)))
-            .replace(/\+/g, "-")
-            .replace(/\//g, "_")
-            .replace(/=+$/, "");
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
     }
 }

@@ -1,9 +1,9 @@
-import type { Oauth2SchemeOptions, RefreshSchemeOptions, LocalSchemeOptions, CookieSchemeOptions } from "../runtime";
-import type { StrategyOptions, HTTPRequest } from "../types";
+import type { Oauth2SchemeOptions, RefreshSchemeOptions, LocalSchemeOptions, CookieSchemeOptions } from '../runtime';
+import type { StrategyOptions, HTTPRequest } from '../types';
 import type { Nuxt } from '@nuxt/schema'
-import { addServerHandler, addTemplate } from "@nuxt/kit";
+import { addServerHandler, addTemplate } from '@nuxt/kit';
 import { join } from 'pathe';
-import { defu } from "defu";
+import { defu } from 'defu';
 
 export function assignDefaults<SOptions extends StrategyOptions>(strategy: SOptions, defaults: SOptions): void {
     Object.assign(strategy, defu(strategy, defaults));
@@ -24,7 +24,7 @@ export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOption
     strategy.endpoints!.token = endpoint;
 
     // Set response_type to code
-    strategy.responseType = "code";
+    strategy.responseType = 'code';
 
     addTemplate({
         filename: 'auth-addAuthorize.ts',
@@ -86,7 +86,7 @@ export function assignAbsoluteEndpoints<SOptions extends StrategyOptions<(LocalS
             const endpoint = endpoints[key];
 
             if (endpoint) {
-                if (typeof endpoint === "object") {
+                if (typeof endpoint === 'object') {
                     if (!endpoint.url || endpoint.url.startsWith(url)) {
                         continue;
                     }

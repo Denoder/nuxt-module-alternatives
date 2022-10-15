@@ -1,7 +1,7 @@
-import type { HTTPRequest, HTTPResponse } from ".";
-import type { Auth } from "../runtime/core";
-import type { Token, IdToken, RefreshToken, RefreshController, RequestHandler,} from "../runtime/inc";
-import type { PartialExcept } from "./utils";
+import type { HTTPRequest, HTTPResponse } from '.';
+import type { Auth } from '../runtime/core';
+import type { Token, IdToken, RefreshToken, RefreshController, RequestHandler,} from '../runtime/inc';
+import type { PartialExcept } from './utils';
 
 export interface UserOptions {
     property: string | false;

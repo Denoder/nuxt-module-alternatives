@@ -1,8 +1,8 @@
-import type { EndpointsOption, SchemePartialOptions, SchemeCheck, CookieUserOptions, HTTPRequest, HTTPResponse } from "../../types";
-import type { Auth } from "..";
-import { BaseScheme } from "./base";
-import { getProp } from "../../utils";
-import { RequestHandler } from "../inc";
+import type { EndpointsOption, SchemePartialOptions, SchemeCheck, CookieUserOptions, HTTPRequest, HTTPResponse } from '../../types';
+import type { Auth } from '..';
+import { BaseScheme } from './base';
+import { getProp } from '../../utils';
+import { RequestHandler } from '../inc';
 
 export interface CookieSchemeEndpoints extends EndpointsOption {
     login: HTTPRequest;
@@ -24,7 +24,7 @@ export interface CookieSchemeOptions {
 }
 
 const DEFAULTS: SchemePartialOptions<CookieSchemeOptions> = {
-    name: "cookie",
+    name: 'cookie',
     cookie: {
         name: undefined,
         server: false,
@@ -32,16 +32,16 @@ const DEFAULTS: SchemePartialOptions<CookieSchemeOptions> = {
     endpoints: {
         csrf: false,
         login: {
-            url: "/api/auth/login",
-            method: "post",
+            url: '/api/auth/login',
+            method: 'post',
         },
         logout: {
-            url: "/api/auth/logout",
-            method: "post",
+            url: '/api/auth/logout',
+            method: 'post',
         },
         user: {
-            url: "/api/auth/user",
-            method: "get",
+            url: '/api/auth/user',
+            method: 'get',
         },
     },
     user: {
@@ -60,14 +60,12 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT);
 
         // Initialize Request Interceptor
-        const handler = this.$auth.ctx.$http ? this.$auth.ctx.$http : this.$auth.ctx.$fetch
-        this.requestHandler = new RequestHandler(this, handler);
+        this.requestHandler = new RequestHandler(this, this.$auth.ctx.$http);
     }
 
     async mounted(): Promise<HTTPResponse | void> {
         if (process.server) {
-            const handler = this.$auth.ctx.$http ? this.$auth.ctx.$http : this.$auth.ctx.$fetch
-            handler.setHeader("referer", this.$auth.ctx.ssrContext?.event.req.headers.host);
+            this.$auth.ctx.$http.setHeader('referer', this.$auth.ctx.ssrContext?.event.req.headers.host);
         }
 
         // Initialize request interceptor
@@ -164,7 +162,7 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
                 return response;
             })
             .catch((error) => {
-                this.$auth.callOnError(error, { method: "fetchUser" });
+                this.$auth.callOnError(error, { method: 'fetchUser' });
                 return Promise.reject(error);
             });
     }
@@ -176,14 +174,14 @@ export class CookieScheme<OptionsT extends CookieSchemeOptions> extends BaseSche
         }
 
         // But reset regardless
-        this.$auth.redirect("logout");
+        this.$auth.redirect('logout');
         return this.$auth.reset();
     }
 
     reset({ resetInterceptor = true } = {}): void {
         if (this.options.cookie.name) {
             this.$auth.$storage.setCookie(this.options.cookie.name, null, {
-                prefix: "",
+                prefix: '',
             });
         }
 

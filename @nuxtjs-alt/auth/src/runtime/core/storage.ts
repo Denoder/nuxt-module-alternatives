@@ -1,8 +1,8 @@
-import type { ModuleOptions } from "../../types";
+import type { ModuleOptions } from '../../types';
 import type { NuxtApp } from 'nuxt/app'
-import { isUnset, isSet, decodeValue, encodeValue } from "../../utils";
-import { parse, serialize, CookieSerializeOptions } from "cookie-es";
-import { defineStore, StateTree } from "pinia";
+import { isUnset, isSet, decodeValue, encodeValue } from '../../utils';
+import { parse, serialize, CookieSerializeOptions } from 'cookie-es';
+import { defineStore, StateTree } from 'pinia';
 
 export class Storage {
     ctx: NuxtApp;
@@ -125,7 +125,7 @@ export class Storage {
         } else {
             this.state = {};
 
-            console.warn("[AUTH] The pinia store is not activated. This might cause issues in auth module behavior, like redirects not working properly. To activate it, please install it and add it to your config after this module");
+            console.warn('[AUTH] The pinia store is not activated. This might cause issues in auth module behavior, like redirects not working properly. To activate it, please install it and add it to your config after this module');
         }
     }
 
@@ -138,7 +138,7 @@ export class Storage {
     }
 
     setState<V extends any>(key: string, value: V): V {
-        if (key[0] === "_") {
+        if (key[0] === '_') {
             this.#state[key] = value;
         }
         else if (this.#piniaEnabled) {
@@ -154,7 +154,7 @@ export class Storage {
     }
 
     getState(key: string): any {
-        if (key[0] !== "_") {
+        if (key[0] !== '_') {
             return this.state[key];
         } else {
             return this.#state[key];
@@ -164,7 +164,7 @@ export class Storage {
     watchState(watchKey: string, fn: (value: any) => void) {
         if (this.#piniaEnabled) {
             return this.#initStore.$onAction((context: { name: string, args: any[] }) => {
-                if (context.name === "SET") {
+                if (context.name === 'SET') {
                     const { key, value } = context.args[0];
                     if (key === watchKey) {
                         fn(value);
@@ -229,7 +229,7 @@ export class Storage {
 
     getLocalStoragePrefix(): string {
         if (!this.options.localStorage) {
-            throw new Error("Cannot get prefix; localStorage is off");
+            throw new Error('Cannot get prefix; localStorage is off');
         }
 
         return this.options.localStorage.prefix;
@@ -249,7 +249,7 @@ export class Storage {
         // There's no great way to check if localStorage is enabled; most solutions
         // error out. So have to use this hacky approach :\
         // https://stackoverflow.com/questions/16427636/check-if-localstorage-is-available
-        const test = "test";
+        const test = 'test';
 
         try {
             localStorage.setItem(test, test);
@@ -257,7 +257,7 @@ export class Storage {
             return true;
         } catch (e) {
             if (!this.options.ignoreExceptions) {
-                console.warn("[AUTH] Local storage is enabled in config, but the browser does not support it.");
+                console.warn('[AUTH] Local storage is enabled in config, but the browser does not support it.');
             }
             return false;
         }
@@ -314,7 +314,7 @@ export class Storage {
 
     getSessionStoragePrefix(): string {
         if (!this.options.sessionStorage) {
-            throw new Error("Cannot get prefix; sessionStorage is off");
+            throw new Error('Cannot get prefix; sessionStorage is off');
         }
 
         return this.options.sessionStorage.prefix;
@@ -339,7 +339,7 @@ export class Storage {
             return true
         } catch (e) {
             if (!this.options.ignoreExceptions) {
-                console.warn("[AUTH] Session storage is enabled in config, but the browser does not support it.")
+                console.warn('[AUTH] Session storage is enabled in config, but the browser does not support it.')
             }
             return false
         }
@@ -356,7 +356,7 @@ export class Storage {
 
         const cookieStr = process.client ? document.cookie : this.ctx.ssrContext?.event.req.headers.cookie;
 
-        return parse(cookieStr || "") || {};
+        return parse(cookieStr || '') || {};
     }
 
     setCookie<V extends any>(key: string, value: V, options: { prefix?: string } = {}) {
@@ -379,7 +379,7 @@ export class Storage {
         }
 
         // Accept expires as a number for js-cookie compatiblity
-        if (typeof $options.expires === "number") {
+        if (typeof $options.expires === 'number') {
             $options.expires = new Date(Date.now() + $options.expires * 864e5);
         }
 
@@ -391,13 +391,13 @@ export class Storage {
         } 
         else if (process.server && this.ctx.ssrContext?.event.res) {
             // Send Set-Cookie header from server side
-            let cookies = (this.ctx.ssrContext?.event.res.getHeader("Set-Cookie") as string[]) || [];
+            let cookies = (this.ctx.ssrContext?.event.res.getHeader('Set-Cookie') as string[]) || [];
             if (!Array.isArray(cookies)) cookies = [cookies];
             cookies.unshift(serializedCookie);
 
-            this.ctx.ssrContext?.event.res.setHeader("Set-Cookie", cookies.filter(
+            this.ctx.ssrContext?.event.res.setHeader('Set-Cookie', cookies.filter(
                 (v, i, arr) => arr.findIndex( 
-                    (val) => val.startsWith(v.slice(0, v.indexOf("="))) 
+                    (val) => val.startsWith(v.slice(0, v.indexOf('='))) 
                 ) === i
             ));
         }
@@ -442,7 +442,7 @@ export class Storage {
         if (window.navigator.cookieEnabled) {
             return true;
         } else {
-            console.warn("[AUTH] Cookies are enabled in config, but the browser does not support it.");
+            console.warn('[AUTH] Cookies are enabled in config, but the browser does not support it.');
             return false;
         }
     }

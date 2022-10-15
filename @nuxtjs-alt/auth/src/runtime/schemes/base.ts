@@ -1,6 +1,6 @@
-import type { SchemeOptions } from "../../types";
-import type { Auth } from "..";
-import { defu } from "defu";
+import type { SchemeOptions } from '../../types';
+import type { Auth } from '..';
+import { defu } from 'defu';
 
 export class BaseScheme<OptionsT extends SchemeOptions> {
     options: OptionsT;

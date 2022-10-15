@@ -1,10 +1,10 @@
-import type { HTTPResponse, SchemeCheck, SchemePartialOptions } from "../../types";
-import type { Auth } from "..";
-import { Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions } from "./oauth2";
-import { encodeQuery, parseQuery, normalizePath, getProp } from "../../utils";
-import { IdToken, ConfigurationDocument } from "../inc";
-import { IdTokenableSchemeOptions } from "../../types";
-import { useRoute } from "nuxt/app";
+import type { HTTPResponse, SchemeCheck, SchemePartialOptions } from '../../types';
+import type { Auth } from '..';
+import { Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions } from './oauth2';
+import { encodeQuery, parseQuery, normalizePath, getProp } from '../../utils';
+import { IdToken, ConfigurationDocument } from '../inc';
+import { IdTokenableSchemeOptions } from '../../types';
+import { useRoute } from 'nuxt/app';
 
 export interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
     configuration: string;
@@ -15,17 +15,17 @@ export interface OpenIDConnectSchemeOptions extends Oauth2SchemeOptions, IdToken
 }
 
 const DEFAULTS: SchemePartialOptions<OpenIDConnectSchemeOptions> = {
-    name: "openIDConnect",
-    responseType: "code",
-    grantType: "authorization_code",
-    scope: ["openid", "profile", "offline_access"],
+    name: 'openIDConnect',
+    responseType: 'code',
+    grantType: 'authorization_code',
+    scope: ['openid', 'profile', 'offline_access'],
     idToken: {
-        property: "id_token",
+        property: 'id_token',
         maxAge: 1800,
-        prefix: "_id_token.",
-        expirationPrefix: "_id_token_expiration.",
+        prefix: '_id_token.',
+        expirationPrefix: '_id_token_expiration.',
     },
-    codeChallengeMethod: "S256",
+    codeChallengeMethod: 'S256',
 };
 
 export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = OpenIDConnectSchemeOptions> extends Oauth2Scheme<OptionsT> {
@@ -142,7 +142,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
                 id_token_hint: this.idToken.get(),
                 post_logout_redirect_uri: this.logoutRedirectURI,
             };
-            const url = this.options.endpoints.logout + "?" + encodeQuery(opts);
+            const url = this.options.endpoints.logout + '?' + encodeQuery(opts);
             window.location.replace(url);
         }
         return this.$auth.reset();
@@ -183,7 +183,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
             return;
         }
 
-        const hash = parseQuery(route.hash.substr(1));
+        const hash = parseQuery(route.hash.slice(1));
         const parsedQuery = Object.assign({}, route.query, hash);
 
         // accessToken/idToken
@@ -199,32 +199,30 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
         let idToken = parsedQuery[this.options.idToken.property] as string;
 
         // Validate state
-        const state = this.$auth.$storage.getUniversal(this.name + ".state");
-        this.$auth.$storage.setUniversal(this.name + ".state", null);
+        const state = this.$auth.$storage.getUniversal(this.name + '.state');
+        this.$auth.$storage.setUniversal(this.name + '.state', null);
         if (state && parsedQuery.state !== state) {
             return;
         }
 
         // -- Authorization Code Grant --
-        if (this.options.responseType === "code" && parsedQuery.code) {
-            let codeVerifier;
+        if (this.options.responseType === 'code' && parsedQuery.code) {
+            let codeVerifier: any;
 
             // Retrieve code verifier and remove it from storage
-            if (this.options.codeChallengeMethod && this.options.codeChallengeMethod !== "implicit") {
-                codeVerifier = this.$auth.$storage.getUniversal(
-                    this.name + ".pkce_code_verifier"
-                );
-                this.$auth.$storage.setUniversal(
-                    this.name + ".pkce_code_verifier",
-                    null
-                );
+            if (this.options.codeChallengeMethod && this.options.codeChallengeMethod !== 'implicit') {
+                codeVerifier = this.$auth.$storage.getUniversal(this.name + '.pkce_code_verifier');
+                this.$auth.$storage.setUniversal(this.name + '.pkce_code_verifier', null);
             }
 
             const response = await this.$auth.request({
-                method: "post",
+                method: 'post',
                 url: this.options.endpoints.token,
-                baseURL: "",
-                body: encodeQuery({
+                baseURL: '',
+                headers: {
+                    'content-type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
                     code: parsedQuery.code as string,
                     client_id: this.options.clientId,
                     redirect_uri: this.redirectURI,
@@ -232,7 +230,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
                     audience: this.options.audience,
                     grant_type: this.options.grantType,
                     code_verifier: codeVerifier,
-                }),
+                }).toString(),
             });
 
             token = (getProp(response, this.options.token!.property) as string) || token;
@@ -257,7 +255,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
         }
 
         // Redirect to home
-        this.$auth.redirect("home", false, false);
+        this.$auth.redirect('home', false, false);
 
         return true; // True means a redirect happened
     }

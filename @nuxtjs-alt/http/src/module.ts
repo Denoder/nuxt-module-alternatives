@@ -101,28 +101,43 @@ export default defineNuxtModule({
         ])
 
         addTemplate({
-            getContents: () => nitroHttp(),
-            filename: 'nitro-http.ts',
+            getContents: () => nuxt.options.dev ? devNitroHttp() : nitroHttp(),
+            filename: nuxt.options.dev ? 'nitro-http.mjs' : 'nitro-http.ts',
             write: true
         })
 
         // Add nitro plugin
         // ensure `nitro.plugins` is initialized
         nuxt.options.nitro.plugins = nuxt.options.nitro.plugins || []
-        nuxt.options.nitro.plugins.push(join(nuxt.options.buildDir, 'nitro-http.ts'))
+        nuxt.options.nitro.plugins.push(join(nuxt.options.buildDir, nuxt.options.dev ? 'nitro-http.mjs' : 'nitro-http.ts'))
     }
 })
+
+function devNitroHttp()
+{
+return `
+import { createInstance } from '@refactorjs/ofetch'
+
+export default function (nitroApp) {
+    // should inherit defaults from $fetch
+    const $http = createInstance({}, $fetch)
+
+    globalThis.$http = $http
+}
+`
+}
 
 function nitroHttp()
 {
 return `import type { NitroAppPlugin } from 'nitropack'
+import type { $Fetch } from 'ohmyfetch'
 import { createInstance } from '@refactorjs/ofetch'
 
 export default <NitroAppPlugin> function (nitroApp) {
     // @ts-ignore
     const config = useRuntimeConfig()
-    // @ts-ignore
-    const $http = createInstance({ baseURL: config.app.baseURL }, $fetch)
+    // to-do: allow same config from http to be used in nitro
+    const $http = createInstance({ baseURL: config.app.baseURL }, $fetch as $Fetch)
 
     globalThis.$http = $http
 }

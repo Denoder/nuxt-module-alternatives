@@ -1,7 +1,7 @@
-import type { ProviderPartialOptions, HTTPRequest, ProviderOptions } from "../types";
-import type { CookieSchemeOptions } from "../runtime";
+import type { ProviderPartialOptions, HTTPRequest, ProviderOptions } from '../types';
+import type { CookieSchemeOptions } from '../runtime';
 import type { Nuxt } from '@nuxt/schema'
-import { assignDefaults } from "../utils/provider";
+import { assignDefaults } from '../utils/provider';
 
 export interface LaravelSanctumProviderOptions extends ProviderOptions, CookieSchemeOptions {}
 
@@ -11,10 +11,10 @@ export function laravelSanctum(nuxt: Nuxt, strategy: ProviderPartialOptions<Lara
     };
 
     const DEFAULTS: typeof strategy = {
-        scheme: "cookie",
-        name: "laravelSanctum",
+        scheme: 'cookie',
+        name: 'laravelSanctum',
         cookie: {
-            name: "XSRF-TOKEN",
+            name: 'XSRF-TOKEN',
             server: nuxt.options.ssr
         },
         endpoints: {

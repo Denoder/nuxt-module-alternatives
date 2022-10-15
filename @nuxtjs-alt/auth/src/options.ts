@@ -12,7 +12,7 @@ export const moduleDefaults = {
 
     // -- Authorization --
 
-    scopeKey: "scope",
+    scopeKey: 'scope',
 
     // -- Redirects --
 
@@ -23,37 +23,37 @@ export const moduleDefaults = {
     watchLoggedIn: true,
 
     redirect: {
-        login: "/login",
-        logout: "/",
-        home: "/",
-        callback: "/login",
+        login: '/login',
+        logout: '/',
+        home: '/',
+        callback: '/login',
     },
 
     //  -- Pinia Store --
 
     pinia: {
-        namespace: "auth",
+        namespace: 'auth',
     },
 
     // -- Cookie Store --
 
     cookie: {
-        prefix: "auth.",
+        prefix: 'auth.',
         options: {
-            path: "/",
+            path: '/',
         },
     },
 
     // -- localStorage Store --
 
     localStorage: {
-        prefix: "auth.",
+        prefix: 'auth.',
     },
 
     // -- sessionStorage Store --
 
     sessionStorage: {
-        prefix: "auth.",
+        prefix: 'auth.',
     },
 
     // -- Strategies --

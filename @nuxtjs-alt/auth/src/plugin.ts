@@ -1,5 +1,5 @@
-import { ImportOptions } from "./resolve"
-import { ModuleOptions, Strategy } from "./types"
+import { ImportOptions } from './resolve'
+import { ModuleOptions, Strategy } from './types'
 
 export const getAuthDTS = () => {
 return `import type { Plugin } from '#app'
@@ -36,7 +36,7 @@ export default defineNuxtPlugin(async nuxtApp => {
         const scheme = options.strategyScheme[strategy.name!]
         const schemeOptions = JSON.stringify(strategy, null, 2)
         return `auth.registerStrategy('${strategy.name}', new ${scheme.as}(auth, ${schemeOptions}));`
-    }).join(";\n")}
+    }).join(';\n')}
 
     try {
         await auth.init();

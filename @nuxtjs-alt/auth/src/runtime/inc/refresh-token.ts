@@ -1,8 +1,8 @@
-import type { RefreshableScheme } from "../../types";
-import type { Storage } from "../core";
-import { addTokenPrefix } from "../../utils";
-import { TokenStatus } from "./token-status";
-import jwtDecode, { JwtPayload } from "jwt-decode";
+import type { RefreshableScheme } from '../../types';
+import type { Storage } from '../core';
+import { addTokenPrefix } from '../../utils';
+import { TokenStatus } from './token-status';
+import jwtDecode, { JwtPayload } from 'jwt-decode';
 
 export class RefreshToken {
     scheme: RefreshableScheme;
@@ -74,7 +74,7 @@ export class RefreshToken {
             // If the token is not jwt, we can't decode and refresh it, use tokenExpiresAt value
             refreshTokenExpiration = tokenExpiresAtMillis;
 
-            if (!((error && error.name === "InvalidTokenError"))) {
+            if (!((error && error.name === 'InvalidTokenError'))) {
                 throw error;
             }
         }

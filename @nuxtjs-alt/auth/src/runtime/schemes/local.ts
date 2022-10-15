@@ -1,8 +1,8 @@
-import type { EndpointsOption, SchemePartialOptions, TokenableSchemeOptions, TokenableScheme, UserOptions, HTTPRequest, HTTPResponse, SchemeCheck } from "../../types";
-import type { Auth } from "..";
-import { getProp } from "../../utils";
-import { Token, RequestHandler } from "../inc";
-import { BaseScheme } from "./base";
+import type { EndpointsOption, SchemePartialOptions, TokenableSchemeOptions, TokenableScheme, UserOptions, HTTPRequest, HTTPResponse, SchemeCheck } from '../../types';
+import type { Auth } from '..';
+import { getProp } from '../../utils';
+import { Token, RequestHandler } from '../inc';
+import { BaseScheme } from './base';
 
 export interface LocalSchemeEndpoints extends EndpointsOption {
     login: HTTPRequest;
@@ -19,33 +19,33 @@ export interface LocalSchemeOptions extends TokenableSchemeOptions {
 }
 
 const DEFAULTS: SchemePartialOptions<LocalSchemeOptions> = {
-    name: "local",
+    name: 'local',
     endpoints: {
         login: {
-            url: "/api/auth/login",
-            method: "post",
+            url: '/api/auth/login',
+            method: 'post',
         },
         logout: {
-            url: "/api/auth/logout",
-            method: "post",
+            url: '/api/auth/logout',
+            method: 'post',
         },
         user: {
-            url: "/api/auth/user",
-            method: "get",
+            url: '/api/auth/user',
+            method: 'get',
         },
     },
     token: {
-        property: "token",
-        type: "Bearer",
-        name: "Authorization",
+        property: 'token',
+        type: 'Bearer',
+        name: 'Authorization',
         maxAge: 1800,
         global: true,
         required: true,
-        prefix: "_token.",
-        expirationPrefix: "_token_expiration.",
+        prefix: '_token.',
+        expirationPrefix: '_token_expiration.',
     },
     user: {
-        property: "user",
+        property: 'user',
         autoFetch: true,
     },
     clientId: false,
@@ -65,8 +65,7 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
         this.token = new Token(this, this.$auth.$storage);
 
         // Initialize Request Interceptor
-        const handler = this.$auth.ctx.$http ? this.$auth.ctx.$http : this.$auth.ctx.$fetch
-        this.requestHandler = new RequestHandler(this, handler);
+        this.requestHandler = new RequestHandler(this, this.$auth.ctx.$http);
     }
 
     check(checkStatus = false): SchemeCheck {
@@ -105,10 +104,10 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
     mounted({ tokenCallback = () => this.$auth.reset(), refreshTokenCallback = undefined } = {}): Promise<HTTPResponse | void> {
         const { tokenExpired, refreshTokenExpired } = this.check(true);
 
-        if (refreshTokenExpired && typeof refreshTokenCallback === "function") {
+        if (refreshTokenExpired && typeof refreshTokenCallback === 'function') {
             // @ts-ignore
             refreshTokenCallback();
-        } else if (tokenExpired && typeof tokenCallback === "function") {
+        } else if (tokenExpired && typeof tokenCallback === 'function') {
             tokenCallback();
         }
 
@@ -197,7 +196,7 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
                 return response;
             })
             .catch((error) => {
-                this.$auth.callOnError(error, { method: "fetchUser" });
+                this.$auth.callOnError(error, { method: 'fetchUser' });
                 return Promise.reject(error);
             });
     }
@@ -209,7 +208,7 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
         }
 
         // But reset regardless
-        this.$auth.redirect("logout");
+        this.$auth.redirect('logout');
         return this.$auth.reset();
     }
 

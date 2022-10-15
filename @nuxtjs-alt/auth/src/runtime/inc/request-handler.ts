@@ -1,6 +1,6 @@
-import type { TokenableScheme, RefreshableScheme } from "../../types";
-import { ExpiredAuthSessionError } from "./expired-auth-session-error";
-import { FetchInstance, FetchConfig } from "@refactorjs/ofetch"
+import type { TokenableScheme, RefreshableScheme } from '../../types';
+import { ExpiredAuthSessionError } from './expired-auth-session-error';
+import { FetchInstance, FetchConfig } from '@refactorjs/ofetch'
 
 export class RequestHandler {
     scheme: TokenableScheme | RefreshableScheme;
@@ -94,7 +94,7 @@ export class RequestHandler {
     #needToken(config: FetchConfig): boolean {
         const options = this.scheme.options;
 
-        return ( options.token!.global || Object.values(options.endpoints).some((endpoint) => typeof endpoint === "object" ? endpoint.url === config.url : endpoint === config.url));
+        return ( options.token!.global || Object.values(options.endpoints).some((endpoint) => typeof endpoint === 'object' ? endpoint.url === config.url : endpoint === config.url));
     }
 
     // ---------------------------------------------------------------
@@ -102,7 +102,7 @@ export class RequestHandler {
     // Refresh tokens if token has expired
 
     #getUpdatedRequestConfig(config: FetchConfig, token: string | boolean) {
-        if (typeof token === "string") {
+        if (typeof token === 'string') {
             config.headers![this.scheme.options.token!.name] = token;
         }
 

@@ -1,6 +1,6 @@
 import type { NuxtModule } from '@nuxt/schema'
 import { existsSync, promises as fsp } from 'fs'
-import { defineBuildConfig } from "unbuild"
+import { defineBuildConfig } from 'unbuild'
 import { pathToFileURL } from 'url'
 import { resolve } from 'path'
 import { fdir } from 'fdir'

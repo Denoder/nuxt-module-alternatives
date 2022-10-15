@@ -1,8 +1,8 @@
-import type { HTTPRequest, HTTPResponse, RefreshableScheme, RefreshableSchemeOptions, SchemeCheck, SchemePartialOptions } from "../../types";
-import type { Auth } from "..";
-import { cleanObj, getProp } from "../../utils";
-import { RefreshController, RefreshToken, ExpiredAuthSessionError } from "../inc";
-import { LocalScheme, LocalSchemeEndpoints, LocalSchemeOptions } from "./local";
+import type { HTTPRequest, HTTPResponse, RefreshableScheme, RefreshableSchemeOptions, SchemeCheck, SchemePartialOptions } from '../../types';
+import type { Auth } from '..';
+import { cleanObj, getProp } from '../../utils';
+import { RefreshController, RefreshToken, ExpiredAuthSessionError } from '../inc';
+import { LocalScheme, LocalSchemeEndpoints, LocalSchemeOptions } from './local';
 
 export interface RefreshSchemeEndpoints extends LocalSchemeEndpoints {
     refresh: HTTPRequest;
@@ -14,21 +14,21 @@ export interface RefreshSchemeOptions extends LocalSchemeOptions, RefreshableSch
 }
 
 const DEFAULTS: SchemePartialOptions<RefreshSchemeOptions> = {
-    name: "refresh",
+    name: 'refresh',
     endpoints: {
         refresh: {
-            url: "/api/auth/refresh",
-            method: "post",
+            url: '/api/auth/refresh',
+            method: 'post',
         },
     },
     refreshToken: {
-        property: "refresh_token",
-        data: "refresh_token",
+        property: 'refresh_token',
+        data: 'refresh_token',
         maxAge: 60 * 60 * 24 * 30,
         required: true,
         tokenRequired: false,
-        prefix: "_refresh_token.",
-        expirationPrefix: "_refresh_token_expiration.",
+        prefix: '_refresh_token.',
+        expirationPrefix: '_refresh_token_expiration.',
     },
     autoLogout: false,
 };
@@ -156,7 +156,7 @@ export class RefreshScheme<OptionsT extends RefreshSchemeOptions = RefreshScheme
 
         // Add grant type to payload if defined
         if (this.options.grantType) {
-            endpoint.body.grant_type = "refresh_token";
+            endpoint.body.grant_type = 'refresh_token';
         }
 
         cleanObj(endpoint.body);
@@ -168,7 +168,7 @@ export class RefreshScheme<OptionsT extends RefreshSchemeOptions = RefreshScheme
             this.updateTokens(response, { isRefreshing: true });
             return await response;
         } catch (error: any) {
-            this.$auth.callOnError(error, { method: "refreshToken" });
+            this.$auth.callOnError(error, { method: 'refreshToken' });
             return await Promise.reject(error);
         }
     }

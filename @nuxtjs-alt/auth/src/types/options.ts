@@ -1,4 +1,4 @@
-import type { Strategy } from "./strategy";
+import type { Strategy } from './strategy';
 import type { NuxtPlugin } from '@nuxt/schema'
 
 export interface ModuleOptions {

@@ -1,19 +1,19 @@
-import type { Strategy, ModuleOptions } from "./types";
+import type { Strategy, ModuleOptions } from './types';
 import type { Nuxt, NuxtModule } from '@nuxt/schema'
-import { resolvePath, requireModule } from "@nuxt/kit";
-import { ProviderAliases } from "./providers";
-import * as AUTH_PROVIDERS from "./providers";
-import { existsSync } from "fs";
+import { resolvePath, requireModule } from '@nuxt/kit';
+import { ProviderAliases } from './providers';
+import * as AUTH_PROVIDERS from './providers';
+import { existsSync } from 'fs';
 import { hash } from 'ohash'
 
 const BuiltinSchemes = {
-    local: "LocalScheme",
-    cookie: "CookieScheme",
-    oauth2: "Oauth2Scheme",
-    openIDConnect: "OpenIDConnectScheme",
-    refresh: "RefreshScheme",
-    laravelJWT: "LaravelJWTScheme",
-    auth0: "Auth0Scheme",
+    local: 'LocalScheme',
+    cookie: 'CookieScheme',
+    oauth2: 'Oauth2Scheme',
+    openIDConnect: 'OpenIDConnectScheme',
+    refresh: 'RefreshScheme',
+    laravelJWT: 'LaravelJWTScheme',
+    auth0: 'Auth0Scheme',
 };
 
 export interface ImportOptions {
@@ -49,7 +49,7 @@ export async function resolveStrategies(nuxt: Nuxt, options: ModuleOptions): Pro
 
         delete strategy.provider;
 
-        if (typeof provider === "function" && !(provider as NuxtModule).getOptions) {
+        if (typeof provider === 'function' && !(provider as NuxtModule).getOptions) {
             provider(nuxt, strategy);
         }
 
@@ -78,7 +78,7 @@ export async function resolveStrategies(nuxt: Nuxt, options: ModuleOptions): Pro
 }
 
 export async function resolveScheme(scheme: string): Promise<ImportOptions | void> {
-    if (typeof scheme !== "string") {
+    if (typeof scheme !== 'string') {
         return;
     }
 
@@ -86,28 +86,28 @@ export async function resolveScheme(scheme: string): Promise<ImportOptions | voi
         return {
             name: BuiltinSchemes[scheme as keyof typeof BuiltinSchemes],
             as: BuiltinSchemes[scheme as keyof typeof BuiltinSchemes],
-            from: "#auth/runtime",
+            from: '#auth/runtime',
         };
     }
 
     const path = await resolvePath(scheme);
 
     if (existsSync(path)) {
-        const _path = path.replace(/\\/g, "/");
+        const _path = path.replace(/\\/g, '/');
         return {
-            name: "default",
-            as: "Scheme$" + hash({ path: _path }),
+            name: 'default',
+            as: 'Scheme$' + hash({ path: _path }),
             from: _path,
         };
     }
 }
 
 export function resolveProvider(provider: string | ((...args: any[]) => any)) {
-    if (typeof provider === "function") {
+    if (typeof provider === 'function') {
         return provider;
     }
 
-    if (typeof provider !== "string") {
+    if (typeof provider !== 'string') {
         return;
     }
 
