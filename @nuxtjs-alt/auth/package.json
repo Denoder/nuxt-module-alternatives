@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/auth",
-    "version": "2.0.17",
+    "version": "2.0.18",
     "description": "An alternative module to @nuxtjs/auth",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",

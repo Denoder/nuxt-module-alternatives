@@ -28,10 +28,20 @@ export default defineNuxtModule({
         // Add auto imports
         const composables = resolver.resolve('runtime/composables')
 
-        // Aliases
+        // Runtime
         const runtime = resolver.resolve('runtime');
         nuxt.options.alias['#auth/runtime'] = runtime;
         nuxt.options.build.transpile.push(runtime)
+
+        // Utils
+        const utils = resolver.resolve('utils');
+        nuxt.options.alias['#auth/utils'] = utils;
+        nuxt.options.build.transpile.push(utils)
+
+        // Providers
+        const providers = resolver.resolve('providers');
+        nuxt.options.alias['#auth/providers'] = providers;
+        nuxt.options.build.transpile.push(providers)
 
         // Resolve strategies
         const { strategies, strategyScheme } = await resolveStrategies(nuxt, options);

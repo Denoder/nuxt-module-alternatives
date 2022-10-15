@@ -13,7 +13,16 @@ Please tell me if you encounter any issues with these changes.
 
 **Composable**
 
-A `useAuth` composable is available to utitlize if `$auth` from `useNuxtApp()` isnt working out for you in terms of type hinting. 
+A `useAuth()` composable is available to utitlize if `$auth` from `useNuxtApp()` isnt working out for you in terms of type hinting. 
+
+**Options/Extra Features**
+
+Besides what nuxt auth normally offers, here are some other options/changes
+
+- `globalMiddleware`: `boolean` (Default: false) - Enables/disables the middleware to be used globally
+- `enableMiddleware`: `boolean` (Default: true) - Enables/disables the built-in middleware
+- `pinia.namespace`: `string` (Default: 'auth') - Changed from vuex to pinia, this is the namespace to use for the pinia store
+- `sessionStorage`: `string|false` (Default: 'auth.') - Similar to the localstorage option, there is a session storage options available for you to use.
 
 **Cookie-based auth**
 
@@ -102,3 +111,10 @@ properties have been changed to:
 - `clientWindow`: `boolean`
 - `clientWindowWidth`: `number`
 - `clientWindowHeight`: `number`
+
+**Aliases**
+
+Available Aliases:
+- `#auth/runtime`
+- `#auth/utils`
+- `#auth/providers`
