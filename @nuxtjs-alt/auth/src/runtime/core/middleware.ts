@@ -1,11 +1,10 @@
-import type { RouteLocationNormalized } from 'vue-router';
 import type { NuxtApp } from 'nuxt/app'
 import { routeOption, getMatchedComponents, normalizePath } from '../../utils';
 import { useNuxtApp, defineNuxtRouteMiddleware } from 'nuxt/app';
 
-export default defineNuxtRouteMiddleware(async (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
+export default defineNuxtRouteMiddleware(async (to, from) => {
     // Disable middleware if options: { auth: false } is set on the route
-    if (routeOption(to, 'auth', false)) {
+    if (to.meta.auth && routeOption(to, 'auth', false)) {
         return;
     }
 
@@ -21,7 +20,7 @@ export default defineNuxtRouteMiddleware(async (to: RouteLocationNormalized, fro
 
     const { login, callback } = ctx.$auth.options.redirect;
 
-    const pageIsInGuestMode = routeOption(to, 'auth', 'guest');
+    const pageIsInGuestMode = to.meta.auth && routeOption(to, 'auth', 'guest');
 
     const insidePage = (page: string) => normalizePath(to.path, ctx as NuxtApp) === normalizePath(page, ctx as NuxtApp);
 

@@ -26,6 +26,9 @@ declare module '@nuxt/schema' {
     export interface NuxtOptions {
         auth?: ModuleOptions;
     }
+    export interface RuntimeConfig {
+        auth?: ModuleOptions
+    }
 }
 
 declare const NuxtAuth: NuxtSchema.NuxtModule<ModuleOptions>

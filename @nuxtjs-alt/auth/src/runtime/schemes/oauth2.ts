@@ -194,6 +194,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     }
 
     async login($opts: { state?: string; params?: any; nonce?: string } = {}): Promise<void> {
+
         const opts = {
             protocol: 'oauth2',
             response_type: this.options.responseType,
@@ -303,7 +304,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         if (this.options.endpoints.logout) {
             const opts = {
                 client_id: this.options.clientId,
-                logout_uri: this.logoutRedirectURI,
+                redirect_uri: this.logoutRedirectURI
             };
             const url = this.options.endpoints.logout + '?' + encodeQuery(opts);
             window.location.replace(url);

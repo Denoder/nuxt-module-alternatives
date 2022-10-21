@@ -20,7 +20,10 @@ export default defineNuxtModule({
     defaults: moduleDefaults,
     async setup(moduleOptions, nuxt) {
         // Merge all option sources
-        const options: ModuleOptions = defu(moduleOptions, moduleDefaults)
+        const options: ModuleOptions = defu({ 
+            ...moduleOptions,
+            ...nuxt.options.runtimeConfig[CONFIG_KEY]
+        }, moduleDefaults)
 
         // Resolver
         const resolver = createResolver(import.meta.url);

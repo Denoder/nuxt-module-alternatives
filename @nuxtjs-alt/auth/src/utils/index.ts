@@ -32,7 +32,7 @@ export function encodeQuery(queryObject: {
 }
 
 export function routeOption(route: RouteLocationNormalized, key: string, value: string | boolean): boolean {
-    return route.matched.some((m: RouteRecordNormalized) => m.meta[key] === value);
+    return route.matched.some((m: RouteRecordNormalized) => m.meta && m.meta[key] === value);
 }
 
 export function getMatchedComponents(route: RouteLocationNormalized, matches: unknown[] = []): RouteComponent[][] {

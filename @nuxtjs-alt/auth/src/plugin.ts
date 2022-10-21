@@ -24,7 +24,7 @@ import { defineNuxtPlugin } from '#imports'
 // Active schemes
 ${options.schemeImports.map((i) => `import { ${i.name}${i.name !== i.as ? ' as ' + i.as : ''} } from '${i.from}'`).join('\n')}
 
-export default defineNuxtPlugin(async nuxtApp => {
+export default defineNuxtPlugin(nuxtApp => {
     // Options
     const options = ${JSON.stringify(options.options, null, 2)}
 
@@ -38,16 +38,9 @@ export default defineNuxtPlugin(async nuxtApp => {
         return `auth.registerStrategy('${strategy.name}', new ${scheme.as}(auth, ${schemeOptions}));`
     }).join(';\n')}
 
-    try {
-        await auth.init();
+    nuxtApp.provide('auth', auth)
 
-        return {
-            provide: {
-                auth
-            }
-        }
-    }
-    catch (error) {
+    return auth.init().catch(error => {
         if (process.client) {
             // Don't console log expired auth session errors. This error is common, and expected to happen.
             // The error happens whenever the user does an ssr request (reload/initial navigation) with an expired refresh
@@ -55,9 +48,9 @@ export default defineNuxtPlugin(async nuxtApp => {
             if (error instanceof ExpiredAuthSessionError) {
                 return
             }
-
+        
             console.error('[ERROR] [AUTH]', error)
         }
-    }
+    })
 })`
 }

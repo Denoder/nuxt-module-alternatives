@@ -1,5 +1,5 @@
 import type { HTTPRequest, HTTPResponse, Scheme, SchemeOptions, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions, Route } from '../../types';
-import type { NuxtApp } from 'nuxt/app'
+import type { NuxtApp } from 'nuxt/app';
 import { isRelativeURL, isSet, isSameURL, getProp, routeOption } from '../../utils';
 import { useRouter, useRoute } from 'nuxt/app';
 import { Storage } from './storage';
@@ -75,7 +75,7 @@ export class Auth {
         return this.$storage.getState('busy') as boolean;
     }
 
-    async init(): Promise<Auth | void> {
+    async init(): Promise<void> {
         // Reset on error
         if (this.options.resetOnError) {
             this.onError((...args) => {
@@ -104,19 +104,17 @@ export class Auth {
         }
         catch (error: any) {
             this.callOnError(error);
-        }
+        } 
         finally {
             if (process.client && this.options.watchLoggedIn) {
                 this.$storage.watchState('loggedIn', (loggedIn: boolean) => {
                     const route = useRoute();
-                    if (routeOption(route, 'auth', false)) {
+                    if (route.meta.auth && !routeOption(route, 'auth', false)) {
                         this.redirect(loggedIn ? 'home' : 'logout');
                     }
                 });
             }
-        }
-
-        return Promise.resolve(this);
+        }        
     }
 
     registerStrategy(name: string, strategy: Scheme): void {
@@ -369,6 +367,10 @@ export class Auth {
 
         // Apply rewrites
         if (this.options.rewriteRedirects) {
+            if (name === 'logout' && isRelativeURL(from) && !isSameURL(this.ctx, to, from)) {
+                this.$storage.setUniversal('redirect', from);
+            }
+
             if (name === 'login' && isRelativeURL(from) && !isSameURL(this.ctx, to, from)) {
                 this.$storage.setUniversal('redirect', from);
             }

@@ -166,7 +166,7 @@ export class Storage {
             return this.#initStore.$onAction((context: { name: string, args: any[] }) => {
                 if (context.name === 'SET') {
                     const { key, value } = context.args[0];
-                    if (key === watchKey) {
+                    if (watchKey === key) {
                         fn(value);
                     }
                 }
