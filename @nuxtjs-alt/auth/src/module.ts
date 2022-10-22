@@ -28,9 +28,6 @@ export default defineNuxtModule({
         // Resolver
         const resolver = createResolver(import.meta.url);
 
-        // Add auto imports
-        const composables = resolver.resolve('runtime/composables')
-
         // Runtime
         const runtime = resolver.resolve('runtime');
         nuxt.options.alias['#auth/runtime'] = runtime;
@@ -77,10 +74,14 @@ export default defineNuxtModule({
             write: true
         })
 
+        // Add auto imports
+        const composables = resolver.resolve('runtime/composables')
+
         addImports([
             { from: composables, name: 'useAuth' },
         ])
 
+        // Middleware
         if (options.enableMiddleware) {
             nuxt.hook('app:resolve', (app) => {
                 app.middleware.push({

@@ -3,7 +3,6 @@ import type { Nuxt } from '@nuxt/schema'
 import { addTemplate, defineNuxtModule, addPluginTemplate, createResolver, addImports } from '@nuxt/kit'
 import { name, version } from '../package.json'
 import { defu } from 'defu'
-import { join } from 'pathe';
 
 const CONFIG_KEY = 'http'
 
@@ -20,7 +19,16 @@ export default defineNuxtModule({
     setup(opts: ModuleOptions, nuxt: Nuxt) {
         // Combine options with runtime config
         const moduleOptions: ModuleOptions = defu(nuxt.options.runtimeConfig?.public[CONFIG_KEY], opts)
-        
+
+        // Default host
+        const defaultHost = moduleOptions.host || process.env.NITRO_HOST || process.env.HOST || 'localhost'
+
+        // Default port
+        const defaultPort = moduleOptions.port || process.env.NITRO_PORT || process.env.PORT || 3000
+
+        // Default prefix
+        const prefix = moduleOptions.prefix || process.env.PREFIX || '/'
+
         // Support baseUrl alternative
         if (moduleOptions.baseUrl) {
             console.warn('baseUrl is deprecated please use baseURL instead.')
@@ -35,8 +43,8 @@ export default defineNuxtModule({
         }
 
         // Apply defaults
-        const options: ModuleOptions = defu(moduleOptions, {
-            baseURL: nuxt.options.app.baseURL,
+        const options = defu(moduleOptions, {
+            baseURL: `http://${defaultHost}:${defaultPort}${prefix}`,
             browserBaseURL: undefined,
             proxyHeaders: true,
             proxyHeadersIgnore: [
@@ -100,23 +108,25 @@ export default defineNuxtModule({
             { from: composables, name: 'useLazyHttp' }
         ])
 
-        addTemplate({
-            getContents: () => nuxt.options.dev ? devNitroHttp() : nitroHttp(),
-            filename: nuxt.options.dev ? 'nitro-http.mjs' : 'nitro-http.ts',
-            write: true
-        })
+        // doesn't work on windows for some reason
+        if (process.platform !== "win32") {
+            // create nitro plugin
+            addTemplate({
+                getContents: () => nuxt.options.dev ? devNitroHttp() : nitroHttp(),
+                filename: `nitro-http${nuxt.options.dev ? '.mjs' : '.ts'}`,
+                write: true
+            })
 
-        // Add nitro plugin
-        // ensure `nitro.plugins` is initialized
-        nuxt.options.nitro.plugins = nuxt.options.nitro.plugins || []
-        nuxt.options.nitro.plugins.push(join(nuxt.options.buildDir, nuxt.options.dev ? 'nitro-http.mjs' : 'nitro-http.ts'))
+            nuxt.hook('nitro:config', (nitro) => {
+                nitro.plugins = nitro.plugins || []
+                nitro.plugins.push(resolver.resolve(nuxt.options.buildDir, `nitro-http${nuxt.options.dev ? '.mjs' : '.ts'}`))
+            })
+        }
     }
 })
 
-function devNitroHttp()
-{
-return `
-import { createInstance } from '@refactorjs/ofetch'
+function devNitroHttp() {
+return `import { createInstance } from '@refactorjs/ofetch'
 
 export default function (nitroApp) {
     // should inherit defaults from $fetch
@@ -127,8 +137,7 @@ export default function (nitroApp) {
 `
 }
 
-function nitroHttp()
-{
+function nitroHttp() {
 return `import type { NitroAppPlugin } from 'nitropack'
 import type { $Fetch } from 'ohmyfetch'
 import { createInstance } from '@refactorjs/ofetch'

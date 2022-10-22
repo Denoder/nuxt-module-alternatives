@@ -4,7 +4,7 @@ import type { Auth } from '../core';
 import { encodeQuery, getProp, normalizePath, parseQuery, removeTokenPrefix, urlJoin, randomString } from '../../utils';
 import { RefreshController, RequestHandler, ExpiredAuthSessionError, Token, RefreshToken } from '../inc';
 import { BaseScheme } from './base';
-import { useRoute } from 'nuxt/app';
+import { useRoute, useRuntimeConfig } from '#imports';
 import requrl from 'requrl';
 
 export interface Oauth2SchemeEndpoints extends EndpointsOption {
@@ -91,7 +91,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     constructor($auth: Auth, options: SchemePartialOptions<Oauth2SchemeOptions>, ...defaults: SchemePartialOptions<Oauth2SchemeOptions>[]) {
         super($auth, options as OptionsT, ...(defaults as OptionsT[]), DEFAULTS as OptionsT);
 
-        this.req = process.server ? $auth.ctx.ssrContext?.event.req : undefined;
+        this.req = process.server ? $auth.ctx.ssrContext!.event.req : undefined;
 
         // Initialize Token instance
         this.token = new Token(this, this.$auth.$storage);
@@ -111,8 +111,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     }
 
     protected get redirectURI(): string {
-        // @ts-ignore
-        const basePath = this.$auth.ctx.$config.app.baseURL || '';
+        const basePath = useRuntimeConfig().app.baseURL || '';
         const path = normalizePath(basePath + '/' + this.$auth.options.redirect.callback); // Don't pass in context since we want the base path
         return this.options.redirectUri || urlJoin(requrl(this.req), path);
     }
@@ -332,7 +331,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     async #handleCallback(): Promise<boolean | void> {
         const route = useRoute();
         // Handle callback only for specified route
-        if (this.$auth.options.redirect && normalizePath(route.path, this.$auth.ctx) !== normalizePath(this.$auth.options.redirect.callback, this.$auth.ctx)) {
+        if (this.$auth.options.redirect && normalizePath(route.path) !== normalizePath(this.$auth.options.redirect.callback)) {
             return;
         }
         // Callback flow is not supported in server side
@@ -372,7 +371,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                 method: 'post',
                 url: this.options.endpoints.token,
                 baseURL: '',
-                body: encodeQuery({
+                body: new URLSearchParams({
                     code: parsedQuery.code as string,
                     client_id: this.options.clientId as string,
                     redirect_uri: this.redirectURI,
@@ -380,7 +379,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                     audience: this.options.audience,
                     grant_type: this.options.grantType,
                     code_verifier: codeVerifier,
-                }),
+                }).toString(),
             });
 
             token = (getProp(response, this.options.token!.property) as string) || token;
@@ -407,7 +406,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         }
         // Redirect to home
         else if (this.$auth.options.watchLoggedIn) {
-            this.$auth.redirect('home', false, false);
+            this.$auth.redirect('home', false);
             return true; // True means a redirect happened
         }
     }
@@ -441,12 +440,12 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: encodeQuery({
-                refresh_token: removeTokenPrefix(refreshToken, this.options.token!.type),
+            body: new URLSearchParams({
+                refresh_token: removeTokenPrefix(refreshToken, this.options.token!.type) as string,
                 scopes: this.scope,
                 client_id: this.options.clientId as string,
                 grant_type: 'refresh_token',
-            }),
+            }).toString(),
         })
         .catch((error) => {
             this.$auth.callOnError(error, { method: 'refreshToken' });

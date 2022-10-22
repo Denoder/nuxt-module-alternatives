@@ -1,12 +1,12 @@
-import type { RouteLocationNormalized, RouteRecordNormalized, RouteComponent } from 'vue-router';
+import type { RouteComponent } from 'vue-router';
 import type { RecursivePartial } from '../types';
-import type { NuxtApp } from 'nuxt/app';
+import { useRuntimeConfig, useRoute } from '#imports';
 
 export const isUnset = (o: any): boolean => typeof o === 'undefined' || o === null;
 
 export const isSet = (o: any): boolean => !isUnset(o);
 
-export const isSameURL = (ctx: NuxtApp, a: string, b: string): boolean => normalizePath(a, ctx) === normalizePath(b, ctx);
+export const isSameURL = (a: string, b: string): boolean => normalizePath(a) === normalizePath(b);
 
 export function isRelativeURL(u: string) {
     return (u && u.length && new RegExp(['^\\/([a-zA-Z0-9@\\-%_~.:]', '[/a-zA-Z0-9@\\-%_~.:]*)?', '([?][^#]*)?(#[^#]*)?$'].join('')).test(u));
@@ -31,28 +31,29 @@ export function encodeQuery(queryObject: {
         .join('&');
 }
 
-export function routeOption(route: RouteLocationNormalized, key: string, value: string | boolean): boolean {
-    return route.matched.some((m: RouteRecordNormalized) => m.meta && m.meta[key] === value);
+export function routeMeta(key: string, value: string | boolean): boolean {
+    return useRoute().meta[key] === value
 }
 
-export function getMatchedComponents(route: RouteLocationNormalized, matches: unknown[] = []): RouteComponent[][] {
+export function getMatchedComponents(matches: unknown[] = []): RouteComponent[][] {
     return [
-        ...route.matched.map(function (m: RouteRecordNormalized, index: number) {
-            return Object.keys(m.components as Record<string, RouteComponent>).map(function (key) {
+        ...useRoute().matched.map(function (m, index: number) {
+            return Object.keys(m.components).map(function (key) {
                 matches.push(index);
-                return m.components![key];
+                return m.components[key];
             });
         })
     ]
 }
 
-export function normalizePath(path: string = '', ctx?: NuxtApp): string {
+export function normalizePath(path: string = ''): string {
     // Remove query string
+    const config = useRuntimeConfig()
     let result = path.split('?')[0];
 
     // Remove base path
-    if (ctx && ctx.$config.app.baseURL) {
-        result = result.replace(ctx.$config.app.baseURL, '/');
+    if (config.app.baseURL) {
+        result = result.replace(config.app.baseURL, '/');
     }
 
     // Remove redundant / from the end of path

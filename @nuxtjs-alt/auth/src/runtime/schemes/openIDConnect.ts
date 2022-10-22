@@ -255,7 +255,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
         }
 
         // Redirect to home
-        this.$auth.redirect('home', false, false);
+        this.$auth.redirect('home', false);
 
         return true; // True means a redirect happened
     }

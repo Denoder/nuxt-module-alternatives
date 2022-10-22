@@ -1,28 +1,27 @@
-import type { NuxtApp } from 'nuxt/app'
-import { routeOption, getMatchedComponents, normalizePath } from '../../utils';
-import { useNuxtApp, defineNuxtRouteMiddleware } from 'nuxt/app';
+import { routeMeta, getMatchedComponents, normalizePath } from '../../utils';
+import { useNuxtApp, defineNuxtRouteMiddleware } from '#imports';
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
     // Disable middleware if options: { auth: false } is set on the route
-    if (to.meta.auth && routeOption(to, 'auth', false)) {
+    if (to.meta.auth && routeMeta('auth', false)) {
         return;
     }
 
     // Disable middleware if no route was matched to allow 404/error page
     const matches: unknown[] = [];
-    const Components = getMatchedComponents(to, matches);
+    const Components = getMatchedComponents(matches);
 
     if (!Components.length) {
         return;
     }
 
-    const ctx: Partial<NuxtApp> = useNuxtApp();
+    const ctx = useNuxtApp();
 
     const { login, callback } = ctx.$auth.options.redirect;
 
-    const pageIsInGuestMode = to.meta.auth && routeOption(to, 'auth', 'guest');
+    const pageIsInGuestMode = to.meta.auth && routeMeta('auth', 'guest');
 
-    const insidePage = (page: string) => normalizePath(to.path, ctx as NuxtApp) === normalizePath(page, ctx as NuxtApp);
+    const insidePage = (page: string) => normalizePath(to.path) === normalizePath(page);
 
     if (ctx.$auth.$state.loggedIn) {
         // Perform scheme checks.
@@ -30,7 +29,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
         // -- Authorized --
         if (!login || insidePage(login) || pageIsInGuestMode) {
-            ctx.$auth.redirect('home', to);
+            ctx.$auth.redirect('home');
         }
 
         // Refresh token has expired. There is no way to refresh. Force reset.
@@ -57,6 +56,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     // (Those passing `callback` at runtime need to mark their callback component
     // with `auth: false` to avoid an unnecessary redirect from callback to login)
     else if (!pageIsInGuestMode && (!callback || !insidePage(callback))) {
-        ctx.$auth.redirect('login', to);
+        ctx.$auth.redirect('login');
     }
 });

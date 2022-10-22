@@ -53,7 +53,7 @@ export default defineNuxtPlugin(ctx => {
 
     if (options.proxyHeaders) {
         // Proxy SSR request headers
-        if (process.server && ctx.ssrContext?.event.req && ctx.ssrContext?.event.req.headers) {
+        if (process.server && ctx.ssrContext?.event?.req?.headers) {
             const reqHeaders = { ...ctx.ssrContext.event.req.headers }
             for (const h of options.proxyHeadersIgnore) {
                 delete reqHeaders[h]
@@ -65,7 +65,7 @@ export default defineNuxtPlugin(ctx => {
 
     const http = httpInstance(defaults)
 
-    if (!globalThis.$http) {
+    if (!globalThis.$http && process.client) {
         globalThis.$http = http
     }
 

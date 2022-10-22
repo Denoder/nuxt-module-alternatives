@@ -1,5 +1,5 @@
 import type { ModuleOptions } from '../../types';
-import type { NuxtApp } from 'nuxt/app'
+import type { NuxtApp } from '#app'
 import { isUnset, isSet, decodeValue, encodeValue } from '../../utils';
 import { parse, serialize, CookieSerializeOptions } from 'cookie-es';
 import { defineStore, StateTree } from 'pinia';
@@ -108,7 +108,7 @@ export class Storage {
         this.#state = {};
 
         // Use pinia for local state's if possible
-        this.#piniaEnabled = this.options.pinia && !!this.ctx.$pinia;
+        this.#piniaEnabled = this.options.pinia && !!this.ctx['$pinia'];
 
         if (this.#piniaEnabled) {
             this.#store = defineStore(this.options.pinia.namespace, {
@@ -120,7 +120,7 @@ export class Storage {
                 },
             });
 
-            this.#initStore = this.#store(this.ctx.$pinia);
+            this.#initStore = this.#store(this.ctx['$pinia']);
             this.state = this.#initStore.$state;
         } else {
             this.state = {};
@@ -354,13 +354,13 @@ export class Storage {
             return;
         }
 
-        const cookieStr = process.client ? document.cookie : this.ctx.ssrContext?.event.req.headers.cookie;
+        const cookieStr = process.client ? document.cookie : this.ctx.ssrContext!.event.req.headers.cookie;
 
         return parse(cookieStr || '') || {};
     }
 
     setCookie<V extends any>(key: string, value: V, options: { prefix?: string } = {}) {
-        if (!this.options.cookie || (process.server && !this.ctx.ssrContext?.event.res)) {
+        if (!this.options.cookie || (process.server && !this.ctx.ssrContext!.event.res)) {
             return;
         }
 
@@ -389,13 +389,13 @@ export class Storage {
             // Set in browser
             document.cookie = serializedCookie;
         } 
-        else if (process.server && this.ctx.ssrContext?.event.res) {
+        else if (process.server && this.ctx.ssrContext!.event.res) {
             // Send Set-Cookie header from server side
-            let cookies = (this.ctx.ssrContext?.event.res.getHeader('Set-Cookie') as string[]) || [];
+            let cookies = (this.ctx.ssrContext!.event.res.getHeader('Set-Cookie') as string[]) || [];
             if (!Array.isArray(cookies)) cookies = [cookies];
             cookies.unshift(serializedCookie);
 
-            this.ctx.ssrContext?.event.res.setHeader('Set-Cookie', cookies.filter(
+            this.ctx.ssrContext!.event.res.setHeader('Set-Cookie', cookies.filter(
                 (v, i, arr) => arr.findIndex( 
                     (val) => val.startsWith(v.slice(0, v.indexOf('='))) 
                 ) === i
@@ -406,7 +406,7 @@ export class Storage {
     }
 
     getCookie(key: string): any {
-        if (!this.options.cookie || (process.server && !this.ctx.ssrContext?.event.req)) {
+        if (!this.options.cookie || (process.server && !this.ctx.ssrContext!.event.req)) {
             return;
         }
 

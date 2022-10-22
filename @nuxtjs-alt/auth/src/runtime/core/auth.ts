@@ -1,7 +1,7 @@
-import type { HTTPRequest, HTTPResponse, Scheme, SchemeOptions, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions, Route } from '../../types';
-import type { NuxtApp } from 'nuxt/app';
-import { isRelativeURL, isSet, isSameURL, getProp, routeOption } from '../../utils';
-import { useRouter, useRoute } from 'nuxt/app';
+import type { HTTPRequest, HTTPResponse, Scheme, SchemeOptions, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions } from '../../types';
+import type { NuxtApp } from '#app';
+import { isRelativeURL, isSet, isSameURL, getProp, routeMeta } from '../../utils';
+import { useRouter, useRoute } from '#imports';
 import { Storage } from './storage';
 import requrl from 'requrl';
 
@@ -16,7 +16,7 @@ export class Auth {
     $storage: Storage;
     $state: {
         strategy: string;
-        user: Record<string, any> | null;
+        user: Record<string, any>;
         loggedIn: boolean;
     };
     #errorListeners: ErrorListener[] = [];
@@ -109,7 +109,7 @@ export class Auth {
             if (process.client && this.options.watchLoggedIn) {
                 this.$storage.watchState('loggedIn', (loggedIn: boolean) => {
                     const route = useRoute();
-                    if (route.meta.auth && !routeOption(route, 'auth', false)) {
+                    if (route.meta.auth && !routeMeta('auth', false)) {
                         this.redirect(loggedIn ? 'home' : 'logout');
                     }
                 });
@@ -342,12 +342,11 @@ export class Auth {
     /**
      * 
      * @param name redirect name
-     * @param route (default: false) Internal useRoute() (false) or manually specify
      * @param router (default: true) Whether to use nuxt redirect (true) or window redirect (false)
      *
      * @returns
      */
-    redirect(name: string, route: Route | false = false, router: boolean = true): void {
+    redirect(name: string, router: boolean = true): void {
         const activeRouter = useRouter();
         const activeRoute = useRoute();
 
@@ -355,9 +354,8 @@ export class Auth {
             return;
         }
 
-        const optRoute = route && this.options.fullPathRedirect ? route.fullPath : route && route.path
-        const nuxtRoute = this.options.fullPathRedirect ? activeRoute.fullPath : activeRoute.path
-        const from = route ? optRoute : nuxtRoute;
+        const route = this.options.fullPathRedirect ? activeRoute.fullPath : activeRoute.path
+        const from = route;
 
         let to: string = this.options.redirect[name];
 
@@ -367,11 +365,11 @@ export class Auth {
 
         // Apply rewrites
         if (this.options.rewriteRedirects) {
-            if (name === 'logout' && isRelativeURL(from) && !isSameURL(this.ctx, to, from)) {
+            if (name === 'logout' && isRelativeURL(from) && !isSameURL(to, from)) {
                 this.$storage.setUniversal('redirect', from);
             }
 
-            if (name === 'login' && isRelativeURL(from) && !isSameURL(this.ctx, to, from)) {
+            if (name === 'login' && isRelativeURL(from) && !isSameURL(to, from)) {
                 this.$storage.setUniversal('redirect', from);
             }
 
@@ -390,11 +388,11 @@ export class Auth {
         to = this.callOnRedirect(to, from) || to;
 
         // Prevent infinity redirects
-        if (isSameURL(this.ctx, to, from)) {
+        if (isSameURL(to, from)) {
             return;
         }
 
-        const query = route ? route.query : activeRoute.query;
+        const query = activeRoute.query;
         const queryString = Object.keys(query).map((key) => key + '=' + query[key]).join('&');
 
         if (!router) {

@@ -46,7 +46,7 @@ export function addAuthorize<SOptions extends StrategyOptions<Oauth2SchemeOption
     })
 }
 
-export function initializePasswordGrantFlow<SOptions extends StrategyOptions<RefreshSchemeOptions>>(nuxt: any, strategy: SOptions): void {
+export function initializePasswordGrantFlow<SOptions extends StrategyOptions<RefreshSchemeOptions>>(nuxt: Nuxt, strategy: SOptions): void {
     // Get clientSecret, clientId, endpoints.login.url
     const clientSecret = strategy.clientSecret;
     const clientId = strategy.clientId;

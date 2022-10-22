@@ -37,10 +37,6 @@ export function useHttp<
     request: Ref<ReqT> | ReqT | (() => ReqT),
     opts: UseHttpOptions<_ResT, Transform, PickKeys> = {}
 ) {
-    if (process.dev && !opts.key && Object.values(opts).some(v => typeof v === 'function' || v instanceof Blob)) {
-        console.warn('[nuxt] [useFetch] You should provide a key when passing options that are not serializable to JSON:', opts)
-    }
-
     if (!request) {
         throw new Error('[nuxt] [useHttp] request is missing.')
     }
@@ -54,7 +50,6 @@ export function useHttp<
         }
         return (isRef(r) ? r.value : r)
     })
-
 
     const { server, lazy, default: defaultFn, transform, pick, watch, initialCache, ...fetchOptions } = opts
 
