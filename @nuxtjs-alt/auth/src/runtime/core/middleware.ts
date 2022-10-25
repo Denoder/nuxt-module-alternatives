@@ -3,7 +3,7 @@ import { useNuxtApp, defineNuxtRouteMiddleware } from '#imports';
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
     // Disable middleware if options: { auth: false } is set on the route
-    if (to.meta.auth && routeMeta('auth', false)) {
+    if (Object.hasOwn(to.meta, 'auth') && routeMeta('auth', false)) {
         return;
     }
 
@@ -19,7 +19,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     const { login, callback } = ctx.$auth.options.redirect;
 
-    const pageIsInGuestMode = to.meta.auth && routeMeta('auth', 'guest');
+    const pageIsInGuestMode = Object.hasOwn(to.meta, 'auth') && routeMeta('auth', 'guest');
 
     const insidePage = (page: string) => normalizePath(to.path) === normalizePath(page);
 

@@ -104,12 +104,11 @@ export class Auth {
         }
         catch (error: any) {
             this.callOnError(error);
-        } 
+        }
         finally {
             if (process.client && this.options.watchLoggedIn) {
                 this.$storage.watchState('loggedIn', (loggedIn: boolean) => {
-                    const route = useRoute();
-                    if (route.meta.auth && !routeMeta('auth', false)) {
+                    if (Object.hasOwn(useRoute().meta, 'auth') && !routeMeta('auth', false)) {
                         this.redirect(loggedIn ? 'home' : 'logout');
                     }
                 });
