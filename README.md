@@ -12,11 +12,12 @@ Alternative modules to use while waiting for Nuxt 3 Compatibility
 **Module Order**
 
 If you're using a combination of http/ohmyfetch, pinia and auth you need to load them in `modules` in the following order.
+Note: that if you are trying to use the proxy interceptors then the http module needs to be before the proxy module.
 ```
 modules: [
     '@nuxtjs-alt/auth',
-    '@nuxtjs-alt/http',
     '@nuxtjs-alt/proxy', // needed if using ssr
+    '@nuxtjs-alt/http',
     '@pinia/nuxt',
 ]
 ```
