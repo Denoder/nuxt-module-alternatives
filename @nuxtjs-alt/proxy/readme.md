@@ -7,7 +7,7 @@ This serves as an alternative for @nuxtjs-alt/proxy. Please note that his is for
 This module creates a file in your `buildDir` called `nuxt-http-proxy.ts` which will handle all of the proxying you set within your nuxt config. The config is similar to what vite has except that this one creates a physical file which is needed for production.
 
 **Version 2.0+**
-New options have been added to the proxy module. The proxies now need to be moved into a `proxies` property (example provided below). An `interceptors` property has been added so that proxying applies to the native `$fetch` in nitro and via client side. Same for the `@nuxtjs-alt/http` module. An `enableProxy` property has been added if you would like to disable the `http-proxy` creation for some reason.
+New options have been added to the proxy module. The proxies now need to be moved into a `proxies` property (example provided below). A `fetch` property has been added so that proxying applies to the native `$fetch` in nitro and via client side. An `enableProxy` property has been added if you would like to disable the `http-proxy` creation for some reason.
 
 **Configuration**
 
@@ -51,10 +51,7 @@ export default defineNuxtConfig({
                 ws: true
             }
         },
-        interceptors: {
-            http: true, // requires @nuxtjs-alt/http
-            fetch: true,
-        }
+        fetch: true
     }
 })
 

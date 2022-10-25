@@ -65,7 +65,7 @@ export default defineNuxtPlugin(ctx => {
 
     const http = httpInstance(defaults)
 
-    if (!globalThis.$http && process.client) {
+    if (!globalThis.$http) {
         globalThis.$http = http
     }
 

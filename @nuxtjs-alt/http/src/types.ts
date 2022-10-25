@@ -18,6 +18,7 @@ export interface ModuleOptions extends Omit<FetchConfig, 'credentials'> {
     credentials?: string;
     headers?: any;
     debug?: boolean;
+    interceptorPlugin?: boolean;
 }
 
 declare global {

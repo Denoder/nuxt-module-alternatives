@@ -12,10 +12,7 @@ export interface ModuleOptions {
     proxies: {
         [key: string]: string | ProxyOptions
     }
-    interceptors?: {
-        http?: boolean
-        fetch?: boolean
-    }
+    fetch?: boolean
 }
 
 interface ProxyOptions extends Server.ServerOptions {
@@ -52,10 +49,7 @@ export default defineNuxtModule({
     },
     defaults: {
         enableProxy: true,
-        interceptors: {
-            http: false,
-            fetch: false
-        }
+        fetch: false
     },
     setup(options, nuxt) {
         const config = (nuxt.options.runtimeConfig.proxy = defu(nuxt.options.runtimeConfig.proxy, options)) as ModuleOptions
@@ -75,7 +69,7 @@ export default defineNuxtModule({
             })
         }
 
-        if (config.interceptors?.fetch || config.interceptors?.http) {
+        if (config.fetch) {
             // Create Interceptor
             addPluginTemplate({
                 src: resolver.resolve('runtime/interceptor.mjs'), 
@@ -85,7 +79,7 @@ export default defineNuxtModule({
         }
 
         // doesn't work on windows for some reason
-        if (config.interceptors?.fetch && process.platform !== "win32") {
+        if (config.fetch && process.platform !== "win32") {
             // create nitro plugin
             addTemplate({
                 getContents: () => nitroFetchProxy(config),
@@ -115,6 +109,7 @@ Object.keys(config).forEach((context) => {
 
     if (isObject(opts)) {
         opts = { ...opts }
+        opts.rewrite = opts.rewrite ? new Function("return (" + opts.rewrite + ")")() : false
     }
 
     proxies[context] = [{ ...opts }]
@@ -128,6 +123,10 @@ export default function (nitroApp) {
                     const [opts] = proxies[context]
                     if (doesProxyContextMatchUrl(context, request)) {
                         options.baseURL = opts.target
+                    }
+
+                    if (opts.rewrite) {
+                        request = opts.rewrite(request)
                     }
                 }
             }
@@ -158,8 +157,7 @@ function converter(key, val) {
 }
 
 function proxyMiddlewareContent(options: ProxyOptions): string {
-    return `
-import * as http from 'http'
+    return `import * as http from 'http'
 import * as net from 'net'
 import { createProxyServer, ProxyServer, Server } from '@refactorjs/http-proxy'
 import { defineEventHandler } from 'h3'
@@ -183,8 +181,6 @@ interface ProxyOptions extends Server.ServerOptions {
         res: http.ServerResponse,
         options: ProxyOptions
     ) => void | null | undefined | false | string
-
-    router?: (req: http.IncomingMessage) => Server.ProxyTarget | Promise<Server.ProxyTarget | undefined> | undefined
 }
 
 // lazy require only when proxy is used
@@ -192,7 +188,7 @@ const proxies: Record<string, [ProxyServer, ProxyOptions]> = {}
 const options: Record<string, ProxyOptions> = ${JSON.stringify(options, converter)};
 
 Object.keys(options).forEach((context) => {
-    let opts = options[context]
+    let opts: ProxyOptions = options[context]
 
     if (typeof opts === 'string') {
         opts = { target: opts, changeOrigin: true } as ProxyOptions
@@ -203,7 +199,6 @@ Object.keys(options).forEach((context) => {
         opts.rewrite = opts.rewrite ? new Function("return (" + opts.rewrite + ")")() : false
         opts.configure = opts.configure ? new Function("return (" + opts.configure + ")")() : false
         opts.bypass = opts.bypass ? new Function("return (" + opts.bypass + ")")() : false
-        opts.router = opts.router ? new Function("return (" + opts.router + ")")() : false
     }
 
     const proxy = createProxyServer(opts)
@@ -213,21 +208,21 @@ Object.keys(options).forEach((context) => {
         const res = originalRes as http.ServerResponse | net.Socket
         if ('req' in res) {
             console.error('http proxy error:' + err.stack, {
-                timestamp: true,
-                error: err
+                    timestamp: true,
+                    error: err
             })
-
             if (!res.headersSent && !res.writableEnded) {
-                res.writeHead(500, {
-                    'Content-Type': 'text/plain'
-                }).end()
+                res
+                    .writeHead(500, {
+                        'Content-Type': 'text/plain'
+                    })
+                    .end()
             }
         } else {
             console.error('ws proxy error:' + err.stack, {
                 timestamp: true,
                 error: err
             })
-
             res.end()
         }
     })
@@ -241,7 +236,7 @@ Object.keys(options).forEach((context) => {
 })
 
 export default defineEventHandler(async (event) => {
-    await new Promise<void>(async (resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
         const next = (err?: unknown) => {
             if (err) {
                 reject(err)
@@ -255,6 +250,7 @@ export default defineEventHandler(async (event) => {
         for (const context in proxies) {
             if (doesProxyContextMatchUrl(context, url)) {
                 const [proxy, opts] = proxies[context]
+                const options: Server.ServerOptions = {}
 
                 if (opts.bypass) {
                     const bypassResult = opts.bypass(event.req, event.res, opts)
@@ -262,21 +258,26 @@ export default defineEventHandler(async (event) => {
                         event.req.url = bypassResult
                         console.debug('bypass: ' + event.req.url + ' -> ' + bypassResult)
                         return next()
-                    }
-                    else if (bypassResult === false) {
+                    } else if (isObject(bypassResult)) {
+                        Object.assign(options, bypassResult)
+                        console.debug('bypass: ' + event.req.url + ' use modified options: %O', options)
+                        return next()
+                    } else if (bypassResult === false) {
                         console.debug('bypass: ' + event.req.url + ' -> 404')
                         return event.res.end(404)
                     }
                 }
 
-                const activeProxyOptions = await prepareProxyRequest(event.req, opts)
-                console.debug(url + ' -> ' + (opts.target || opts.forward) + url)
+                console.debug(event.req.url + ' -> ' + opts.target || opts.forward)
 
-                proxy.web(event.req, event.res, activeProxyOptions)
+                if (opts.rewrite) {
+                    event.req.url = opts.rewrite(event.req.url!) as string
+                }
+
+                proxy.web(event.req, event.res, options)
                 return
             }
         }
-
         next()
     })
 })
@@ -289,68 +290,6 @@ function doesProxyContextMatchUrl(context: string, url: string): boolean {
     return (
         (context.startsWith('^') && new RegExp(context).test(url)) || url.startsWith(context)
     )
-}
-
-async function prepareProxyRequest(req: http.IncomingMessage, opts: ProxyOptions) {
-    const newProxyOptions = Object.assign({}, opts)
-
-    if (opts.router) {
-        const newTarget = await getTarget(req, opts)
-        if (newTarget) {
-            console.debug('[proxy] Router new target: %s -> "%s"', opts.target, newTarget)
-            newProxyOptions.target = newTarget
-        }
-    }
-
-    if (opts.rewrite) {
-        req.url = opts.rewrite(req.url!) as string
-    }
-
-    return newProxyOptions
-}
-
-async function getTarget(req: http.IncomingMessage, config: ProxyOptions) {
-    let newTarget: Server.ProxyTarget | Promise<Server.ProxyTarget | undefined> | undefined
-    const router = config.router
-
-    switch (typeof router) {
-        case 'function':
-            newTarget = await router(req)
-            break
-        case 'object':
-            newTarget = getTargetFromProxyTable(req, router)
-            break
-    }
-
-    return newTarget
-}
-
-function getTargetFromProxyTable(req: http.IncomingMessage, table: { [hostOrPath: string]: Server.ServerOptions['target'] }) {
-    let result: Server.ProxyTarget | undefined
-    const host = req.headers.host as string
-    const path = req.url
-
-    const hostAndPath = host + path
-
-    for (const [key, value] of Object.entries(table)) {
-        if (key.indexOf('/') > -1) {
-            if (hostAndPath.indexOf(key) > -1) {
-                // match 'localhost:3000/api'
-                result = value as Server.ProxyTarget
-                console.debug('[proxy] Router table match: "%s"', key)
-                continue
-            }
-        } else {
-            if (key === host) {
-                // match 'localhost:3000'
-                result = value as Server.ProxyTarget
-                console.debug('[proxy] Router table match: "%s"', host)
-                continue
-            }
-        }
-    }
-
-    return result
 }
 `
 }

@@ -14,7 +14,7 @@ function doesProxyContextMatchUrl(context, url) {
     )
 }
 
-export default defineNuxtPlugin(nuxtApp => {
+export default defineNuxtPlugin(({ $http }) => {
     Object.keys(options.proxies).forEach((context) => {
         let opts = options.proxies[context]
     
@@ -29,16 +29,16 @@ export default defineNuxtPlugin(nuxtApp => {
         proxies[context] = [{ ...opts }]
     })
 
-    if (process.client && options.fetch) {
-        $fetch.create({
-            async onRequest({ request, options }) {
-                for (const context in proxies) {
-                    const [opts] = proxies[context]
-                    if (doesProxyContextMatchUrl(context, request)) {
-                        options.baseURL = opts.target
-                    }
+    if (process.client) {
+        $http.interceptors.request.use(config => {
+            for (const context in proxies) {
+                const [opts] = proxies[context]
+                if (doesProxyContextMatchUrl(context, config.url)) {
+                    config.baseURL = opts.target
                 }
             }
+    
+            return config
         })
     }
 })
