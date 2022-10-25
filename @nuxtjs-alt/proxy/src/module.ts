@@ -1,6 +1,6 @@
 import type { ProxyServer, Server } from '@refactorjs/http-proxy'
 import type { IncomingMessage, ServerResponse } from 'http'
-import { addServerHandler, addTemplate, defineNuxtModule } from '@nuxt/kit'
+import { addServerHandler, addTemplate, addPluginTemplate, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { name, version } from '../package.json'
 import { join } from 'pathe'
 import { defu } from 'defu'
@@ -8,7 +8,14 @@ import { defu } from 'defu'
 const CONFIG_KEY = 'proxy'
 
 export interface ModuleOptions {
-    [key: string]: string | ProxyOptions
+    enableProxy: boolean
+    proxies: {
+        [key: string]: string | ProxyOptions
+    }
+    interceptors?: {
+        http?: boolean
+        fetch?: boolean
+    }
 }
 
 interface ProxyOptions extends Server.ServerOptions {
@@ -34,7 +41,7 @@ interface ProxyOptions extends Server.ServerOptions {
     router?: (req: IncomingMessage) => Server.ProxyTarget | Promise<Server.ProxyTarget | undefined> | undefined
 }
 
-export default defineNuxtModule<ModuleOptions>({
+export default defineNuxtModule({
     meta: {
         name,
         version,
@@ -43,22 +50,105 @@ export default defineNuxtModule<ModuleOptions>({
             nuxt: '^3.0.0-rc.9'
         }
     },
-    defaults: {},
+    defaults: {
+        enableProxy: true,
+        interceptors: {
+            http: false,
+            fetch: false
+        }
+    },
     setup(options, nuxt) {
         const config = (nuxt.options.runtimeConfig.proxy = defu(nuxt.options.runtimeConfig.proxy, options)) as ModuleOptions
+        const resolver = createResolver(import.meta.url)
 
-        addTemplate({
-            filename: 'nuxt-http-proxy.ts',
-            write: true,
-            getContents: () => proxyMiddlewareContent(config),
-        })
+        if (config.enableProxy) {
+            // Create Proxy
+            addTemplate({ 
+                filename: 'nuxt-http-proxy.ts', 
+                write: true,
+                getContents: () => proxyMiddlewareContent(config.proxies)
+            })
 
-        addServerHandler({
-            handler: join(nuxt.options.buildDir, 'nuxt-http-proxy.ts'),
-            middleware: true,
-        })
+            addServerHandler({ 
+                handler: join(nuxt.options.buildDir, 'nuxt-http-proxy.ts'), 
+                middleware: true 
+            })
+        }
+
+        if (config.interceptors?.fetch || config.interceptors?.http) {
+            // Create Interceptor
+            addPluginTemplate({
+                src: resolver.resolve('runtime/interceptor.mjs'), 
+                filename: 'interceptor.mjs',
+                options: config
+            })
+        }
+
+        // doesn't work on windows for some reason
+        if (config.interceptors?.fetch && process.platform !== "win32") {
+            // create nitro plugin
+            addTemplate({
+                getContents: () => nitroFetchProxy(config),
+                filename: `nitro-fetch.mjs`,
+                write: true
+            })
+
+            nuxt.hook('nitro:config', (nitro) => {
+                nitro.plugins = nitro.plugins || []
+                nitro.plugins.push(resolver.resolve(nuxt.options.buildDir, `nitro-fetch.mjs`))
+            })
+        }
     }
 })
+
+function nitroFetchProxy(config: ModuleOptions): string {
+return `import { createFetch, Headers } from 'ohmyfetch'
+const config = ${JSON.stringify(config.proxies, converter)};
+const proxies = {}
+
+Object.keys(config).forEach((context) => {
+    let opts = config[context]
+
+    if (typeof opts === 'string') {
+        opts = { target: opts }
+    }
+
+    if (isObject(opts)) {
+        opts = { ...opts }
+    }
+
+    proxies[context] = [{ ...opts }]
+})
+
+export default function (nitroApp) {
+    // using create() doesnt work, so we need to replace the global $fetch instance with a new one.
+    const $nitroFetch = createFetch({ fetch: nitroApp.localFetch, Headers, defaults: {
+            async onRequest({ request, options }) {
+                for (const context in proxies) {
+                    const [opts] = proxies[context]
+                    if (doesProxyContextMatchUrl(context, request)) {
+                        options.baseURL = opts.target
+                    }
+                }
+            }
+        }
+    })
+
+    // @ts-ignore
+    globalThis.$fetch = $nitroFetch
+}
+
+function isObject(value) {
+    return Object.prototype.toString.call(value) === '[object Object]'
+}
+
+function doesProxyContextMatchUrl(context, url) {
+    return (
+        (context.startsWith('^') && new RegExp(context).test(url)) || url.startsWith(context)
+    )
+}
+`
+}
 
 function converter(key, val) {
     if (typeof val === 'function' || val && val.constructor === RegExp) {
@@ -67,7 +157,7 @@ function converter(key, val) {
     return val
 }
 
-function proxyMiddlewareContent(options: ModuleOptions): string {
+function proxyMiddlewareContent(options: ProxyOptions): string {
     return `
 import * as http from 'http'
 import * as net from 'net'
@@ -180,7 +270,7 @@ export default defineEventHandler(async (event) => {
                 }
 
                 const activeProxyOptions = await prepareProxyRequest(event.req, opts)
-                console.debug(event.req.headers.host + url + ' -> ' + (opts.target || opts.forward) + event.req.url)
+                console.debug(url + ' -> ' + (opts.target || opts.forward) + url)
 
                 proxy.web(event.req, event.res, activeProxyOptions)
                 return
