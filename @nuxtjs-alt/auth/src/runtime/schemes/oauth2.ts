@@ -31,9 +31,10 @@ export interface Oauth2SchemeOptions extends SchemeOptions, TokenableSchemeOptio
     acrValues: string;
     audience: string;
     autoLogout: boolean;
-    clientWindow: boolean
-    clientWindowWidth: number
-    clientWindowHeight: number
+    clientWindow: boolean;
+    clientWindowWidth: number;
+    clientWindowHeight: number;
+    organization?: string;
 }
 
 const DEFAULTS: SchemePartialOptions<Oauth2SchemeOptions> = {
@@ -210,6 +211,10 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             clientWindowHeight: this.options.clientWindowHeight,
             ...$opts.params,
         };
+
+        if (this.options.organization) {
+            opts.organization = this.options.organization;
+        }
 
         if (this.options.audience) {
             opts.audience = this.options.audience;
