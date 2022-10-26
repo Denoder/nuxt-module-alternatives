@@ -1,4 +1,4 @@
-import { defineNuxtPlugin } from '#imports'
+import { defineNuxtPlugin, useRuntimeConfig } from '#imports'
 
 // Nuxt Options
 const proxies = {}

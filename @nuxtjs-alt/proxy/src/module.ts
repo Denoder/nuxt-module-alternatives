@@ -34,8 +34,6 @@ interface ProxyOptions extends Server.ServerOptions {
         res: ServerResponse,
         options: ProxyOptions
     ) => void | null | undefined | false | string
-
-    router?: (req: IncomingMessage) => Server.ProxyTarget | Promise<Server.ProxyTarget | undefined> | undefined
 }
 
 export default defineNuxtModule({
@@ -54,6 +52,8 @@ export default defineNuxtModule({
     setup(options, nuxt) {
         const config = (nuxt.options.runtimeConfig.proxy = defu(nuxt.options.runtimeConfig.proxy, options)) as ModuleOptions
         const resolver = createResolver(import.meta.url)
+        const defaultHost = process.env.NITRO_HOST || process.env.HOST || 'localhost'
+        const defaultPort = process.env.NITRO_PORT || process.env.PORT || 3000
 
         if (config.enableProxy) {
             // Create Proxy
@@ -82,69 +82,26 @@ export default defineNuxtModule({
         if (config.fetch && process.platform !== "win32") {
             // create nitro plugin
             addTemplate({
-                getContents: () => nitroFetchProxy(config),
-                filename: `nitro-fetch.mjs`,
+                getContents: () => nitroFetchProxy(defaultHost, defaultPort),
+                filename: 'nitro-fetch.mjs',
                 write: true
             })
 
             nuxt.hook('nitro:config', (nitro) => {
                 nitro.plugins = nitro.plugins || []
-                nitro.plugins.push(resolver.resolve(nuxt.options.buildDir, `nitro-fetch.mjs`))
+                nitro.plugins.push(resolver.resolve(nuxt.options.buildDir, 'nitro-fetch.mjs'))
             })
         }
     }
 })
 
-function nitroFetchProxy(config: ModuleOptions): string {
+function nitroFetchProxy(host: string, port: number | string): string {
 return `import { createFetch, Headers } from 'ohmyfetch'
-const config = ${JSON.stringify(config.proxies, converter)};
-const proxies = {}
-
-Object.keys(config).forEach((context) => {
-    let opts = config[context]
-
-    if (typeof opts === 'string') {
-        opts = { target: opts }
-    }
-
-    if (isObject(opts)) {
-        opts = { ...opts }
-        opts.rewrite = opts.rewrite ? new Function("return (" + opts.rewrite + ")")() : false
-    }
-
-    proxies[context] = [{ ...opts }]
-})
 
 export default function (nitroApp) {
-    // using create() doesnt work, so we need to replace the global $fetch instance with a new one.
-    const $nitroFetch = createFetch({ fetch: nitroApp.localFetch, Headers, defaults: {
-            async onRequest({ request, options }) {
-                for (const context in proxies) {
-                    const [opts] = proxies[context]
-                    if (doesProxyContextMatchUrl(context, request)) {
-                        options.baseURL = opts.target
-                    }
-
-                    if (opts.rewrite) {
-                        request = opts.rewrite(request)
-                    }
-                }
-            }
-        }
-    })
-
-    // @ts-ignore
-    globalThis.$fetch = $nitroFetch
-}
-
-function isObject(value) {
-    return Object.prototype.toString.call(value) === '[object Object]'
-}
-
-function doesProxyContextMatchUrl(context, url) {
-    return (
-        (context.startsWith('^') && new RegExp(context).test(url)) || url.startsWith(context)
-    )
+    // the proxy module needs the host and port of the nitro server n order for it to proxy it properly.
+    // By default only a path is being submitted so this will chnage it to the host and port
+    globalThis.$fetch = createFetch({ fetch: nitroApp.localFetch, Headers, defaults: { baseURL: 'http://${host}:${port}' } })
 }
 `
 }

@@ -1,4 +1,4 @@
-import { defineNuxtPlugin } from '#imports'
+import { defineNuxtPlugin, useRuntimeConfig } from '#imports'
 
 // Nuxt Options
 const proxies = {}
@@ -21,7 +21,7 @@ export default defineNuxtPlugin(({ $http }) => {
         if (typeof opts === 'string') {
             opts = { target: opts }
         }
-    
+
         if (isObject(opts)) {
             opts = { ...opts }
         }
@@ -37,7 +37,7 @@ export default defineNuxtPlugin(({ $http }) => {
                     config.baseURL = opts.target
                 }
             }
-    
+
             return config
         })
     }

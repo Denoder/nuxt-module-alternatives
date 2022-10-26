@@ -75,7 +75,7 @@ export default defineNuxtModule({
         })
 
         if (typeof options.browserBaseURL === 'undefined') {
-            options.browserBaseURL = options.baseURL
+            options.browserBaseURL = nuxt.options.app.baseURL
         }
 
         // Convert http:// to https:// if https option is on
@@ -141,9 +141,7 @@ return `import { createInstance } from '@refactorjs/ofetch'
 
 export default function (nitroApp) {
     // should inherit defaults from $fetch
-    const $http = createInstance({}, $fetch)
-
-    globalThis.$http = $http
+    globalThis.$http = createInstance({}, $fetch)
 }
 `
 }
