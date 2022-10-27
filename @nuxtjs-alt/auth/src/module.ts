@@ -1,5 +1,5 @@
 import type { ModuleOptions } from './types';
-import { addImports, addTemplate, defineNuxtModule, addPluginTemplate, createResolver } from '@nuxt/kit';
+import { addImports, addPluginTemplate, addTemplate, createResolver, defineNuxtModule, installModule } from '@nuxt/kit';
 import { name, version } from '../package.json';
 import { resolveStrategies } from './resolve';
 import { moduleDefaults } from './options';
@@ -20,32 +20,13 @@ export default defineNuxtModule({
     defaults: moduleDefaults,
     async setup(moduleOptions, nuxt) {
         // Merge all option sources
-        const options: ModuleOptions = defu({ 
-            ...moduleOptions,
-            ...nuxt.options.runtimeConfig[CONFIG_KEY]
-        }, moduleDefaults)
+        const options: ModuleOptions = defu({ ...moduleOptions, ...nuxt.options.runtimeConfig[CONFIG_KEY] }, moduleDefaults)
 
         // Resolver
         const resolver = createResolver(import.meta.url);
 
-        // Runtime
-        const runtime = resolver.resolve('runtime');
-        nuxt.options.alias['#auth/runtime'] = runtime;
-        nuxt.options.build.transpile.push(runtime)
-
-        // Utils
-        const utils = resolver.resolve('utils');
-        nuxt.options.alias['#auth/utils'] = utils;
-        nuxt.options.build.transpile.push(utils)
-
-        // Providers
-        const providers = resolver.resolve('providers');
-        nuxt.options.alias['#auth/providers'] = providers;
-        nuxt.options.build.transpile.push(providers)
-
         // Resolve strategies
         const { strategies, strategyScheme } = await resolveStrategies(nuxt, options);
-
         delete options.strategies;
 
         // Resolve required imports
@@ -62,6 +43,11 @@ export default defineNuxtModule({
         // Set defaultStrategy
         options.defaultStrategy = options.defaultStrategy || strategies.length ? strategies[0].name : '';
 
+        // Install http module if not in modules
+        if (!nuxt.options.modules.includes('@nuxtjs-alt/http')) {
+            installModule('@nuxtjs-alt/http')
+        }
+
         // Add auth plugin
         addPluginTemplate({
             getContents: () => getAuthPlugin({ options, strategies, strategyScheme, schemeImports }),
@@ -75,11 +61,24 @@ export default defineNuxtModule({
         })
 
         // Add auto imports
-        const composables = resolver.resolve('runtime/composables')
-
         addImports([
-            { from: composables, name: 'useAuth' },
+            { from: resolver.resolve('runtime/composables'), name: 'useAuth' },
         ])
+
+        // Runtime
+        const runtime = resolver.resolve('runtime');
+        nuxt.options.alias['#auth/runtime'] = runtime;
+
+        // Utils
+        const utils = resolver.resolve('utils');
+        nuxt.options.alias['#auth/utils'] = utils;
+
+        // Providers
+        const providers = resolver.resolve('providers');
+        nuxt.options.alias['#auth/providers'] = providers;
+
+        // Transpile
+        nuxt.options.build.transpile.push(runtime, providers, utils)
 
         // Middleware
         if (options.enableMiddleware) {
