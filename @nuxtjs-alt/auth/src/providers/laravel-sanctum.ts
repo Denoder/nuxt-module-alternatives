@@ -41,7 +41,7 @@ export function laravelSanctum(nuxt: Nuxt, strategy: ProviderPartialOptions<Lara
                 client: false
             },
             autoFetch: true,
-        },
+        }
     };
 
     assignDefaults(strategy, DEFAULTS)

@@ -9,14 +9,23 @@ Remember this is a mix of `ohmyfetch` and `nuxt/http` so to use methods you woul
 ```ts
 // Available methods: 'get', 'head', 'delete', 'post', 'put', 'patch', 'options'
 
-// $http.$get('/api') $http.$get({ url: '/api' }) is the same as $fetch('/api', { method: 'get' })
+// $http.$get('/api', options) and $http.$get({ url: '/api' }) is the same as $fetch('/api', { method: 'get' })
 await $http.$get('/api', options)
 await $http.$get({ url: '/api', ...options })
 
 // Access Raw Response
-// $http.get('/api') and $http.get({ url: '/api' }) is the same as $fetch.raw('/api', { method: 'get' })
+// $http.get('/api', options) and $http.get({ url: '/api' }) is the same as $fetch.raw('/api', { method: 'get' })
 await $http.get('/api', options)
 await $http.get({ url: '/api', ...options })
+
+// $http.request('/api', options) and $http.request({ url: '/api' }) is the same as $fetch('/api')
+await $http.request({ url: '/api', ...options })
+await $http.request('/api', options)
+
+// Access Raw Response
+// $http.requestRaw('/api', options) and $http.requestRaw({ url: '/api' }) is the same as $fetch.raw('/api')
+await $http.requestRaw({ url: '/api', ...options })
+await $http.requestRaw('/api', options)
 ```
 
 A `useHttp` composable is avaialble, it works like `useFetch` except uses this module under the hood

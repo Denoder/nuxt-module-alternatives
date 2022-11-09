@@ -2,6 +2,7 @@ import type { ModuleOptions } from './types'
 import type { Nuxt } from '@nuxt/schema'
 import { addTemplate, defineNuxtModule, addPluginTemplate, createResolver, addImports } from '@nuxt/kit'
 import { name, version } from '../package.json'
+import { withHttps } from 'ufo'
 import { defu } from 'defu'
 
 const CONFIG_KEY = 'http'
@@ -80,9 +81,8 @@ export default defineNuxtModule({
 
         // Convert http:// to https:// if https option is on
         if (options.https === true) {
-            const https = (s: string) => s.replace('http://', 'https://')
-            options.baseURL = https(options.baseURL)
-            options.browserBaseURL = https(options.browserBaseURL)
+            options.baseURL = withHttps(options.baseURL)
+            options.browserBaseURL = withHttps(options.browserBaseURL)
         }
 
         // resolver
@@ -94,6 +94,7 @@ export default defineNuxtModule({
             addPluginTemplate({
                 src: resolver.resolve('runtime/templates/interceptor.plugin.mjs'),
                 filename: 'proxy.plugin.mjs',
+                // @ts-ignore
                 options: nuxt.options['proxy'],
             })
         }

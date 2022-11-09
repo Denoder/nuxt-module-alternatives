@@ -1,10 +1,11 @@
 import type { HTTPResponse, SchemeCheck, SchemePartialOptions } from '../../types';
 import type { Auth } from '..';
 import { Oauth2Scheme, Oauth2SchemeEndpoints, Oauth2SchemeOptions } from './oauth2';
-import { encodeQuery, parseQuery, normalizePath, getProp } from '../../utils';
+import { normalizePath, getProp } from '../../utils';
 import { IdToken, ConfigurationDocument } from '../inc';
 import { IdTokenableSchemeOptions } from '../../types';
-import { useRoute } from 'nuxt/app';
+import { useRoute } from '#imports';
+import { getQuery, withQuery, QueryObject, QueryValue } from 'ufo'
 
 export interface OpenIDConnectSchemeEndpoints extends Oauth2SchemeEndpoints {
     configuration: string;
@@ -138,11 +139,11 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
 
     logout() {
         if (this.options.endpoints.logout) {
-            const opts = {
-                id_token_hint: this.idToken.get(),
+            const opts: QueryObject = {
+                id_token_hint: this.idToken.get() as QueryValue,
                 post_logout_redirect_uri: this.logoutRedirectURI,
             };
-            const url = this.options.endpoints.logout + '?' + encodeQuery(opts);
+            const url = withQuery(this.options.endpoints.logout, opts);
             window.location.replace(url);
         }
         return this.$auth.reset();
@@ -183,7 +184,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
             return;
         }
 
-        const hash = parseQuery(route.hash.slice(1));
+        const hash = getQuery(route.hash.slice(1));
         const parsedQuery = Object.assign({}, route.query, hash);
 
         // accessToken/idToken
@@ -219,9 +220,9 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
                 method: 'post',
                 url: this.options.endpoints.token,
                 baseURL: '',
-                headers: {
-                    'content-type': 'application/x-www-form-urlencoded',
-                },
+                headers: new Headers({
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }),
                 body: new URLSearchParams({
                     code: parsedQuery.code as string,
                     client_id: this.options.clientId,
@@ -230,7 +231,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
                     audience: this.options.audience,
                     grant_type: this.options.grantType,
                     code_verifier: codeVerifier,
-                }).toString(),
+                }),
             });
 
             token = (getProp(response, this.options.token!.property) as string) || token;

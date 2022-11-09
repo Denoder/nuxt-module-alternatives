@@ -1,8 +1,9 @@
 import type { HTTPRequest, HTTPResponse, Scheme, SchemeOptions, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions } from '../../types';
 import type { NuxtApp } from '#app';
-import { isRelativeURL, isSet, isSameURL, getProp, routeMeta } from '../../utils';
+import { isSet, getProp, routeMeta, isRelativeURL } from '../../utils';
 import { useRouter, useRoute } from '#imports';
 import { Storage } from './storage';
+import { isSamePath } from 'ufo'
 import requrl from 'requrl';
 
 export type ErrorListener = (...args: any[]) => void;
@@ -108,7 +109,7 @@ export class Auth {
         finally {
             if (process.client && this.options.watchLoggedIn) {
                 this.$storage.watchState('loggedIn', (loggedIn: boolean) => {
-                    if (Object.hasOwn(useRoute().meta, 'auth') && !routeMeta('auth', false)) {
+                    if (Object.prototype.hasOwnProperty.call(useRoute().meta, 'auth') && !routeMeta('auth', false)) {
                         this.redirect(loggedIn ? 'home' : 'logout');
                     }
                 });
@@ -272,7 +273,6 @@ export class Auth {
     async request(endpoint: HTTPRequest, defaults: HTTPRequest = {}): Promise<HTTPResponse | void> {
 
         const request = typeof defaults === 'object' ? Object.assign({}, defaults, endpoint) : endpoint;
-        const method = request.method ? request.method.toLowerCase() : 'get'
 
         if (request.baseURL === '') {
             // @ts-ignore
@@ -283,7 +283,7 @@ export class Auth {
             return Promise.reject(new Error('[AUTH] add the @nuxtjs-alt/http module to nuxt.config file'));
         }
 
-        return this.ctx.$http['$' + method](request).catch((error: Error) => {
+        return this.ctx.$http.request(request).catch((error: Error) => {
             // Call all error handlers
             this.callOnError(error, { method: 'request' });
 
@@ -301,11 +301,11 @@ export class Auth {
             const tokenName = (this.getStrategy() as TokenableScheme).options.token!.name || 'Authorization';
 
             if (!request.headers) {
-                request.headers = {};
+                request.headers = new Headers();
             }
 
-            if (!request.headers[tokenName as keyof typeof request.headers] && isSet(token) && token && typeof token === 'string') {
-                request.headers[tokenName as keyof typeof request.headers] = token;
+            if (!request.headers.has(tokenName) && isSet(token) && token && typeof token === 'string') {
+                request.headers.set(tokenName, token)
             }
         }
 
@@ -364,11 +364,11 @@ export class Auth {
 
         // Apply rewrites
         if (this.options.rewriteRedirects) {
-            if (name === 'logout' && isRelativeURL(from) && !isSameURL(to, from)) {
+            if (name === 'logout' && isRelativeURL(from) && !isSamePath(to, from)) {
                 this.$storage.setUniversal('redirect', from);
             }
 
-            if (name === 'login' && isRelativeURL(from) && !isSameURL(to, from)) {
+            if (name === 'login' && isRelativeURL(from) && !isSamePath(to, from)) {
                 this.$storage.setUniversal('redirect', from);
             }
 
@@ -387,7 +387,7 @@ export class Auth {
         to = this.callOnRedirect(to, from) || to;
 
         // Prevent infinity redirects
-        if (isSameURL(to, from)) {
+        if (isSamePath(to, from)) {
             return;
         }
 

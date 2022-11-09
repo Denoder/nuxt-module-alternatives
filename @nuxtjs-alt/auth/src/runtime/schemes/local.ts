@@ -105,7 +105,6 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
         const { tokenExpired, refreshTokenExpired } = this.check(true);
 
         if (refreshTokenExpired && typeof refreshTokenCallback === 'function') {
-            // @ts-ignore
             refreshTokenCallback();
         } else if (tokenExpired && typeof tokenCallback === 'function') {
             tokenCallback();
@@ -169,7 +168,7 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
         return this.fetchUser();
     }
 
-    fetchUser(endpoint?: HTTPRequest): Promise<HTTPResponse | void> {
+    async fetchUser(endpoint?: HTTPRequest): Promise<HTTPResponse | void> {
         // Token is required but not available
         if (!this.check().valid) {
             return Promise.resolve();

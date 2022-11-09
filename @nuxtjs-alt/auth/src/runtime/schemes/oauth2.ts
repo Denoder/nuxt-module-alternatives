@@ -1,8 +1,9 @@
 import type { RefreshableScheme, SchemePartialOptions, SchemeCheck, RefreshableSchemeOptions, UserOptions, SchemeOptions, HTTPResponse, EndpointsOption, TokenableSchemeOptions } from '../../types';
 import type { IncomingMessage } from 'http'
 import type { Auth } from '../core';
-import { encodeQuery, getProp, normalizePath, parseQuery, removeTokenPrefix, urlJoin, randomString } from '../../utils';
+import { getProp, normalizePath, randomString, removeTokenPrefix } from '../../utils';
 import { RefreshController, RequestHandler, ExpiredAuthSessionError, Token, RefreshToken } from '../inc';
+import { joinURL, getQuery, withQuery } from 'ufo'
 import { BaseScheme } from './base';
 import { useRoute, useRuntimeConfig } from '#imports';
 import requrl from 'requrl';
@@ -114,11 +115,11 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     protected get redirectURI(): string {
         const basePath = useRuntimeConfig().app.baseURL || '';
         const path = normalizePath(basePath + '/' + this.$auth.options.redirect.callback); // Don't pass in context since we want the base path
-        return this.options.redirectUri || urlJoin(requrl(this.req), path);
+        return this.options.redirectUri || joinURL(requrl(this.req), path);
     }
 
     protected get logoutRedirectURI(): string {
-        return (this.options.logoutRedirectUri || urlJoin(requrl(this.req), this.$auth.options.redirect.logout));
+        return (this.options.logoutRedirectUri || joinURL(requrl(this.req), this.$auth.options.redirect.logout));
     }
 
     check(checkStatus = false): SchemeCheck {
@@ -194,7 +195,6 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
     }
 
     async login($opts: { state?: string; params?: any; nonce?: string } = {}): Promise<void> {
-
         const opts = {
             protocol: 'oauth2',
             response_type: this.options.responseType,
@@ -239,7 +239,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                         const codeVerifier = this.generateRandomString();
                         this.$auth.$storage.setUniversal(this.name + '.pkce_code_verifier', codeVerifier);
                         const codeChallenge = await this.pkceChallengeFromVerifier(codeVerifier, opts.code_challenge_method === 'S256');
-                        opts.code_challenge = window.encodeURIComponent(codeChallenge);
+                        opts.code_challenge = globalThis.encodeURIComponent(codeChallenge);
                     }
                     break;
                 case 'implicit':
@@ -258,27 +258,27 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
 
         this.$auth.$storage.setUniversal(this.name + '.state', opts.state);
 
-        const url = this.options.endpoints.authorization + '?' + encodeQuery(opts);
+        const url = withQuery(this.options.endpoints.authorization, opts);
 
         if (opts.clientWindow) {
             if (this.#clientWindowReference === null || this.#clientWindowReference!.closed) {
                 // Window features to center popup in middle of parent window
-                const windowFeatures = this.clientWindowFeatures(window, opts.clientWindowWidth, opts.clientWindowHeight)
+                const windowFeatures = this.clientWindowFeatures(opts.clientWindowWidth, opts.clientWindowHeight)
 
-                this.#clientWindowReference = window.open(url, 'oauth2-client-window', windowFeatures)
+                this.#clientWindowReference = globalThis.open(url, 'oauth2-client-window', windowFeatures)
 
                 let strategy = this.$auth.$state.strategy
 
                 let listener = this.clientWindowCallback.bind(this)
 
                 // setting listener to know about approval from oauth provider
-                window.addEventListener('message', listener)
+                globalThis.addEventListener('message', listener)
 
                 // watching pop up window and clearing listener when it closes
                 // or is being used by a different provider
                 let checkPopUpInterval = setInterval(() => {
                     if (this.#clientWindowReference!.closed || strategy !== this.$auth.$state.strategy) {
-                        window.removeEventListener('message', listener)
+                        globalThis.removeEventListener('message', listener)
                         this.#clientWindowReference = null
                         clearInterval(checkPopUpInterval)
                     }
@@ -287,7 +287,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                 this.#clientWindowReference!.focus()
             }
         } else {
-            window.location.replace(url)
+            globalThis.location.replace(url)
         }
     }
 
@@ -298,9 +298,9 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         }
     }
 
-    clientWindowFeatures(window: Window, clientWindowWidth: number, clientWindowHeight: number): string {
-        const top = window.top!.outerHeight / 2 + window.top!.screenY - clientWindowHeight / 2
-        const left = window.top!.outerWidth / 2 + window.top!.screenX - clientWindowWidth / 2
+    clientWindowFeatures(clientWindowWidth: number, clientWindowHeight: number): string {
+        const top = globalThis.top!.outerHeight / 2 + globalThis.top!.screenY - clientWindowHeight / 2
+        const left = globalThis.top!.outerWidth / 2 + globalThis.top!.screenX - clientWindowWidth / 2
         return `toolbar=no, menubar=no, width=${clientWindowWidth}, height=${clientWindowHeight}, top=${top}, left=${left}`
     }
 
@@ -310,8 +310,8 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                 client_id: this.options.clientId,
                 redirect_uri: this.logoutRedirectURI
             };
-            const url = this.options.endpoints.logout + '?' + encodeQuery(opts);
-            window.location.replace(url);
+            const url = withQuery(this.options.endpoints.logout, opts);
+            globalThis.location.replace(url);
         }
         return this.$auth.reset();
     }
@@ -344,7 +344,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             return;
         }
 
-        const hash = parseQuery(route.hash.slice(1));
+        const hash = getQuery(route.hash.slice(1));
         const parsedQuery = Object.assign({}, route.query, hash);
         // accessToken/idToken
         let token: string = parsedQuery[this.options.token!.property] as string;
@@ -364,7 +364,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
 
         // -- Authorization Code Grant --
         if (this.options.responseType === 'code' && parsedQuery.code) {
-            let codeVerifier: any;
+            let codeVerifier: string;
 
             // Retrieve code verifier and remove it from storage
             if (this.options.codeChallengeMethod && this.options.codeChallengeMethod !== 'implicit') {
@@ -376,6 +376,9 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                 method: 'post',
                 url: this.options.endpoints.token,
                 baseURL: '',
+                headers: new Headers({
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }),
                 body: new URLSearchParams({
                     code: parsedQuery.code as string,
                     client_id: this.options.clientId as string,
@@ -384,7 +387,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                     audience: this.options.audience,
                     grant_type: this.options.grantType,
                     code_verifier: codeVerifier,
-                }).toString(),
+                }),
             });
 
             token = (getProp(response, this.options.token!.property) as string) || token;
@@ -404,12 +407,11 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         }
 
         if (this.options.clientWindow) {
-            if (window.opener) {
-                window.opener.postMessage({ isLoggedIn: true })
-                window.close()
+            if (globalThis.opener) {
+                globalThis.opener.postMessage({ isLoggedIn: true })
+                globalThis.close()
             }
         }
-        // Redirect to home
         else if (this.$auth.options.watchLoggedIn) {
             this.$auth.redirect('home', false);
             return true; // True means a redirect happened
@@ -442,15 +444,15 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             method: 'post',
             url: this.options.endpoints.token,
             baseURL: '',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: new Headers({
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }),
             body: new URLSearchParams({
                 refresh_token: removeTokenPrefix(refreshToken, this.options.token!.type) as string,
                 scopes: this.scope,
                 client_id: this.options.clientId as string,
                 grant_type: 'refresh_token',
-            }).toString(),
+            }),
         })
         .catch((error) => {
             this.$auth.callOnError(error, { method: 'refreshToken' });
@@ -481,16 +483,16 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         return v; // plain is plain - url-encoded by default
     }
 
-    protected generateRandomString(): string {
+    generateRandomString(): string {
         const array = new Uint32Array(28); // this is of minimum required length for servers with PKCE-enabled
-        window.crypto.getRandomValues(array);
+        globalThis.crypto.getRandomValues(array);
         return Array.from(array, (dec) => ('0' + dec.toString(16)).slice(-2)).join('');
     }
 
     #sha256(plain: string): Promise<ArrayBuffer> {
         const encoder = new TextEncoder();
         const data = encoder.encode(plain);
-        return window.crypto.subtle.digest('SHA-256', data);
+        return globalThis.crypto.subtle.digest('SHA-256', data);
     }
 
     #base64UrlEncode(str: ArrayBuffer): string {
@@ -498,10 +500,6 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         // btoa accepts chars only within ascii 0-255 and base64 encodes them.
         // Then convert the base64 encoded to base64url encoded
         // (replace + with -, replace / with _, trim trailing =)
-        // @ts-ignore
-        return btoa(String.fromCharCode.apply(null, new Uint8Array(str)))
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=+$/, '');
+        return btoa(String.fromCharCode.apply(null, new Uint8Array(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
 }

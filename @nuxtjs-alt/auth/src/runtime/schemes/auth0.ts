@@ -1,4 +1,4 @@
-import { encodeQuery } from '../../utils';
+import { withQuery } from 'ufo';
 import { Oauth2Scheme } from '../schemes/oauth2';
 
 export class Auth0Scheme extends Oauth2Scheme {
@@ -9,7 +9,8 @@ export class Auth0Scheme extends Oauth2Scheme {
             client_id: this.options.clientId as string,
             returnTo: this.logoutRedirectURI,
         };
-        const url = this.options.endpoints.logout + '?' + encodeQuery(opts);
+
+        const url = withQuery(this.options.endpoints.logout as string, opts)
         window.location.replace(url);
     }
 }
