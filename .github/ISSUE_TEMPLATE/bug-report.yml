@@ -17,6 +17,14 @@ body:
     validations:
       required: true
   - type: textarea
+    id: nuxt-config
+    attributes:
+      label: Nuxt Config
+      description: Please provide your nuxt config in here, if you do not provide it, this issue will be ignored.
+      placeholder: Nuxt Config
+    validations:
+      required: true
+  - type: textarea
     id: reproduction
     attributes:
       label: Reproduction
