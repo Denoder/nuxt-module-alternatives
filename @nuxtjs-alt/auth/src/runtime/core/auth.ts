@@ -345,7 +345,7 @@ export class Auth {
      *
      * @returns
      */
-    redirect(name: string, router: boolean = true): void {
+    redirect(name: string, router: boolean = true, retirect_to: boolean = true): void {
         const activeRouter = useRouter();
         const activeRoute = useRoute();
 
@@ -353,9 +353,7 @@ export class Auth {
             return;
         }
 
-        const route = this.options.fullPathRedirect ? activeRoute.fullPath : activeRoute.path
-        const from = route;
-
+        const from = retirect_to ? (this.options.fullPathRedirect ? retirect_to.fullPath : retirect_to.path) : this.options.fullPathRedirect ? activeRoute.fullPath : activeRoute.path;
         let to: string = this.options.redirect[name];
 
         if (!to) {
