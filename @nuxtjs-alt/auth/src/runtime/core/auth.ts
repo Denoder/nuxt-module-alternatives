@@ -1,4 +1,4 @@
-import type { HTTPRequest, HTTPResponse, Scheme, SchemeOptions, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions } from '../../types';
+import type { HTTPRequest, HTTPResponse, Scheme, SchemeOptions, SchemeCheck, TokenableScheme, RefreshableScheme, ModuleOptions, Route } from '../../types';
 import type { NuxtApp } from '#app';
 import { isSet, getProp, routeMeta, isRelativeURL } from '../../utils';
 import { useRouter, useRoute } from '#imports';
@@ -114,7 +114,7 @@ export class Auth {
                     }
                 });
             }
-        }        
+        }
     }
 
     registerStrategy(name: string, strategy: Scheme): void {
@@ -301,11 +301,11 @@ export class Auth {
             const tokenName = (this.getStrategy() as TokenableScheme).options.token!.name || 'Authorization';
 
             if (!request.headers) {
-                request.headers = new Headers();
+                request.headers = {};
             }
 
-            if (!request.headers.has(tokenName) && isSet(token) && token && typeof token === 'string') {
-                request.headers.set(tokenName, token)
+            if (!request.headers[tokenName as keyof typeof request.headers] && isSet(token) && token && typeof token === 'string') {
+                request.headers[tokenName as keyof typeof request.headers] = token;
             }
         }
 
@@ -341,11 +341,12 @@ export class Auth {
     /**
      * 
      * @param name redirect name
+     * @param route (default: false) Internal useRoute() (false) or manually specify
      * @param router (default: true) Whether to use nuxt redirect (true) or window redirect (false)
      *
      * @returns
      */
-    redirect(name: string, router: boolean = true): void {
+    redirect(name: string, route: Route | false = false, router: boolean = true): void {
         const activeRouter = useRouter();
         const activeRoute = useRoute();
 
@@ -353,10 +354,10 @@ export class Auth {
             return;
         }
 
-        const route = this.options.fullPathRedirect ? activeRoute.fullPath : activeRoute.path
-        const from = route;
+        const nuxtRoute = this.options.fullPathRedirect ? activeRoute.fullPath : activeRoute.path
+        const from = route ? (this.options.fullPathRedirect ? route.fullPath : route.path) : nuxtRoute;
 
-        let to: string = this.options.redirect[name];
+        let to: string = this.options.redirect[name as keyof typeof this.options.redirect];
 
         if (!to) {
             return;

@@ -1,7 +1,6 @@
 import type { RouteComponent } from 'vue-router';
 import type { RecursivePartial } from '../types';
 import { useRuntimeConfig, useRoute } from '#imports';
-import { normalizeURL } from 'ufo';
 
 export const isUnset = (o: any): boolean => typeof o === 'undefined' || o === null;
 
@@ -18,9 +17,9 @@ export function routeMeta(key: string, value: string | boolean): boolean {
 export function getMatchedComponents(matches: unknown[] = []): RouteComponent[][] {
     return [
         ...useRoute().matched.map(function (m, index: number) {
-            return Object.keys(m.components).map(function (key) {
+            return Object.keys(m.components!).map(function (key) {
                 matches.push(index);
-                return m.components[key];
+                return m.components![key];
             });
         })
     ]
@@ -36,7 +35,13 @@ export function normalizePath(path: string = ''): string {
         result = result.replace(config.app.baseURL, '/');
     }
 
-    result = normalizeURL(result)
+    // Remove redundant / from the end of path
+    if (result.charAt(result.length - 1) === '/') {
+        result = result.slice(0, -1);
+    }
+
+    // Remove duplicate slashes
+    result = result.replace(/\/+/g, '/');
 
     return result;
 }

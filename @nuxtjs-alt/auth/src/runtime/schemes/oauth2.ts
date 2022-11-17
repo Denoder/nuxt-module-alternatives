@@ -364,7 +364,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
 
         // -- Authorization Code Grant --
         if (this.options.responseType === 'code' && parsedQuery.code) {
-            let codeVerifier: string;
+            let codeVerifier;
 
             // Retrieve code verifier and remove it from storage
             if (this.options.codeChallengeMethod && this.options.codeChallengeMethod !== 'implicit') {
@@ -376,9 +376,9 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                 method: 'post',
                 url: this.options.endpoints.token,
                 baseURL: '',
-                headers: new Headers({
+                headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
-                }),
+                },
                 body: new URLSearchParams({
                     code: parsedQuery.code as string,
                     client_id: this.options.clientId as string,
@@ -386,7 +386,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
                     response_type: this.options.responseType,
                     audience: this.options.audience,
                     grant_type: this.options.grantType,
-                    code_verifier: codeVerifier,
+                    code_verifier: codeVerifier as string,
                 }),
             });
 
@@ -413,7 +413,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             }
         }
         else if (this.$auth.options.watchLoggedIn) {
-            this.$auth.redirect('home', false);
+            this.$auth.redirect('home', false, false);
             return true; // True means a redirect happened
         }
     }
@@ -444,9 +444,9 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
             method: 'post',
             url: this.options.endpoints.token,
             baseURL: '',
-            headers: new Headers({
+            headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
-            }),
+            },
             body: new URLSearchParams({
                 refresh_token: removeTokenPrefix(refreshToken, this.options.token!.type) as string,
                 scopes: this.scope,
@@ -500,6 +500,7 @@ export class Oauth2Scheme<OptionsT extends Oauth2SchemeOptions = Oauth2SchemeOpt
         // btoa accepts chars only within ascii 0-255 and base64 encodes them.
         // Then convert the base64 encoded to base64url encoded
         // (replace + with -, replace / with _, trim trailing =)
+        // @ts-ignore
         return btoa(String.fromCharCode.apply(null, new Uint8Array(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
 }

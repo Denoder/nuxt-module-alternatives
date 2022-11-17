@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/auth",
-    "version": "2.1.0",
+    "version": "2.1.5",
     "description": "An alternative module to @nuxtjs/auth",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -30,27 +30,26 @@
     "scripts": {
         "dev": "nuxi dev playground",
         "dev:build": "nuxi build playground",
-        "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
+        "dev:prepare": "unbuild --stub && nuxi prepare playground",
         "prepack": "unbuild"
     },
     "dependencies": {
-        "@nuxt/kit": "^3.0.0-rc.13",
-        "@nuxtjs-alt/http": "^1.4.4",
-        "@pinia/nuxt": "^0.4.3",
-        "body-parser": "1.20.1",
-        "cookie-es": "^0.5.0",
-        "defu": "^6.1.0",
-        "jwt-decode": "^3.1.2",
-        "ohash": "^0.1.5",
-        "pathe": "^0.3.9",
-        "requrl": "^3.0.2"
+        "@nuxt/kit": "^3.0.0",
+        "@nuxtjs-alt/http": "latest",
+        "@pinia/nuxt": "latest",
+        "body-parser": "latest",
+        "cookie-es": "latest",
+        "jwt-decode": "latest",
+        "requrl": "latest",
+        "defu": "latest",
+        "ohash": "latest",
+        "pathe": "latest"
     },
     "devDependencies": {
-        "@nuxt/module-builder": "^0.2.0",
-        "@nuxt/schema": "3.0.0-rc.13",
-        "fdir": "^5.3.0",
-        "nuxt": "^3.0.0-rc.13",
-        "unbuild": "^0.9.4"
+        "@nuxt/schema": "3.0.0",
+        "fdir": "latest",
+        "nuxt": "^3.0.0",
+        "unbuild": "latest"
     },
     "repository": {
         "type": "git",

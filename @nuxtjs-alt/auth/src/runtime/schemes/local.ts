@@ -105,6 +105,7 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
         const { tokenExpired, refreshTokenExpired } = this.check(true);
 
         if (refreshTokenExpired && typeof refreshTokenCallback === 'function') {
+            //@ts-ignore
             refreshTokenCallback();
         } else if (tokenExpired && typeof tokenCallback === 'function') {
             tokenCallback();
@@ -129,17 +130,17 @@ export class LocalScheme<OptionsT extends LocalSchemeOptions = LocalSchemeOption
 
         // Add client id to payload if defined
         if (this.options.clientId) {
-            endpoint.body!['client_id'] = this.options.clientId;
+            endpoint.body!['client_id' as keyof BodyInit] = this.options.clientId as keyof BodyInit;
         }
 
         // Add grant type to payload if defined
         if (this.options.grantType) {
-            endpoint.body!['grant_type'] = this.options.grantType;
+            endpoint.body!['grant_type' as keyof BodyInit] = this.options.grantType as keyof BodyInit;
         }
 
         // Add scope to payload if defined
         if (this.options.scope) {
-            endpoint.body!['scope'] = this.options.scope;
+            endpoint.body!['scope' as keyof BodyInit] = this.options.scope as keyof BodyInit;
         }
 
         // Make login request

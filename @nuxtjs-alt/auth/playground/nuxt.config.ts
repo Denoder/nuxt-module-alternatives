@@ -1,7 +1,7 @@
 import Module from '..'
 
 export default defineNuxtConfig({
-    buildModules: [
+    modules: [
         Module,
         "@nuxtjs-alt/http",
         "@pinia/nuxt",

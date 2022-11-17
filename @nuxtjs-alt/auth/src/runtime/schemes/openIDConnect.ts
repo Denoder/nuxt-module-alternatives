@@ -220,9 +220,9 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
                 method: 'post',
                 url: this.options.endpoints.token,
                 baseURL: '',
-                headers: new Headers({
+                headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
-                }),
+                },
                 body: new URLSearchParams({
                     code: parsedQuery.code as string,
                     client_id: this.options.clientId,
@@ -256,7 +256,7 @@ export class OpenIDConnectScheme<OptionsT extends OpenIDConnectSchemeOptions = O
         }
 
         // Redirect to home
-        this.$auth.redirect('home', false);
+        this.$auth.redirect('home', false, false);
 
         return true; // True means a redirect happened
     }

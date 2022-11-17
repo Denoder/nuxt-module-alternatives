@@ -14,7 +14,7 @@ export default defineNuxtModule({
         version,
         configKey: CONFIG_KEY,
         compatibility: {
-            nuxt: '^3.0.0-rc.9',
+            nuxt: '^3.0.0',
         },
     },
     defaults: moduleDefaults,

@@ -108,7 +108,8 @@ export class Storage {
         this.#state = {};
 
         // Use pinia for local state's if possible
-        this.#piniaEnabled = this.options.pinia && !!this.ctx['$pinia'];
+        // @ts-ignore
+        this.#piniaEnabled = this.options.pinia && !!this.ctx.$pinia;
 
         if (this.#piniaEnabled) {
             this.#store = defineStore(this.options.pinia.namespace, {
@@ -120,7 +121,8 @@ export class Storage {
                 },
             });
 
-            this.#initStore = this.#store(this.ctx['$pinia']);
+            // @ts-ignore
+            this.#initStore = this.#store(this.ctx.$pinia);
             this.state = this.#initStore.$state;
         } else {
             this.state = {};
@@ -418,7 +420,7 @@ export class Storage {
 
         const cookies = this.getCookies();
 
-        const value = cookies[$key] ? decodeURIComponent(cookies[$key] as string) : undefined;
+        const value = cookies![$key] ? decodeURIComponent(cookies![$key] as string) : undefined;
 
         return decodeValue(value);
     }
