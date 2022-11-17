@@ -1,6 +1,6 @@
 {
     "name": "@nuxtjs-alt/proxy",
-    "version": "2.0.3",
+    "version": "2.1.0",
     "description": "An alternative module to @nuxtjs/proxy",
     "homepage": "https://github.com/Teranode/nuxt-module-alternatives",
     "author": "Teranode",
@@ -14,27 +14,27 @@
     ],
     "license": "MIT",
     "type": "module",
-    "main": "./dist/module.mjs",
+    "main": "./dist/module.cjs",
+    "module": "./dist/module.mjs",
     "types": "./dist/types.d.ts",
     "scripts": {
         "dev": "nuxi dev playground",
         "dev:build": "nuxi build playground",
-        "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
-        "prepack": "nuxt-module-build"
+        "dev:prepare": "unbuild --stub && nuxi prepare playground",
+        "prepack": "unbuild"
     },
     "files": [
         "dist"
     ],
     "dependencies": {
-        "@nuxt/kit": "^3.0.0-rc.12",
-        "@refactorjs/http-proxy": "^0.1.4",
-        "defu": "^6.1.0",
-        "pathe": "^0.3.9",
-        "ohmyfetch": "latest"
+        "@nuxt/kit": "^3.0.0",
+        "@refactorjs/http-proxy": "latest",
+        "defu": "latest",
+        "ofetch": "latest"
     },
     "devDependencies": {
-        "@nuxt/module-builder": "0.2.0",
-        "nuxt": "^3.0.0-rc.12"
+        "unbuild": "latest",
+        "nuxt": "^3.0.0"
     },
     "repository": {
         "type": "git",

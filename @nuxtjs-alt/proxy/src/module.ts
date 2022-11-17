@@ -1,40 +1,9 @@
-import type { ProxyServer, Server } from '@refactorjs/http-proxy'
-import type { IncomingMessage, ServerResponse } from 'http'
 import { addServerHandler, addTemplate, addPluginTemplate, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { name, version } from '../package.json'
-import { join } from 'pathe'
+import { ModuleOptions, ProxyOptions } from './types'
 import { defu } from 'defu'
 
 const CONFIG_KEY = 'proxy'
-
-export interface ModuleOptions {
-    enableProxy: boolean
-    proxies: {
-        [key: string]: string | ProxyOptions
-    }
-    fetch?: boolean
-}
-
-interface ProxyOptions extends Server.ServerOptions {
-    /**
-     * rewrite path
-     */
-    rewrite?: (path: string) => string | null | undefined | false
-
-    /**
-     * configure the proxy server (e.g. listen to events)
-     */
-    configure?: (proxy: ProxyServer, options: ProxyOptions) => void | null | undefined | false
-
-    /**
-     * webpack-dev-server style bypass function
-     */
-    bypass?: (
-        req: IncomingMessage,
-        res: ServerResponse,
-        options: ProxyOptions
-    ) => void | null | undefined | false | string
-}
 
 export default defineNuxtModule({
     meta: {
@@ -42,7 +11,7 @@ export default defineNuxtModule({
         version,
         configKey: CONFIG_KEY,
         compatibility: {
-            nuxt: '^3.0.0-rc.9'
+            nuxt: '^3.0.0'
         }
     },
     defaults: {
@@ -58,13 +27,13 @@ export default defineNuxtModule({
         if (config.enableProxy) {
             // Create Proxy
             addTemplate({ 
-                filename: 'nuxt-http-proxy.ts', 
+                filename: 'nuxt-proxy.ts', 
                 write: true,
-                getContents: () => proxyMiddlewareContent(config.proxies)
+                getContents: () => proxyMiddlewareContent(config.proxies ?? {})
             })
 
-            addServerHandler({ 
-                handler: join(nuxt.options.buildDir, 'nuxt-http-proxy.ts'), 
+            addServerHandler({
+                handler: resolver.resolve(nuxt.options.buildDir, 'nuxt-proxy.ts'), 
                 middleware: true 
             })
         }
@@ -72,13 +41,15 @@ export default defineNuxtModule({
         if (config.fetch) {
             // Create Interceptor
             addPluginTemplate({
-                src: resolver.resolve('runtime/interceptor.mjs'), 
-                filename: 'interceptor.mjs',
+                src: resolver.resolve('runtime/fetch.interceptor.mjs'), 
+                filename: 'fetch.interceptor.mjs',
                 options: config
             })
+
+            nuxt.options.build.transpile.push(resolver.resolve('runtime'))
         }
 
-        // doesn't work on windows for some reason
+        // Don't know if it runs on windows still.
         if (config.fetch && process.platform !== "win32") {
             // create nitro plugin
             addTemplate({
@@ -96,17 +67,17 @@ export default defineNuxtModule({
 })
 
 function nitroFetchProxy(host: string, port: number | string): string {
-return `import { createFetch, Headers } from 'ohmyfetch'
+return `import { createFetch, Headers } from 'ofetch'
 
 export default function (nitroApp) {
-    // the proxy module needs the host and port of the nitro server n order for it to proxy it properly.
+    // the proxy module needs the host and port of the nitro server in order for it to proxy it properly.
     // By default only a path is being submitted so this will chnage it to the host and port
     globalThis.$fetch = createFetch({ fetch: nitroApp.localFetch, Headers, defaults: { baseURL: 'http://${host}:${port}' } })
 }
 `
 }
 
-function converter(key, val) {
+function converter(key: string, val: any) {
     if (typeof val === 'function' || val && val.constructor === RegExp) {
         return String(val)
     }
@@ -114,8 +85,8 @@ function converter(key, val) {
 }
 
 function proxyMiddlewareContent(options: ProxyOptions): string {
-    return `import * as http from 'http'
-import * as net from 'net'
+    return `import * as http from 'node:http'
+import * as net from 'node:net'
 import { createProxyServer, ProxyServer, Server } from '@refactorjs/http-proxy'
 import { defineEventHandler } from 'h3'
 
@@ -142,10 +113,12 @@ interface ProxyOptions extends Server.ServerOptions {
 
 // lazy require only when proxy is used
 const proxies: Record<string, [ProxyServer, ProxyOptions]> = {}
-const options: Record<string, ProxyOptions> = ${JSON.stringify(options, converter)};
+const options: { [key: string]: string | ProxyOptions } | undefined = ${JSON.stringify(options, converter)};
 
-Object.keys(options).forEach((context) => {
-    let opts: ProxyOptions = options[context]
+Object.keys(options!).forEach((context) => {
+    let opts = options![context]
+
+    if (!opts) return
 
     if (typeof opts === 'string') {
         opts = { target: opts, changeOrigin: true } as ProxyOptions
@@ -165,15 +138,14 @@ Object.keys(options).forEach((context) => {
         const res = originalRes as http.ServerResponse | net.Socket
         if ('req' in res) {
             console.error('http proxy error:' + err.stack, {
-                    timestamp: true,
-                    error: err
+                timestamp: true,
+                error: err
             })
             if (!res.headersSent && !res.writableEnded) {
-                res
-                    .writeHead(500, {
-                        'Content-Type': 'text/plain'
-                    })
-                    .end()
+                res.writeHead(500, {
+                    'Content-Type': 'text/plain'
+                })
+                .end()
             }
         } else {
             console.error('ws proxy error:' + err.stack, {
