@@ -1,17 +1,11 @@
 import httpModule from '..'
+import { defineNuxtConfig } from 'nuxt/config'
 
 export default defineNuxtConfig({
-    bridge: false,
-    buildModules: [
-        httpModule
+    modules: [
+        httpModule,
     ],
-    http: {},
-    vite: {
-        server: {
-            hmr: {
-                clientPort: 443,
-                path: "hmr/",
-            },
-        },
-    },
+    http: {
+        interceptorPlugin: true
+    }
 });

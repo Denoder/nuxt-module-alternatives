@@ -4,7 +4,7 @@ This serves as an extension to ohmyfetch for nuxt. Please note this is only for 
 This works similar to nuxt/http and nuxtjs-alt/axios except it utilizes ohmyfetch. All property options will be under `http`.
 This module is required in order for `@nuxtjs-alt/auth` to function.
 
-Remember this is a mix of `ohmyfetch` and `nuxt/http` so to use methods you would use as an example:
+Remember this is a mix of `ofetch` and `nuxt/http` so to use methods you would use as an example:
 
 ```ts
 // Available methods: 'get', 'head', 'delete', 'post', 'put', 'patch', 'options'
@@ -18,14 +18,19 @@ await $http.$get({ url: '/api', ...options })
 await $http.get('/api', options)
 await $http.get({ url: '/api', ...options })
 
-// $http.request('/api', options) and $http.request({ url: '/api' }) is the same as $fetch('/api')
+// $http.request('/api', options) and $http.request({ url: '/api' }) is the same as $fetch('/api', options)
 await $http.request({ url: '/api', ...options })
 await $http.request('/api', options)
 
 // Access Raw Response
-// $http.requestRaw('/api', options) and $http.requestRaw({ url: '/api' }) is the same as $fetch.raw('/api')
-await $http.requestRaw({ url: '/api', ...options })
-await $http.requestRaw('/api', options)
+// $http.raw('/api', options) and $http.raw({ url: '/api' }) is the same as $fetch.raw('/api', options)
+await $http.raw({ url: '/api', ...options })
+await $http.raw('/api', options)
+
+// Access Fetch Native Response
+// $http.natvie('/api', options) and $http.native({ url: '/api' }) is the same as $fetch.native('/api', options) or fetch('/api', options)
+await $http.native({ url: '/api', ...options })
+await $http.native('/api', options)
 ```
 
 A `useHttp` composable is avaialble, it works like `useFetch` except uses this module under the hood

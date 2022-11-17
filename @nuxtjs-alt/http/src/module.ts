@@ -13,13 +13,13 @@ export default defineNuxtModule({
         version,
         configKey: CONFIG_KEY,
         compatibility: {
-            nuxt: '^3.0.0-rc.9'
+            nuxt: '^3.0.0'
         },
     },
     defaults: {} as ModuleOptions,
     setup(opts: ModuleOptions, nuxt: Nuxt) {
         // Combine options with runtime config
-        const moduleOptions: ModuleOptions = defu(nuxt.options.runtimeConfig?.public[CONFIG_KEY], opts)
+        const moduleOptions: ModuleOptions = defu(nuxt.options.runtimeConfig?.public?.http, opts)
 
         // Default host
         const defaultHost = moduleOptions.host || process.env.NITRO_HOST || process.env.HOST || 'localhost'
@@ -29,19 +29,6 @@ export default defineNuxtModule({
 
         // Default prefix
         const prefix = moduleOptions.prefix || process.env.PREFIX || '/'
-
-        // Support baseUrl alternative
-        if (moduleOptions.baseUrl) {
-            console.warn('baseUrl is deprecated please use baseURL instead.')
-            moduleOptions.baseURL = moduleOptions.baseUrl
-            delete moduleOptions.baseUrl
-        }
-
-        if (moduleOptions.browserBaseUrl) {
-            console.warn('browserBaseUrl is deprecated please use browserBaseURL instead.')
-            moduleOptions.browserBaseURL = moduleOptions.browserBaseUrl
-            delete moduleOptions.browserBaseUrl
-        }
 
         // Apply defaults
         const options: ModuleOptions = defu(moduleOptions, {
@@ -81,21 +68,20 @@ export default defineNuxtModule({
 
         // Convert http:// to https:// if https option is on
         if (options.https === true) {
-            options.baseURL = withHttps(options.baseURL)
+            options.baseURL = withHttps(options.baseURL as string)
             options.browserBaseURL = withHttps(options.browserBaseURL)
         }
 
         // resolver
         const resolver = createResolver(import.meta.url)
 
-        // @ts-ignore
         // Requires proxy module
         if (Object.hasOwn(nuxt.options, 'proxy') && moduleOptions.interceptorPlugin) {
             addPluginTemplate({
                 src: resolver.resolve('runtime/templates/interceptor.plugin.mjs'),
                 filename: 'proxy.plugin.mjs',
                 // @ts-ignore
-                options: nuxt.options['proxy'],
+                options: nuxt.options.proxy,
             })
         }
 
@@ -120,7 +106,7 @@ export default defineNuxtModule({
             { from: composables, name: 'useLazyHttp' }
         ])
 
-        // doesn't work on windows for some reason
+        // Unsure if it works on windows still.
         if (process.platform !== "win32") {
             // create nitro plugin
             addTemplate({

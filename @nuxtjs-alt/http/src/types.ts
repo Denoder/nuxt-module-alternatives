@@ -2,10 +2,8 @@ import { FetchConfig, FetchInstance } from '@refactorjs/ofetch'
 import * as NuxtSchema from '@nuxt/schema';
 
 export interface ModuleOptions extends Omit<FetchConfig, 'credentials'> {
-    baseURL: string;
-    baseUrl?: string;
-    browserBaseURL: string;
-    browserBaseUrl?: string;
+    baseURL?: string;
+    browserBaseURL?: string;
     host?: string;
     prefix?: string;
     proxyHeaders?: boolean;
@@ -40,7 +38,7 @@ interface HttpPluginInjection {
 
 declare module '@nuxt/schema' {
     interface NuxtConfig {
-        http?: Partial<ModuleOptions>
+        http?: ModuleOptions
     }
     interface NuxtOptions {
         http?: ModuleOptions

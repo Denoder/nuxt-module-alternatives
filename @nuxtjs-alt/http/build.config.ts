@@ -1,12 +1,16 @@
 import type { NuxtModule } from '@nuxt/schema'
-import { existsSync, promises as fsp, createReadStream, createWriteStream } from 'fs'
+import { existsSync, promises as fsp } from 'node:fs'
 import { defineBuildConfig } from "unbuild"
-import { pathToFileURL } from 'url'
-import { resolve } from 'path'
+import { pathToFileURL } from 'node:url'
+import { resolve } from 'pathe'
+import mri from 'mri'
+
+const args = mri(process.argv.slice(2))
 
 export default defineBuildConfig({
     failOnWarn: false,
     declaration: true,
+    stub: args.stub,
     entries: [
         'src/module',
         'src/types',
@@ -24,7 +28,8 @@ export default defineBuildConfig({
         'nuxt',
         'nuxt-edge',
         'nuxt3',
-        'vue'
+        'vue',
+        'vue-demi'
     ],
     hooks: {
         async 'rollup:dts:build'(ctx) {
@@ -38,7 +43,7 @@ export default defineBuildConfig({
 
             // Load module meta
             const moduleEntryPath = resolve(ctx.options.outDir, 'module.mjs')
-            const moduleFn: Required<NuxtModule<any>> = await import(
+            const moduleFn: NuxtModule<any> = await import(
                 pathToFileURL(moduleEntryPath).toString()
             ).then(r => r.default || r).catch((err) => {
                 console.error(err)
@@ -48,7 +53,7 @@ export default defineBuildConfig({
             if (!moduleFn) {
                 return
             }
-            const moduleMeta = await moduleFn.getMeta()
+            const moduleMeta = await moduleFn.getMeta!()
 
             // Enhance meta using package.json
             if (ctx.pkg) {
