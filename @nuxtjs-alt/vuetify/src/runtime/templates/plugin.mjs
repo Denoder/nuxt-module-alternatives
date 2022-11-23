@@ -1,4 +1,4 @@
-import { defineNuxtPlugin } from '#app'
+import { defineNuxtPlugin } from '#imports'
 import { createVuetify } from 'vuetify/framework'
 
 const options = JSON.parse('<%= JSON.stringify(options) %>')

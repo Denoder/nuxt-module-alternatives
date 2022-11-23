@@ -1,102 +1,67 @@
+import type { ModuleOptions } from './types';
 import { name, version } from "../package.json";
-import { defineNuxtModule, addVitePlugin, extendViteConfig, addPluginTemplate, createResolver } from '@nuxt/kit'
-import ViteComponents from 'unplugin-vue-components/vite'
-import { VuetifyResolver } from './resolver'
+import { defineNuxtModule, addPluginTemplate, createResolver, addImports } from '@nuxt/kit';
+import vuetify from 'vite-plugin-vuetify'
 
-interface ModuleOptions {
-    config: object
-    plugins: Array<any>
-    customVariables: Array<string>
-}
+const CONFIG_KEY = 'vuetify'
 
 export default defineNuxtModule({
     meta: {
         name,
         version,
-        configKey: 'vuetify',
+        configKey: CONFIG_KEY,
         compatibility: {
-            nuxt: '^3.0.0-rc.9'
+            nuxt: '^3.0.0'
         }
     },
     defaults: {
-        config: {},
-        plugins: [],
-        customVariables: [],
+        vuetifyOptions: {},
+        pluginOptions: {},
     } as ModuleOptions,
     async setup(moduleOptions, nuxt) {
-
-        const options = {
-            ...moduleOptions,
-            ...nuxt.options['vuetify']
-        }
-
-        // Add Vuetify styles
-        nuxt.options.css.push('vuetify/lib/styles/main.sass')
-
-        // Transpile Vuetify
-        nuxt.options.build.transpile.push('vuetify')
-
-        // Custom variables
-        if (options.customVariables && options.customVariables.length > 0) {
-            const sassImports = options.customVariables
-            .map(path => `@import '${path}'`)
-            .join('\n')
-
-            const scssImports = options.customVariables
-            .map(path => `@import '${path}';`)
-            .join('\n')
-
-            extendViteConfig(config => {
-                const sassOptions = {
-                    preprocessorOptions: {
-                        sass: {
-                            additionalData: [...sassImports].join('\n')
-                        },
-                        scss: {
-                            additionalData: [...scssImports].join('\n')
-                        }
-                    }
-                }
-
-                config.css = {
-                    ...config.css,
-                    ...sassOptions
-                }
-            })
-        }
-
-        const vitePlugins = [
-            ViteComponents({
-                resolvers: [
-                    VuetifyResolver(),
-                    ...options.plugins
-                ],
-            }),
-        ];
-
-        vitePlugins.forEach(plugin => {
-            addVitePlugin(plugin)
-        })
-
-        extendViteConfig(config => {
-            // @ts-ignore
-            config.ssr.noExternal = config.ssr.noExternal || []
-            // @ts-ignore
-            config.ssr.noExternal.push('vuetify')
-        })
+        const options: ModuleOptions = moduleOptions
 
         const { resolve } = createResolver(import.meta.url)
 
+        // Transpile Vuetify
+        nuxt.options.build.transpile.push(CONFIG_KEY)
+
+        nuxt.hook('vite:extendConfig', (config) => {
+            // Vuetify plugin configuration
+            config.plugins = [
+                ...(config.plugins || []),
+                vuetify(options.pluginOptions),
+            ]
+
+            config.define = {
+                ...(config.define || {}),
+                'process.env.DEBUG': false,
+            }
+
+            // @ts-ignore: name property is there but not in the typing
+            const vueIndex = config.plugins.findIndex((plugin) => plugin.name === 'vite:vue')
+            if (vueIndex !== -1) {
+                const vuePlugin = config.plugins.splice(vueIndex, 1)[0]
+                config.plugins.unshift(vuePlugin)
+            }
+
+            config.ssr!.noExternal = Array.isArray(config.ssr!.noExternal) ? config.ssr!.noExternal : []
+            config.ssr!.noExternal.push(CONFIG_KEY)
+        })
+
+        // vuetify-specific composables
+        addImports([
+            { from: CONFIG_KEY, name: 'useTheme' },
+            { from: CONFIG_KEY, name: 'useDisplay' },
+            { from: CONFIG_KEY, name: 'useRtl' },
+            { from: CONFIG_KEY, name: 'useLocale' },
+            { from: CONFIG_KEY, name: 'useLayout' }
+        ])
+
         addPluginTemplate({
             src: resolve('./runtime/templates/plugin.mjs'),
-            fileName: 'vuetify.plugin.mjs',
-            options: options.config
+            filename: 'vuetify.plugin.mjs',
+            options: options.vuetifyOptions
         })
     }
 })
-
-declare module "#app" {
-    export interface NuxtConfig {
-        vuetify: ModuleOptions;
-    }
-}
