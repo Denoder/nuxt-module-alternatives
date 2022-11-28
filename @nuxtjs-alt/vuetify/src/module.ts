@@ -1,8 +1,9 @@
 import type { ModuleOptions } from './types';
 import type { Nuxt } from '@nuxt/schema'
 import { name, version } from "../package.json";
-import { defineNuxtModule, addPluginTemplate, createResolver, addImports } from '@nuxt/kit';
+import { defineNuxtModule, addPluginTemplate, createResolver, addImports, addTemplate } from '@nuxt/kit';
 import vuetify from 'vite-plugin-vuetify'
+import { defu } from 'defu'
 
 const CONFIG_KEY = 'vuetify'
 
@@ -37,6 +38,10 @@ export default defineNuxtModule({
         nuxt.options.build.transpile.push(CONFIG_KEY)
 
         nuxt.hook('vite:extendConfig', (config) => {
+            config.optimizeDeps = defu(config.optimizeDeps, {
+                exclude: ['vuetify']
+            })
+
             // Vuetify plugin configuration
             config.plugins = [
                 ...(config.plugins || []),
@@ -74,9 +79,13 @@ export default defineNuxtModule({
             }
         })
 
+        // Runtime
+        const runtime = resolve('./runtime/vuetify');
+        nuxt.options.alias['#vuetify'] = runtime;
+
         // vuetify-specific composables
         addImports([
-            { from: CONFIG_KEY, name: 'useTheme' },
+            { from: resolve('./runtime/theme'), name: 'useTheme' },
             { from: CONFIG_KEY, name: 'useDisplay' },
             { from: CONFIG_KEY, name: 'useRtl' },
             { from: CONFIG_KEY, name: 'useLocale' },

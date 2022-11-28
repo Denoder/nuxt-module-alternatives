@@ -20,7 +20,8 @@ export default defineBuildConfig({
         'nuxt3',
         'vue',
         'vue-demi',
-        'vuetify'
+        'vuetify',
+        'defu'
     ],
     entries: [
         'src/module',

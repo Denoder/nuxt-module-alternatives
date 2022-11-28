@@ -15,7 +15,13 @@ export interface ModuleOptions {
     pluginOptions?: Options
 }
 
-declare module "#app" {
+declare module '#app' {
+    interface NuxtApp {
+        $vuetify: VuetifyOptions;
+    }
+}
+
+declare module '@nuxt/schema' {
     interface NuxtConfig {
         vuetify?: ModuleOptions;
     }
