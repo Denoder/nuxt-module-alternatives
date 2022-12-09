@@ -1,6 +1,14 @@
 # nuxt-module-alternatives
 Alternative modules to use while waiting for Nuxt 3 Compatibility
 
+## Migration
+
+I will be migrating most of these modules over to https://github.com/orgs/nuxt-alt/repositories. This will take me a bit to set up. The module's versions will be incremented by 1 to account for the migration. Each module will have their own separate repository.
+
+| Old Package Name | New Package Name | Link
+| --- | --- | --- |
+| @nuxtjs-alt/vuetify | @nuxt-alt/vuetify | https://github.com/nuxt-alt/vuetify
+
 **Current Modules**
 - Nuxt Axios Module: [Nuxt Community Repository](https://github.com/nuxt-community/axios-module)
 - Nuxt Http Module: [Nuxt Community Module](https://github.com/nuxt/http)
