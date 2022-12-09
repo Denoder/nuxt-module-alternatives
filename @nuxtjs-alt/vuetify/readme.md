@@ -1,3 +1,5 @@
+## This package is deprecated please use the package at: https://github.com/nuxt-alt/vuetify
+
 This module is meant to try to work with Vuetify 3. Here is the config for you to work with
 
 ```ts
