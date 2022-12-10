@@ -8,6 +8,9 @@ I will be migrating most of these modules over to https://github.com/orgs/nuxt-a
 | Old Package Name | New Package Name | Link
 | --- | --- | --- |
 | @nuxtjs-alt/vuetify | @nuxt-alt/vuetify | https://github.com/nuxt-alt/vuetify
+| @nuxtjs-alt/auth | @nuxt-alt/auth | https://github.com/nuxt-alt/auth
+| @nuxtjs-alt/http | @nuxt-alt/http | https://github.com/nuxt-alt/http
+| @nuxtjs-alt/proxy | @nuxt-alt/proxy | https://github.com/nuxt-alt/proxy
 
 **Current Modules**
 - Nuxt Axios Module: [Nuxt Community Repository](https://github.com/nuxt-community/axios-module)
